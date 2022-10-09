@@ -8,12 +8,15 @@ decorator==5.1.1
 entrypoints==0.4
 executing==1.1.0
 fonttools==4.37.4
+importlib-resources==5.10.0
 ipykernel==6.16.0
 ipython==8.5.0
 jedi==0.18.1
+Jinja2==3.1.2
 jupyter-core==4.11.1
 jupyter_client==7.3.5
 kiwisolver==1.4.4
+MarkupSafe==2.1.1
 matplotlib==3.6.1
 matplotlib-inline==0.1.6
 nest-asyncio==1.5.6
@@ -38,6 +41,9 @@ seaborn==0.11.2
 six==1.16.0
 stack-data==0.5.1
 statsmodels==0.13.2
+sweetviz==2.1.4
 tornado==6.2
+tqdm==4.64.1
 traitlets==5.4.0
 wcwidth==0.2.5
+zipp==3.9.0

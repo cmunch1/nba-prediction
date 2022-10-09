@@ -69,19 +69,34 @@ Currently available data includes:
  
  ### DATA PROCESSING SUMMARY
 
+Games.csv and ranking.csv will be merged after initial data processing. Since all the features are *post* game data (final score, winning percentage after the game, etc...) they cannot be used as predictors for the current game. All the features will be used as predictors for the "next game", so the data will need to adjusted so that the TARGET (HOME_TEAM_WINS) is in the same row as the predictors. 
+
+The easiest approach seems to be add a field called TARGET that denotes whether the home team won its *next* game or not.
+
+Game_details.csv will intially be held in reserve for feature engineering. With a roster of 24 players per game and 21 features per player, the initial plan is NOT to add all these 500 features indiscriminately but to instead try to find useful features and incorporate these.
+
+Scaling and power-transforms will not be used at this time since the plan is to use GBTs (gradient boosted trees) such as XGBoost where these tranforms are not needed. These transforms may be needed later for PCA and other techniques, though.
+
+
+duplicates
+
+ - both games.csv and ranking.csv contain several duplicated rows from Dec 2020 (covid season) that the pandas function *df.duplicated()* failed to detect in EDA. These will be filtered out using subsets instead of the entire dataframe.
+
  games.csv
  
  - delete preseason games (this will also take care of the null games from early 2003)
  - keep only games where GAME_STATUS_TEXT = 'Final' (for better utility in the future)
+ - remove duplicated records 
  - flag postseason games 
  - drop 'GAME_STATUS_TEXT', 'TEAM_ID_home', 'TEAM_ID_away'
 
 ranking.csv
  
  - drop preseason rankings (SEASON_ID begins with 1)
- - change SEASON_ID to SEASON and drop beginning 2 for linking with games.csv
  - split HOME_RECORD into HOME_W, HOME_L, and HOME_W_PCT
  - split ROAD_RECORD into ROAD_W, ROAD_L, and ROAD_W_PCT
+ - numericaly encode CONFERENCE (East or West)
+ - remove duplicated records
  - drop 'SEASON_ID', 'LEAGUE_ID', 'RETURNTOPLAY', 'TEAM', 'HOME_RECORD', 'ROAD_RECORD'
 
  game_details.csv
@@ -93,6 +108,13 @@ ranking.csv
  - drop TEAM_ABBREVIATION, TEAM_CITY, PLAYER_NAME, NICKNAME, COMMENT
  
  Join games with ranking
+ 
   - LINK: games.GAME_DATE_EST, games.HOME_TEAM_ID, -> ranking.STANDINGSDATE, ranking.TEAM_ID 
   - ADD: CONFERENCE, G, W, L, W_PCT, HOME_W, HOME_L, HOME_W_PCT, ROAD_W, ROAD_L, ROAD_W_PCT
   - repeat with AWAY_TEAM_ID instead of HOME_TEAM_ID
+  
+ Add TARGET
+ 
+  - Sort games by HOME_TEAM_ID and GAME_ID
+  - for each SEASON and HOME_TEAM_ID, shift HOME_TEAM_WINS down to TARGET for previous game
+  - remove games with null TARGETs (last game played each season by each team will have no null TARGET)
