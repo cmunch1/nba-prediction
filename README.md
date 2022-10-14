@@ -118,3 +118,21 @@ ranking.csv
   - Sort games by HOME_TEAM_ID and GAME_ID
   - for each SEASON and HOME_TEAM_ID, shift HOME_TEAM_WINS down to TARGET for previous game
   - remove games with null TARGETs (last game played each season by each team will have no null TARGET)
+  
+  ### Train / Test Split
+  
+  - Latest season is used as Test data and previous seasons are used as Train data
+  
+  ### Baseline Models
+  
+  Simple If-Then Models
+
+ - Team with best record wins
+ - Home team always wins
+ - Home team wins unless they have losing home record
+ - Home team wins unless visitor has won 2 of 3 last away games
+ 
+ML Models
+
+ - LightGBM
+ - XGBoost
