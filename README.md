@@ -125,14 +125,14 @@ ranking.csv
   
   ### Baseline Models
   
-  Simple If-Then Models
+Simple If-Then Models
 
- - Team with best record wins
- - Home team always wins
- - Home team wins unless they have losing home record
- - Home team wins unless visitor has won 2 of 3 last away games
+ - Team with best record wins (Accuracy = 0.56, AUC = 0.58 on Test data)
+ - Home team always wins (Accuracy = 0.55, AUC = 0.50 on Test data)
+ - Home team wins unless they have losing home record (Accuracy = 0.59, AUC = 0.57 on Test data)
+ - Home team wins unless they have lost last 3 home games (Accuracy = 0.59, AUC = 0.55 on Test data)
  
 ML Models
 
- - LightGBM
- - XGBoost
+ - LightGBM (Accuracy = 0.59, AUC = 0.62 on Test data)
+ - XGBoost (Accuracy = 0.56, AUC = 0.57 on Test data)
