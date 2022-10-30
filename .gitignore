@@ -1,0 +1,4 @@
+/venv
+/.ipynb_checkpoints
+/.neptune
+/__pycache__

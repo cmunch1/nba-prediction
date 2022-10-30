@@ -1,0 +1,1 @@
+{"lambda_l1": 1.795338637297326e-08, "lambda_l2": 0.004705909102689521, "learning_rate": 0.0514056673966814, "max_depth": 100, "n_estimators": 136307, "feature_fraction": 0.707667657054092, "bagging_fraction": 0.5528109129804049, "bagging_freq": 1, "num_leaves": 316, "min_child_samples": 300, "min_data_per_groups": 88}
