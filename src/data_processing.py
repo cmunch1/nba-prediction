@@ -86,7 +86,7 @@ def merge_games_ranking (games, ranking):
     return games_ranking
 
 
-def add_TARGET(games_ranking);
+def add_TARGET(games_ranking):
 
     # all the data in games_ranking is post-game data after the game has already been won or lost
     # the win/lose TARGET needs to be shifted down to previous game so it is aligned with pre-game predictor data
