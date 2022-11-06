@@ -1,24 +1,21 @@
-def run_sweetviz_report(df, TARGET):
-    
-    import sweetviz as sv
-    from datetime import datetime
-    
-    report_label = datetime.today().strftime('%Y-%m-%d_%H_%M')
-    
-    my_report = sv.analyze(df,target_feat=TARGET)
-    my_report.show_html(filepath='SWEETVIZ_' + report_label + '.html')
-    
-    return
+import pandas as pd
+import numpy as np
+
+import itertools
+
+import matplotlib.pyplot as plt
+from matplotlib.colors import TwoSlopeNorm
+
+import sweetviz as sv
+
+from datetime import datetime
+
 
 def plot_corr_barchart(df1, drop_cols, n=30):
     """
     plot a color-gradient barchart showing top n correlations between features
 
     """
-
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    from matplotlib.colors import TwoSlopeNorm
 
     df1 = df1.drop(columns=drop_cols)
     useful_columns =  df1.select_dtypes(include=['number']).columns
@@ -61,9 +58,6 @@ def plot_corr_vs_target(df1, target, drop_cols, n=30):
 
     """
     
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    from matplotlib.colors import TwoSlopeNorm
     
     target_series = df1[target]
     df1 = df1.drop(columns=drop_cols)
@@ -121,9 +115,6 @@ def plot_confusion_matrix(cm,
     http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
 
     """
-    import matplotlib.pyplot as plt
-    import numpy as np
-    import itertools
     
     accuracy = np.trace(cm) / np.sum(cm).astype('float')
     misclass = 1 - accuracy
@@ -166,12 +157,20 @@ def plot_confusion_matrix(cm,
 
 def run_sweetviz_report(df, TARGET):
     
-    import sweetviz as sv
-    from datetime import datetime
-    
     report_label = datetime.today().strftime('%Y-%m-%d_%H_%M')
     
     my_report = sv.analyze(df,target_feat=TARGET)
+    my_report.show_html(filepath='SWEETVIZ_' + report_label + '.html')
+    
+    return
+
+
+def run_sweetviz_comparison(df1, df1_name, df2, df2_name, TARGET, report_label):
+    
+    
+    report_label = report_label + datetime.today().strftime('%Y-%m-%d_%H_%M')
+    
+    my_report = sv.compare([df1, df1_name], [df2, df2_name], target_feat=TARGET,pairwise_analysis="off")
     my_report.show_html(filepath='SWEETVIZ_' + report_label + '.html')
     
     return

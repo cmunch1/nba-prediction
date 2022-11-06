@@ -111,4 +111,12 @@ def add_TARGET(games_ranking):
     
     return games_ranking
 
+def split_train_test(df):
+
+    latest_season = df['SEASON'].unique().max()
+
+    train = df[df['SEASON'] < (latest_season)]
+    test = df[df['SEASON'] >= (latest_season - 1)]
+    
+    return train, test
 
