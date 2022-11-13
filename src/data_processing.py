@@ -11,8 +11,10 @@ def process_games(games):
     games = games[~games.duplicated(subset=['GAME_ID'])]
 
     # drop unnecessary fields
-    drop_fields = ['GAME_STATUS_TEXT', 'TEAM_ID_home', 'TEAM_ID_away']
-    games = games.drop(drop_fields,axis=1)
+    all_columns = games.columns.tolist()
+    drop_columns = ['GAME_STATUS_TEXT', 'TEAM_ID_home', 'TEAM_ID_away']
+    use_columns = [item for item in all_columns if item not in drop_columns]
+    games = games[use_columns]
     
     return games
 
@@ -88,26 +90,7 @@ def merge_games_ranking (games, ranking):
 
 def add_TARGET(games_ranking):
 
-    # all the data in games_ranking is post-game data after the game has already been won or lost
-    # the win/lose TARGET needs to be shifted down to previous game so it is aligned with pre-game predictor data
-
-    # add feature with default to 0
-    games_ranking['TARGET'] = 0
-
-    # sort games by the order in which they were played for each home team
-    games_ranking = games_ranking.sort_values(by = ['HOME_TEAM_ID', 'GAME_ID'], axis=0, ascending=[False, False], ignore_index=True)
-
-    # for each season and each team, shift HOME_TEAM_WINS down one to TARGET
-    home_teams = games_ranking['HOME_TEAM_ID'].unique().tolist()
-    seasons = games_ranking['SEASON'].unique().tolist()
-
-    for season in seasons:
-        for team in home_teams:
-            games_ranking['TARGET'].loc[(games_ranking['SEASON'] == season) & (games_ranking['HOME_TEAM_ID'] == team)] = games_ranking['HOME_TEAM_WINS'].shift(periods=1)
-            
-
-    # remove games with null TARGET
-    games_ranking = games_ranking[games_ranking['TARGET'].notna()]
+    games_ranking['TARGET'] = games_ranking['HOME_TEAM_WINS']
     
     return games_ranking
 

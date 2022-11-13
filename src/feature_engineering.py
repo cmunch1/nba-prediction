@@ -133,10 +133,11 @@ def add_rolling_home_visitor(df, location, roll_list):
     df = df.sort_values(by = [location_id, 'GAME_DATE_EST'], axis=0, ascending=[True, True,], ignore_index=True)
     
     # Win streak, negative if a losing streak
-    df[location + '_TEAM_WIN_STREAK'] = df['HOME_TEAM_WINS'].groupby((df['HOME_TEAM_WINS'] != df.groupby([location_id])['HOME_TEAM_WINS'].shift()).cumsum()).cumcount() + 1
-    df[location + '_TEAM_WIN_STREAK'].loc[df['HOME_TEAM_WINS'] == 0]  = df[location + '_TEAM_WIN_STREAK'].loc[df['HOME_TEAM_WINS'] == 0]  * -1
+    df[location + '_TEAM_WIN_STREAK'] = df['HOME_TEAM_WINS'].groupby((df['HOME_TEAM_WINS'].shift() != df.groupby([location_id])['HOME_TEAM_WINS'].shift(2)).cumsum()).cumcount() + 1
+    # if home team lost the last game of the streak, then the streak must be a losing streak. make it negative
+    df[location + '_TEAM_WIN_STREAK'].loc[df['HOME_TEAM_WINS'].shift() == 0] =  -1 * df[location + '_TEAM_WIN_STREAK']
 
-    # If visitor, the streak has opposite meaning (3 wins for home team is 3 losses in a row for visitor)
+    # If visitor, the streak has opposite meaning (3 wins in a row for home team is 3 losses in a row for visitor)
     if location == 'VISITOR':
         df[location + '_TEAM_WIN_STREAK'] = - df[location + '_TEAM_WIN_STREAK']  
 
@@ -155,7 +156,7 @@ def add_rolling_home_visitor(df, location, roll_list):
             if feature == 'HOME_TEAM_WINS': #remove the "HOME_" for better readability
                 roll_feature_name = location + '_' + feature[5:] + '_AVG_LAST_' + str(roll) + '_' + location
             roll_feature_list.append(roll_feature_name)
-            df[roll_feature_name] = df.groupby(['HOME_TEAM_ID'])[feature].rolling(roll).mean().values
+            df[roll_feature_name] = df.groupby(['HOME_TEAM_ID'])[feature].rolling(roll, closed= "left").mean().values
             
     
     
@@ -169,6 +170,8 @@ def add_rolling_home_visitor(df, location, roll_list):
     
  
     return df
+
+
 
 def process_games_consecutively(df_data):
     # re-organize so that all of a team's games can be listed in chronological order whether HOME or VISITOR
@@ -235,7 +238,7 @@ def process_games_consecutively(df_data):
 
 def add_matchups(df, roll_list):
 
-    # new version 2022-10-30
+    # new version 2022-11-06
     # now ignoring season boundaries and added roll parameters
 
     # group all the games that 2 teams played each other 
@@ -245,12 +248,12 @@ def add_matchups(df, roll_list):
     df = df.sort_values(by = ['TEAM1', 'TEAM2','GAME_DATE_EST'], axis=0, ascending=[True, True, True], ignore_index=True)
 
     for roll in roll_list:
-        df['MATCHUP_WINPCT_' + str(roll)] = df.groupby(['TEAM1','TEAM2'])['TEAM1_win'].rolling(roll).mean().values
+        df['MATCHUP_WINPCT_' + str(roll)] = df.groupby(['TEAM1','TEAM2'])['TEAM1_win'].rolling(roll, closed= "left").mean().values
 
-    df['MATCHUP_WIN_STREAK'] = df['TEAM1_win'].groupby((df['TEAM1_win'] != df.groupby(['TEAM1','TEAM2'])['TEAM1_win'].shift()).cumsum()).cumcount() + 1
-    #make streak negative if a losing streak
-    df['MATCHUP_WIN_STREAK'].loc[df['TEAM1_win'] == 0]  = df['MATCHUP_WIN_STREAK'].loc[df['TEAM1_win'] == 0]  * -1
-
+    df['MATCHUP_WIN_STREAK'] = df['TEAM1_win'].groupby((df['TEAM1_win'].shift() != df.groupby(['TEAM1','TEAM2'])['TEAM1_win'].shift(2)).cumsum()).cumcount() + 1
+    # if team1 lost the last game of the streak, then the streak must be a losing streak. make it negative
+    df['MATCHUP_WIN_STREAK'].loc[df['TEAM1_win'].shift() == 0] = -1 * df['MATCHUP_WIN_STREAK']
+  
     
     return df
 
@@ -276,12 +279,14 @@ def add_past_performance_all(df, roll_list):
     df = df.sort_values(by = ['TEAM1','GAME_DATE_EST'], axis=0, ascending=[True, True,], ignore_index=True)
   
     #streak of games won/lost, make negative is a losing streak
-    df['WIN_STREAK'] = df['TEAM1_win'].groupby((df['TEAM1_win'] != df.groupby(['TEAM1'])['TEAM1_win'].shift()).cumsum()).cumcount() + 1
-    df['WIN_STREAK'].loc[df['TEAM1_win'] == 0]  = df['WIN_STREAK'].loc[df['TEAM1_win'] == 0]  * -1
+    df['WIN_STREAK'] = df['TEAM1_win'].groupby((df['TEAM1_win'].shift() != df.groupby(['TEAM1'])['TEAM1_win'].shift(2)).cumsum()).cumcount() + 1   
+    # if team1 lost the last game of the streak, then the streak must be a losing streak. make it negative
+    df['WIN_STREAK'].loc[df['TEAM1_win'].shift() == 0]  = -1 * df['WIN_STREAK']
     
     #streak of games played at home/away, make negative if away streak
-    df['HOME_AWAY_STREAK'] = df['TEAM1_home'].groupby((df['TEAM1_home'] != df.groupby(['TEAM1'])['TEAM1_home'].shift()).cumsum()).cumcount() + 1
-    df['HOME_AWAY_STREAK'].loc[df['TEAM1_home'] == 0]  = df['HOME_AWAY_STREAK'].loc[df['TEAM1_home'] == 0]  * -1
+    df['HOME_AWAY_STREAK'] = df['TEAM1_home'].groupby((df['TEAM1_home'].shift() != df.groupby(['TEAM1'])['TEAM1_home'].shift(2)).cumsum()).cumcount() + 1
+    # if team1 played the game of the streak away, then the streak must be an away streak. make it negative
+    df['HOME_AWAY_STREAK'].loc[df['TEAM1_home'].shift() == 0]  = -1 * df['HOME_AWAY_STREAK']
     
     #rolling means 
     
@@ -295,7 +300,7 @@ def add_past_performance_all(df, roll_list):
         for roll in roll_list:
             roll_feature_name = feature + '_AVG_LAST_' + str(roll) + '_ALL'
             roll_feature_list.append(roll_feature_name)
-            df[roll_feature_name] = df.groupby(['TEAM1'])[feature].rolling(roll).mean().values
+            df[roll_feature_name] = df.groupby(['TEAM1'])[feature].rolling(roll, closed= "left").mean().values
 
     
     
@@ -309,6 +314,7 @@ def add_past_performance_all(df, roll_list):
     
     
     return df
+
 
 def combine_new_features(df, df_consecutive):
      
@@ -357,6 +363,10 @@ def combine_new_features(df, df_consecutive):
     return df
 
 def remove_non_rolling(df):
+    
+    # remove non-rolling features - these are data leaks
+    # they are stats from the actual game that decides winner/loser, 
+    # but we don't know these stats before a game is played
     
     drop_columns =[]
     
