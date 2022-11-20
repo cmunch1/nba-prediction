@@ -6,3 +6,6 @@
 .ipynb_checkpoints
 .neptune
 __pycache__
+ca_chain
+certfile
+keyfile
