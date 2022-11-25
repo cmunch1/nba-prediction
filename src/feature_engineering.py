@@ -1,6 +1,30 @@
 import pandas as pd
 import numpy as np
 
+def process_features(df: pd.DataFrame) -> pd.DataFrame:
+    
+    home_visitor_roll_list = [3, 7, 10]
+    all_roll_list = [3, 7, 10, 15]
+    
+    df = fix_datatypes(df)
+    df = add_date_features(df)
+    df = remove_playoff_games(df)
+    df = add_rolling_home_visitor(df, "HOME", home_visitor_roll_list)
+    df = add_rolling_home_visitor(df, "VISITOR", home_visitor_roll_list)
+    
+    df_consecutive = process_games_consecutively(df)
+    df_consecutive = add_matchups(df_consecutive, home_visitor_roll_list)
+    df_consecutive = add_past_performance_all(df_consecutive, all_roll_list)
+
+    #add these features back to main dataframe
+    df = combine_new_features(df,df_consecutive) 
+    
+    df = remove_non_rolling(df)
+    
+    df = process_x_minus_y(df)
+    
+    return df
+
 def fix_datatypes(df):
     
     '''
