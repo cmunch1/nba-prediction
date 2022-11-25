@@ -26,6 +26,7 @@ jobs:
       - name: execute python workflows from notebook
         env: 
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+          NEPTUNE_API_TOKEN: ${{ secrets.NEPTUNE_API_TOKEN }}
           
         run: 
           jupyter nbconvert --to notebook --execute 09_production_features_pipeline.ipnyb
