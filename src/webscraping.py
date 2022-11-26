@@ -3,9 +3,10 @@ import numpy as np
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromiumService
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.core.utils import ChromeType
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 from bs4 import BeautifulSoup as soup
@@ -18,6 +19,20 @@ DATAPATH = Path(r'data')
 
 def activate_web_driver():
     service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
+    chrome_options = Options()
+    options = [
+        "--headless",
+        "--disable-gpu",
+        "--window-size=1920,1200",
+        "--ignore-certificate-errors",
+        "--disable-extensions",
+        "--no-sandbox",
+        "--disable-dev-shm-usage"
+        ]
+    
+    for option in options:
+        chrome_options.add_argument(option)
+        
     driver = webdriver.Chrome(service=service)
     
     return driver
