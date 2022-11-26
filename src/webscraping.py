@@ -17,9 +17,11 @@ from pytz import timezone
 from pathlib import Path  #for Windows/Linux compatibility
 DATAPATH = Path(r'data')
 
+from pyvirtualdisplay import Display
 
 def activate_web_driver():
-    
+    display = Display(visible=0, size=(1920,1200))  
+    display.start()
     
     service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
     
