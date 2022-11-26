@@ -29,4 +29,6 @@ jobs:
           NEPTUNE_API_TOKEN: ${{ secrets.NEPTUNE_API_TOKEN }}
           
         run: 
-          jupyter nbconvert --to notebook --execute 09_production_features_pipeline.ipnyb
+          #jupyter nbconvert --to notebook --execute 09_production_features_pipeline.ipnyb
+          jupyter nbconvert --to script 09_production_features_pipeline.ipnyb
+          python 09_production_features_pipeline.py
