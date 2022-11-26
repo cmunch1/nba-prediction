@@ -17,14 +17,30 @@ from pytz import timezone
 from pathlib import Path  #for Windows/Linux compatibility
 DATAPATH = Path(r'data')
 
-#from pyvirtualdisplay import Display
 
 def activate_web_driver():
-    #display = Display(visible=0, size=(1920,1200))  
-    #display.start()
+
     
     service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
     
+    # copied from https://github.com/jsoma/selenium-github-actions
+
+    chrome_options = Options() 
+    options = [
+        "--headless",
+        "--disable-gpu",
+        "--window-size=1920,1200",
+        "--ignore-certificate-errors",
+        "--disable-extensions",
+        "--no-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-blink-features=AutomationControlled",
+        ]
+
+    for option in options:
+        chrome_options.add_argument(option)
+
+    #driver = webdriver.Chrome(service=service, options=chrome_options)
     driver = webdriver.Chrome(service=service)
     
     return driver
@@ -71,7 +87,7 @@ def scrape_to_dataframe(driver, Season, DateFrom, DateTo):
     driver.get(nba_url)
     
     source = soup(driver.page_source, 'html.parser')
-    
+
     driver.implicitly_wait(5)
     
     #check for more than one page
