@@ -32,6 +32,9 @@ jobs:
         
       - name: Install a new Chromium
         run: sudo apt install -y chromium-browser
+        
+      - name: Install xvfb
+        run: sudo apt-get install xvfb
           
       - name: execute python workflows from notebook
         env: 
