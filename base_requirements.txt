@@ -1,4 +1,5 @@
 beautifulsoup4==4.11.1
+html5lib
 lightgbm==3.3.2
 lxml==4.9.1
 matplotlib==3.6.2
