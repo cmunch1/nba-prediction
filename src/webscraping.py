@@ -18,8 +18,13 @@ from pathlib import Path  #for Windows/Linux compatibility
 DATAPATH = Path(r'data')
 
 def activate_web_driver():
+    
     service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
-    chrome_options = Options()
+    
+    # headless option appears to be important for running on Github actions
+    # copied from https://github.com/jsoma/selenium-github-actions
+    
+    chrome_options = Options() 
     options = [
         "--headless",
         "--disable-gpu",
@@ -33,7 +38,7 @@ def activate_web_driver():
     for option in options:
         chrome_options.add_argument(option)
         
-    driver = webdriver.Chrome(service=service)
+    driver = webdriver.Chrome(service=service, options=chrome_options)
     
     return driver
 
