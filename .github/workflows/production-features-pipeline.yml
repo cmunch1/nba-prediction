@@ -33,9 +33,10 @@ jobs:
       - name: Install a new Chromium
         run: sudo apt install -y chromium-browser
         
-      - name: Install xvfb
-        run: sudo apt-get install xvfb
-          
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@latest
+        run: chrome --version
+     
       - name: execute python workflows from notebook
         env: 
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
