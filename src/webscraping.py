@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.service import Service as ChromiumService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from webdriver_manager.core.utils import ChromeType
