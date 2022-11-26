@@ -13,4 +13,5 @@ shap==0.41.0
 sweetviz==2.1.4
 tqdm==4.64.0
 xgboost==1.6.1
+webdriver-manager==3.8.4
 
