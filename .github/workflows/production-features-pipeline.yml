@@ -24,6 +24,15 @@ jobs:
           pip install -r base_requirements.txt
           python -m pip install jupyter nbconvert nbformat
           
+      - name: Remove Chrome
+        run: sudo apt purge google-chrome-stable
+        
+      - name: Remove default Chromium
+        run: sudo apt purge chromium-browser
+        
+      - name: Install a new Chromium
+        run: sudo apt install -y chromium-browser
+          
       - name: execute python workflows from notebook
         env: 
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
