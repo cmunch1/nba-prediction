@@ -27,21 +27,21 @@ def activate_web_driver():
 
     chrome_options = Options() 
     options = [
-        "--headless",
-        "--disable-gpu",
-        "--window-size=1920,1200",
-        "--ignore-certificate-errors",
-        "--disable-extensions",
+        #"--headless",
+        #"--disable-gpu",
+        #"--window-size=1920,1200",
+        #"--ignore-certificate-errors",
+        #"--disable-extensions",
         "--no-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-blink-features=AutomationControlled",
+        #"--disable-dev-shm-usage",
+        #"--disable-blink-features=AutomationControlled",
         ]
 
     for option in options:
         chrome_options.add_argument(option)
 
-    #driver = webdriver.Chrome(service=service, options=chrome_options)
-    driver = webdriver.Chrome(service=service)
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    #driver = webdriver.Chrome(service=service)
     
     return driver
 
