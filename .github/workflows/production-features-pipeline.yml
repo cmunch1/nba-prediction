@@ -35,7 +35,6 @@ jobs:
         
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@latest
-        run: chrome --version
      
       - name: execute python workflows from notebook
         env: 
