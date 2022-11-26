@@ -5,6 +5,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
+from webdriver_manager.core.utils import ChromeType
+
 
 from bs4 import BeautifulSoup as soup
 
@@ -15,7 +17,7 @@ from pathlib import Path  #for Windows/Linux compatibility
 DATAPATH = Path(r'data')
 
 def activate_web_driver():
-    service = ChromeService(executable_path=ChromeDriverManager().install())
+    service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
     driver = webdriver.Chrome(service=service)
     
     return driver
