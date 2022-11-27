@@ -8,7 +8,7 @@ on:
 
 jobs:
   test_schedule:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: checkout repo content
         uses: actions/checkout@v2
@@ -23,15 +23,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r base_requirements.txt
           python -m pip install jupyter nbconvert nbformat
-          
-      - name: Remove Chrome
-        run: sudo apt purge google-chrome-stable
-        
-      - name: Remove default Chromium
-        run: sudo apt purge chromium-browser
-        
-      - name: Install a new Chromium
-        run: sudo apt install -y chromium-browser
         
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@latest
