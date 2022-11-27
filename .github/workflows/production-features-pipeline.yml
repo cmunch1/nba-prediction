@@ -23,18 +23,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r base_requirements.txt
           python -m pip install jupyter nbconvert nbformat
-          
-      - name: Remove Chrome
-        run: sudo apt purge google-chrome-stable
-        
-      - name: Remove default Chromium
-        run: sudo apt purge chromium-browser
-        
-      - name: Install a new Chromium
-        run: sudo apt install -y chromium-browser
         
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@latest
+        
+      - name: Run Chrome
+        run: chrome --version
      
       - name: execute python workflows from notebook
         env: 
