@@ -20,16 +20,33 @@ from pytz import timezone
 from pathlib import Path  #for Windows/Linux compatibility
 DATAPATH = Path(r'data')
 
+def activate_web_driver(browser):
+    
+    if browser == "firefox":
+        driver = activate_web_driver_firefox()
+    else:
+        driver = activate_web_driver_chromium()
+        
+    return driver
 
-def activate_web_driver():
+
+def activate_web_driver_firefox():
     
     service = FirefoxService(executable_path=GeckoDriverManager().install())
-    driver = webdriver.Firefox(service=service)
+    
+    headOption = webdriver.FirefoxOptions()
+    headOption.add_argument("--window-size=1920,1080")
+    headOption.add_argument("--start-maximized")
+    headOption.add_argument("--headless")
+    
+
+    driver = webdriver.Firefox(service=service, options=headOption)
+    
     
     return driver
 
 
-def Chromium_activate_web_driver():
+def activate_web_driver_chromium():
 
     
     service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
@@ -38,13 +55,14 @@ def Chromium_activate_web_driver():
 
     chrome_options = Options() 
     options = [
-        #"--headless",
+        "--headless",
         "--no-sandbox",
         "--disable-dev-shm-usage",
         "--disable-gpu",
         "--window-size=1920,1200",
         "--ignore-certificate-errors",
         "--disable-extensions",
+        "--start-maximized",
         #"--disable-blink-features=AutomationControlled",
         ]
 
@@ -110,7 +128,9 @@ def scrape_to_dataframe(driver, Season, DateFrom, DateTo):
         CLASS_ID_DROPDOWN = "DropDown_select__4pIg9" #determined by visual inspection of page source code
         page_dropdown = driver.find_element(By.XPATH, "//*[@class='" + CLASS_ID_PAGINATION + "']//*[@class='" + CLASS_ID_DROPDOWN + "']")
         page_dropdown.send_keys("ALL") # show all pages
-        page_dropdown.click()
+        #page_dropdown.click()
+        driver.execute_script('arguments[0].click()', page_dropdown) #click() didn't work in headless mode, used this workaround (https://stackoverflow.com/questions/57741875)
+        
         #refresh page data now that it contains all rows of the table
         source = soup(driver.page_source, 'html.parser')
 

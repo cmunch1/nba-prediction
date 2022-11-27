@@ -9,3 +9,4 @@ __pycache__
 ca_chain
 certfile
 keyfile
+geckodriver.log
