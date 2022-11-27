@@ -25,8 +25,11 @@ jobs:
           python -m pip install jupyter nbconvert nbformat
           python -m pip install hopsworks
         
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@latest
+      #- name: Setup Chrome
+      #  uses: browser-actions/setup-chrome@latest
+        
+      - name: Setup Firefox
+        uses: browser-actions/setup-firefox@latest
      
       - name: execute python workflows from notebook
         env: 
