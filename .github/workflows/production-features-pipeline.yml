@@ -23,7 +23,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r base_requirements.txt
           python -m pip install jupyter nbconvert nbformat
-          python -m pip install hopsworks
+        
         
       #- name: Setup Chrome
       #  uses: browser-actions/setup-chrome@latest
