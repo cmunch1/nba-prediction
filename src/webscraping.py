@@ -8,6 +8,9 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.core.utils import ChromeType
 from webdriver_manager.chrome import ChromeDriverManager
 
+from selenium.webdriver.firefox.service import Service as FirefoxService
+from webdriver_manager.firefox import GeckoDriverManager
+
 
 from bs4 import BeautifulSoup as soup
 
@@ -19,6 +22,14 @@ DATAPATH = Path(r'data')
 
 
 def activate_web_driver():
+    
+    service = FirefoxService(executable_path=GeckoDriverManager().install())
+    driver = webdriver.Firefox(service=service)
+    
+    return driver
+
+
+def Chromium_activate_web_driver():
 
     
     service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
