@@ -7,7 +7,7 @@ on:
     - cron: '0 8 * * *'
 
 jobs:
-  test_schedule:
+  scrape_features:
     #runs-on: windows-latest
     runs-on: ubuntu-latest
     steps:
