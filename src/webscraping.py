@@ -121,11 +121,11 @@ def scrape_to_dataframe(driver, Season, DateFrom, DateTo):
     
     
     driver.get(nba_url)
+    time.sleep(60)
     
     source = soup(driver.page_source, 'html.parser')
 
     #driver.implicitly_wait(30)
-    time.sleep(30) # take a pause 30 seconds
     
     #check for more than one page
     CLASS_ID_PAGINATION = "Pagination_pageDropdown__KgjBU" #determined by visual inspection of page source code
@@ -144,7 +144,7 @@ def scrape_to_dataframe(driver, Season, DateFrom, DateTo):
         driver.execute_script('arguments[0].click()', page_dropdown) #click() didn't work in headless mode, used this workaround (https://stackoverflow.com/questions/57741875)
         
         #refresh page data now that it contains all rows of the table
-        time.sleep(15)
+        time.sleep(60)
         source = soup(driver.page_source, 'html.parser')
     time.sleep(15)
     # pull out html table from page source and convert it to a dataframe
