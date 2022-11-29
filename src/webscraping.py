@@ -20,6 +20,9 @@ from pytz import timezone
 from pathlib import Path  #for Windows/Linux compatibility
 DATAPATH = Path(r'data')
 
+import time
+
+
 def activate_web_driver(browser):
     
     if browser == "firefox":
@@ -121,7 +124,8 @@ def scrape_to_dataframe(driver, Season, DateFrom, DateTo):
     
     source = soup(driver.page_source, 'html.parser')
 
-    driver.implicitly_wait(30)
+    #driver.implicitly_wait(30)
+    time.sleep(30) # take a pause 30 seconds
     
     #check for more than one page
     CLASS_ID_PAGINATION = "Pagination_pageDropdown__KgjBU" #determined by visual inspection of page source code
