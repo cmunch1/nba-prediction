@@ -34,13 +34,17 @@ def activate_web_driver_firefox():
     
     service = FirefoxService(executable_path=GeckoDriverManager().install())
     
-    headOption = webdriver.FirefoxOptions()
-    headOption.add_argument("--window-size=1920,1080")
-    headOption.add_argument("--start-maximized")
-    headOption.add_argument("--headless")
+    firefox_options = webdriver.FirefoxOptions()
+    options = [
+        "--window-size=1920,1080",
+        "--start-maximized",
+        "--headless",
+        ]
     
+    for option in options:
+        firefox_options.add_argument(option)
 
-    driver = webdriver.Firefox(service=service, options=headOption)
+    driver = webdriver.Firefox(service=service, options=firefox_options)
     
     
     return driver
@@ -70,7 +74,7 @@ def activate_web_driver_chromium():
         chrome_options.add_argument(option)
 
     driver = webdriver.Chrome(service=service, options=chrome_options)
-    #driver = webdriver.Chrome(service=service)
+   
     
     return driver
 
@@ -117,7 +121,7 @@ def scrape_to_dataframe(driver, Season, DateFrom, DateTo):
     
     source = soup(driver.page_source, 'html.parser')
 
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(30)
     
     #check for more than one page
     CLASS_ID_PAGINATION = "Pagination_pageDropdown__KgjBU" #determined by visual inspection of page source code
