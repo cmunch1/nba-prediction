@@ -125,21 +125,26 @@ def scrape_to_dataframe(driver, Season, DateFrom, DateTo):
     source = soup(driver.page_source, 'html.parser')
 
     #driver.implicitly_wait(30)
-    time.sleep(30) # take a pause 30 seconds
+    time.sleep(5) # take a pause 30 seconds
     
     #check for more than one page
     CLASS_ID_PAGINATION = "Pagination_pageDropdown__KgjBU" #determined by visual inspection of page source code
     pagination = source.find('div', {'class':CLASS_ID_PAGINATION})
-
+    
+    time.sleep(5)
+    
     if pagination is not None:
         # if multiple pages, first activate pulldown option for All pages to show all rows on one page
         CLASS_ID_DROPDOWN = "DropDown_select__4pIg9" #determined by visual inspection of page source code
         page_dropdown = driver.find_element(By.XPATH, "//*[@class='" + CLASS_ID_PAGINATION + "']//*[@class='" + CLASS_ID_DROPDOWN + "']")
+        time.sleep(2)
         page_dropdown.send_keys("ALL") # show all pages
         #page_dropdown.click()
+        time.sleep(2)
         driver.execute_script('arguments[0].click()', page_dropdown) #click() didn't work in headless mode, used this workaround (https://stackoverflow.com/questions/57741875)
         
         #refresh page data now that it contains all rows of the table
+        time.sleep(15)
         source = soup(driver.page_source, 'html.parser')
 
     # pull out html table from page source and convert it to a dataframe
