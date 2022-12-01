@@ -6,7 +6,7 @@ import numpy as np
 import json
 import time
 from datetime import timedelta, datetime
-from branca.element import Figure
+
 
 
 def fancy_header(text, font_size=24):
@@ -14,24 +14,15 @@ def fancy_header(text, font_size=24):
     st.markdown(res, unsafe_allow_html=True )
 
 def get_model(project, model_name, evaluation_metric, sort_metrics_by):
-    """Retrieve desired model or download it from the Hopsworks Model Registry.
-    In second case, it will be physically downloaded to this directory"""
-    TARGET_FILE = "model.pkl"
-    list_of_files = [os.path.join(dirpath,filename) for dirpath, _, filenames \
-                     in os.walk('.') for filename in filenames if filename == TARGET_FILE]
+    """Retrieve desired model from the Hopsworks Model Registry."""
 
-    if list_of_files:
-        model_path = list_of_files[0]
-        model = joblib.load(model_path)
-    else:
-        if not os.path.exists(TARGET_FILE):
-            mr = project.get_model_registry()
-            # get best model based on custom metrics
-            model = mr.get_best_model(model_name,
-                                      evaluation_metric,
-                                      sort_metrics_by)
-            model_dir = model.download()
-            model = joblib.load(model_dir + "/model.pkl")
+    mr = project.get_model_registry()
+    # get best model based on custom metrics
+    model = mr.get_best_model(model_name,
+                                evaluation_metric,
+                                sort_metrics_by)
+    model_dir = model.download()
+    model = joblib.load(model_dir + "/model.pkl")
 
     return model
 
@@ -69,7 +60,7 @@ st.write(f"⏱ Data for {latest_date}")
 
 X = X.drop(columns=["date"]).fillna(0)
 
-data_to_display = decode_features(X, feature_view=feature_view)
+
 
 progress_bar.progress(60)
 
