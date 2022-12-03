@@ -37,7 +37,7 @@ fancy_header('\n📡 Connecting to Hopsworks Feature Store...')
 project = hopsworks.login()
 fs = project.get_feature_store()
 feature_view = fs.get_feature_view(
-    name = 'air_quality_fv',
+    name = 'rolling_stats_fv',
     version = 1
 )
 

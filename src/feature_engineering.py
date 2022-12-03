@@ -1,7 +1,28 @@
 import pandas as pd
 import numpy as np
 
-def process_features(df: pd.DataFrame) -> pd.DataFrame:
+def process_features(df: pd.DataFrame)-> pd.DataFrame:
+    
+    '''
+    Feature engineering to add: 
+        - rolling averages of key stats, 
+        - win/lose streaks, 
+        - home/away streaks, 
+        - specific matchup (team X vs team Y) rolling averages and streaks
+        
+    Functions include:
+        - fix_datatypes(): converts date to proper format and reduces memory footprint of ints and floats
+        - add_date_features(): adds a feature for month number from game date 
+        - remove_playoff_games(): playoff games may bias the statistics
+        - add_rolling_home_visitor(): rolling avgs and streaks for home/visitor team when playing as home/visitor
+        - process_games_consecutively(): separate home team stats from visitor team stats for each game and stack these together by game date
+        - add_past_performance_all(): rolling avgs and streaks no matter if playing as home or visitor team
+        - add_matchups(): rolling avgs and steaks for each time when Team A played Team B
+        
+        
+        
+        
+    '''
     
     home_visitor_roll_list = [3, 7, 10]
     all_roll_list = [3, 7, 10, 15]
@@ -25,7 +46,7 @@ def process_features(df: pd.DataFrame) -> pd.DataFrame:
     
     return df
 
-def fix_datatypes(df):
+def fix_datatypes(df: pd.DataFrame)-> pd.DataFrame:
     
     '''
     Converts date to proper format and reduces memory footprint of ints and floats
@@ -50,30 +71,31 @@ def fix_datatypes(df):
         
     return df
 
-def add_date_features(df):
+def add_date_features(df: pd.DataFrame)-> pd.DataFrame:
     
     '''
     Converts game date to month to limit cardinality
     '''
     
-    import pandas as pd
-
     df['MONTH'] = df['GAME_DATE_EST'].dt.month
     
     return df
 
-def remove_playoff_games(df):
+def remove_playoff_games(df: pd.DataFrame)-> pd.DataFrame:
     
     '''
     Remove playoff games 
+
     '''
     
-    df = df[df["PLAYOFF"] == 0]
-    df = df.drop("PLAYOFF", axis = 1)
+    # Filter to only non-playoff games and then drop the PLAYOFF feature
+    
+    df = df[df["PLAYOFF"] == 0] 
+    df = df.drop("PLAYOFF", axis = 1) 
     
     return df
 
-def process_x_minus_y(df):
+def process_x_minus_y(df: pd.DataFrame)-> pd.DataFrame:
     #Subtract visitor teams stats from the home teams stats for key fields
     # field_x - field_y
     
@@ -91,7 +113,15 @@ def process_x_minus_y(df):
         
     return df
 
-def process_x_minus_league_avg(df, feature_list, team_feature):
+def process_x_minus_league_avg(df: pd.DataFrame, feature_list: list, team_feature: str) -> pd.DataFrame:
+
+    '''
+    Subtract the league average of each stat for that day in time from the team's current stat
+    
+    team_feature = "HOME_TEAM_ID" or "VISITOR_TEAM_ID"
+
+    This provides a measure of how good the team is compared to the the rest of the league
+    '''
 
     # create a temp dataframe so that every date can be front-filled
     # we need the current average for all 30 teams for every day during the season
@@ -103,12 +133,14 @@ def process_x_minus_league_avg(df, feature_list, team_feature):
     temp_feature_list = feature_list.copy()
     temp_feature_list.append(team_feature)
     temp_feature_list.append("GAME_DATE_EST")
-   
+    df_columns = df.columns.to_list()
+    print(df_columns)
     df_temp = df[temp_feature_list]
+    print(temp_feature_list)
 
     # populate the dataframe with all days played and forward fill previous value if a particular team did not play that day
     # https://stackoverflow.com/questions/70362869
-    df_temp = (df_temp.set_index('GAME_DATE_EST')
+    df_temp = (df_temp.set_index('GAME_DATE_EST',)
             .groupby([team_feature])[feature_list]
             .apply(lambda x: x.asfreq('d', method = "ffill"))
             .reset_index()
@@ -134,7 +166,7 @@ def process_x_minus_league_avg(df, feature_list, team_feature):
     return df
 
 
-def add_rolling_home_visitor(df, location, roll_list): 
+def add_rolling_home_visitor(df: pd.DataFrame, location: str, roll_list: list)-> pd.DataFrame:
     
     # location = "HOME" or "VISITOR"
     # roll_list = list of number of games for each rolling mean, e.g. [3, 5, 7, 10, 15]
@@ -189,7 +221,7 @@ def add_rolling_home_visitor(df, location, roll_list):
     
     #remove win averages from roll list - the league average will always be 0.5 (half the teams win, half lose)
     roll_feature_list = [x for x in roll_feature_list if not x.startswith('HOME_TEAM_WINS')]
-    
+    print(location_id)
     df = process_x_minus_league_avg(df, roll_feature_list, location_id)
     
  
@@ -200,6 +232,9 @@ def add_rolling_home_visitor(df, location, roll_list):
 def process_games_consecutively(df_data):
     # re-organize so that all of a team's games can be listed in chronological order whether HOME or VISITOR
     # this will facilitate feature engineering (winpct vs team X, 5-game winpct, current win streak, etc...)
+    
+    # before this step, the data is stored by game, and each game has 2 teams
+    # this function will separate each teams stats so that each game has 2 rows (one for each team) instead of one combined row
     
     #this data will need to be re-linked back to the main dataframe after all processing is done,
     #joining TEAM1 to HOME_TEAM_ID for all records and then TEAM1 to VISITOR_TEAM_ID for all records
