@@ -187,7 +187,9 @@ def convert_columns(df):
     df['HOME'] = df['HOME'].apply(lambda x: 1 if '@' in x else 0)
     
     # convert wins to home team wins
-    # first convert W/L to 1/0
+    # incomplete games will be NaN
+    df = df[df['HOME_TEAM_WINS'].notna()]
+    # convert W/L to 1/0
     df['HOME_TEAM_WINS'] = df['HOME_TEAM_WINS'].apply(lambda x: 1 if 'W' in x else 0)
     # no need to do anything else, win/loss of visitor teams is not used in final dataframe
     
