@@ -9,6 +9,8 @@ from datetime import timedelta, datetime
 
 
 
+
+
 def fancy_header(text, font_size=24):
     res = f'<span style="color:#ff5f27; font-size: {font_size}px;">{text}</span>'
     st.markdown(res, unsafe_allow_html=True )
@@ -27,12 +29,23 @@ def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     return model
 
 
+
+
 st.title('NBA Prediction Project')
 
 progress_bar = st.sidebar.header('⚙️ Working Progress')
 progress_bar = st.sidebar.progress(0)
 st.write(36 * "-")
+fancy_header('\n📡 Connecting to NBA Schedule...')
+
+
+
+progress_bar = st.sidebar.header('⚙️ Working Progress')
+progress_bar = st.sidebar.progress(0)
+st.write(36 * "-")
 fancy_header('\n📡 Connecting to Hopsworks Feature Store...')
+
+
 
 project = hopsworks.login()
 fs = project.get_feature_store()
