@@ -10,3 +10,4 @@ ca_chain
 certfile
 keyfile
 geckodriver.log
+.env
