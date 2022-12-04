@@ -69,11 +69,6 @@ fancy_header(f"🗺 Processing the map...")
 
 
 
-
-
-
-
-
 progress_bar.progress(80)
 st.sidebar.write("-" * 36)
 
