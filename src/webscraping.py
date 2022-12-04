@@ -237,3 +237,40 @@ def combine_home_visitor(df):
         df[field] = df[field].astype('int64')
 
     return df
+
+def get_todays_matchups(driver) -> list:
+
+    '''
+    Goes to NBA Schedule and scrapes the teams playing today
+    '''
+    
+    NBA_SCHEDULE = "https://www.nba.com/schedule"
+
+    driver.get(NBA_SCHEDULE)
+
+    source = soup(driver.page_source, 'html.parser')
+
+
+    # Get how many games are scheduled for today
+    # The specified heading lists the number of games (e.g. "8 GAMES")
+    CLASS_TODAYS_HEADING = "ScheduleDay_sdWeek__iiTmo"
+    game_count = (source.find('h6', {'class':CLASS_TODAYS_HEADING})).text
+    game_count = int(list(filter(str.isdigit, game_count))[0]) #strip-out just numeric part
+
+    # Get the block of all of todays games
+    # All of todays games are in the specified div block
+    CLASS_TODAYS_GAMES = "ScheduleDay_sdGames__NGdO5"
+    todays_games = source.find('div', {'class':CLASS_TODAYS_GAMES})
+
+    # Get the teams playing
+    # Each team listed in todays block will have a href with the specified anchor class
+    # e.g. <a href="/team/1610612743/nuggets/" class="Anchor_anchor__cSc3P Link_styled__okbXW" ...
+    # href includes team ID (1610612743 in example)
+    # first team is visitor, second team is home
+    CLASS_ID = "Anchor_anchor__cSc3P Link_styled__okbXW"
+    links = todays_games.find_all('a', {'class':CLASS_ID})
+    links_list = [i.get("href") for i in links]
+
+    print(links_list)
+    
+    return links_list
