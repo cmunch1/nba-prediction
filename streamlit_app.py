@@ -53,12 +53,12 @@ start_time = int(start_date.timestamp()) * 1000
 X = feature_view.get_batch_data(start_time=start_time)
 progress_bar.progress(50)
 
-latest_date_unix = str(X.date.values[0])[:10]
-latest_date = time.ctime(int(latest_date_unix))
+#latest_date_unix = str(X.date.values[0])[:10]
+#latest_date = time.ctime(int(latest_date_unix))
 
-st.write(f"⏱ Data for {latest_date}")
+#st.write(f"⏱ Data for {latest_date}")
 
-X = X.drop(columns=["date"]).fillna(0)
+#X = X.drop(columns=["date"]).fillna(0)
 
 
 
@@ -82,9 +82,9 @@ preds = model.predict(X)
 
 
 
-next_day_date = datetime.today() + timedelta(days=1)
-next_day = next_day_date.strftime ('%d/%m/%Y')
-df = pd.DataFrame(data=preds, index=cities, columns=[f"AQI Predictions for {next_day}"], dtype=int)
+#next_day_date = datetime.today() + timedelta(days=1)
+#next_day = next_day_date.strftime ('%d/%m/%Y')
+#df = pd.DataFrame(data=preds, index=cities, columns=[f"AQI Predictions for {next_day}"], dtype=int)
 
 st.sidebar.write(df)
 progress_bar.progress(100)
