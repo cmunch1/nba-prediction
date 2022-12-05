@@ -40,7 +40,7 @@ def process_features(df: pd.DataFrame)-> pd.DataFrame:
     #add these features back to main dataframe
     df = combine_new_features(df,df_consecutive) 
     
-    df = remove_non_rolling(df)
+    #df = remove_non_rolling(df)
     
     df = process_x_minus_y(df)
     
@@ -99,8 +99,9 @@ def process_x_minus_y(df: pd.DataFrame)-> pd.DataFrame:
     #Subtract visitor teams stats from the home teams stats for key fields
     # field_x - field_y
     
-    all_features = df.columns.tolist()
-    comparison_features = [x for x in all_features if "_y" in x]
+    useful_features = remove_non_rolling(df)
+    
+    comparison_features = [x for x in useful_features if "_y" in x]
     
     #don't include redunant features. (x - league_avg) - (y - league_avg) = x-y
     comparison_features = [x for x in comparison_features if "_MINUS_LEAGUE_AVG" not in x]
@@ -421,8 +422,11 @@ def combine_new_features(df, df_consecutive):
     
     return df
 
-def remove_non_rolling(df):
+def remove_non_rolling(df: pd.DataFrame) -> list:
     
+    '''
+    Returns a list of columns in a dataframe with the current games stats removed, leaving only rolling averages and streaks
+    '''
     # remove non-rolling features - these are data leaks
     # they are stats from the actual game that decides winner/loser, 
     # but we don't know these stats before a game is played
@@ -439,4 +443,4 @@ def remove_non_rolling(df):
     
     use_columns = [item for item in all_columns if item not in drop_columns]
     
-    return df[use_columns]
+    return use_columns
