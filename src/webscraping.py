@@ -270,7 +270,5 @@ def get_todays_matchups(driver) -> list:
     CLASS_ID = "Anchor_anchor__cSc3P Link_styled__okbXW"
     links = todays_games.find_all('a', {'class':CLASS_ID})
     links_list = [i.get("href") for i in links]
-
-    print(links_list)
     
     return links_list
