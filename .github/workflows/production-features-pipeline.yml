@@ -29,8 +29,11 @@ jobs:
       #- name: Setup Chrome
       #  uses: browser-actions/setup-chrome@latest
         
-      - name: Setup Firefox
-        uses: browser-actions/setup-firefox@latest
+      #- name: Setup Firefox
+      #  uses: browser-actions/setup-firefox@latest
+        
+      - name: Set up Firefox
+        uses: docker://selenium/standalone-firefox:latest
      
       - name: execute python workflows from notebook
         env: 
