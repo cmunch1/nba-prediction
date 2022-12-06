@@ -30,7 +30,7 @@ jobs:
       #  uses: browser-actions/setup-chrome@latest
         
       - name: Setup Firefox
-        uses: mozilla/setup-firefox@latest
+        uses: selenium/standalone-firefox@v1
         
 
      
