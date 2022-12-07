@@ -31,6 +31,8 @@ jobs:
         
       - name: Setup Firefox
         uses: browser-actions/setup-firefox@latest
+        
+
      
       - name: execute python workflows from notebook
         env: 
