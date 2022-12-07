@@ -52,10 +52,15 @@ def fix_datatypes(df: pd.DataFrame)-> pd.DataFrame:
     df['GAME_DATE_EST'] = pd.to_datetime(df['GAME_DATE_EST'])
 
     long_integer_fields = ['GAME_ID', 'HOME_TEAM_ID', 'VISITOR_TEAM_ID', 'SEASON']
+    short_integer_fields = ['PTS_home', 'AST_home', 'REB_home', 'PTS_away', 'AST_away', 'REB_away']
 
     #convert long integer fields to int32 from int64
     for field in long_integer_fields:
         df[field] = df[field].astype('int32')
+
+    #convert specific fields to int8 to avoid type issues with hopsworks.ai
+    for field in short_integer_fields:
+        df[field] = df[field].astype('int8')
     
     #convert the remaining int64s to int8
     for field in df.select_dtypes(include=['int64']).columns.tolist():
