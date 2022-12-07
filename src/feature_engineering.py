@@ -61,6 +61,10 @@ def fix_datatypes(df: pd.DataFrame)-> pd.DataFrame:
     #convert specific fields to int8 to avoid type issues with hopsworks.ai
     for field in short_integer_fields:
         df[field] = df[field].astype('int8')
+        
+    #convert to positive. For some reason, some values have been saved as negative numbers
+    for field in short_integer_fields:
+        df[field] = df[field].abs()
     
     #convert the remaining int64s to int8
     for field in df.select_dtypes(include=['int64']).columns.tolist():
