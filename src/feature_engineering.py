@@ -18,11 +18,7 @@ def process_features(df: pd.DataFrame)-> pd.DataFrame:
         - process_games_consecutively(): separate home team stats from visitor team stats for each game and stack these together by game date
         - add_past_performance_all(): rolling avgs and streaks no matter if playing as home or visitor team
         - add_matchups(): rolling avgs and steaks for each time when Team A played Team B
-        
-        
-        
-        
-    '''
+        '''
     
     home_visitor_roll_list = [3, 7, 10]
     all_roll_list = [3, 7, 10, 15]
@@ -135,9 +131,9 @@ def process_x_minus_league_avg(df: pd.DataFrame, feature_list: list, team_featur
     temp_feature_list.append(team_feature)
     temp_feature_list.append("GAME_DATE_EST")
     df_columns = df.columns.to_list()
-    print(df_columns)
+    #print(df_columns)
     df_temp = df[temp_feature_list]
-    print(temp_feature_list)
+    #print(temp_feature_list)
 
     # populate the dataframe with all days played and forward fill previous value if a particular team did not play that day
     # https://stackoverflow.com/questions/70362869
@@ -222,7 +218,7 @@ def add_rolling_home_visitor(df: pd.DataFrame, location: str, roll_list: list)->
     
     #remove win averages from roll list - the league average will always be 0.5 (half the teams win, half lose)
     roll_feature_list = [x for x in roll_feature_list if not x.startswith('HOME_TEAM_WINS')]
-    print(location_id)
+    #print(location_id)
     df = process_x_minus_league_avg(df, roll_feature_list, location_id)
     
  
