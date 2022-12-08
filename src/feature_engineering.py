@@ -167,7 +167,7 @@ def add_rolling_home_visitor(df: pd.DataFrame, location: str, roll_list: list)->
     return df
 
 
-def process_games_consecutively(df_data: pd.Dataframe)-> pd.DataFrame:
+def process_games_consecutively(df_data: pd.DataFrame)-> pd.DataFrame:
     
     '''
     Separate home team stats from visitor team stats for each game and stack these together by game date. 
