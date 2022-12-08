@@ -465,6 +465,9 @@ def remove_non_rolling(df: pd.DataFrame) -> list:
     # they are stats from the actual game that decides winner/loser, 
     # but we don't know these stats before a game is played
     
+    # These must be retained in the database to recalculate rolling avgs and streaks in the future,
+    # so are filtered out as appropriate instead of deleted
+    
     drop_columns =[]
     
     all_columns = df.columns.tolist()
