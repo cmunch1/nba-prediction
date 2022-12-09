@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import json
 
 def convert_feature_names(df: pd.DataFrame)-> pd.DataFrame:
@@ -23,3 +22,18 @@ def convert_feature_names(df: pd.DataFrame)-> pd.DataFrame:
     df = df.rename(columns=feature_mapper)
 
     return df
+
+def save_feature_names(df: pd.DataFrame)-> pd.DataFrame:
+
+    '''
+    Saves original feature name mixed-case formatting to JSON file
+    '''
+    # hopsworks "sanitizes" feature names by converting to all lowercase
+    # this function saves the original so that they can be re-mapped later
+    # for code re-usability
+    
+    feature_names = df.columns.tolist()
+    with open("feature_names.json", "w") as fp:
+        json.dump(feature_names, fp)
+        
+    return "File Saved."
