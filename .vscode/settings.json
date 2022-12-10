@@ -4,6 +4,7 @@
         "DATAPATH",
         "dotenv",
         "isin",
+        "matchups",
         "nbformat",
         "pytz",
         "webscraping"
