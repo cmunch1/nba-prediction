@@ -1,3 +1,5 @@
+import os
+
 import streamlit as st
 import hopsworks
 import joblib
@@ -6,8 +8,25 @@ import numpy as np
 import json
 import time
 from datetime import timedelta, datetime
+import xgboost as xgb
 
+from src.hopsworks_utils import (
+    convert_feature_names,
+)
 
+from src.feature_engineering import (
+    fix_datatypes,
+    remove_non_rolling,
+)
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+try:
+    HOPSWORKS_API_KEY = os.environ['HOPSWORKS_API_KEY']
+except:
+    raise Exception('Set environment variable HOPSWORKS_API_KEY')
 
 
 
@@ -29,75 +48,73 @@ def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     return model
 
 
-
-
 st.title('NBA Prediction Project')
-
-progress_bar = st.sidebar.header('⚙️ Working Progress')
-progress_bar = st.sidebar.progress(0)
-st.write(36 * "-")
-fancy_header('\n📡 Connecting to NBA Schedule...')
-
-
 
 progress_bar = st.sidebar.header('⚙️ Working Progress')
 progress_bar = st.sidebar.progress(0)
 st.write(36 * "-")
 fancy_header('\n📡 Connecting to Hopsworks Feature Store...')
 
-
-
-project = hopsworks.login()
+project = hopsworks.login(api_key_value=HOPSWORKS_API_KEY)
 fs = project.get_feature_store()
-feature_view = fs.get_feature_view(
-    name = 'rolling_stats_fv',
-    version = 1
+
+rolling_stats_fg = fs.get_feature_group(
+    name="rolling_stats",
+    version=1,
 )
+
 
 st.write("Successfully connected!✔️")
 progress_bar.progress(20)
 
 st.write(36 * "-")
-fancy_header('\n☁️ Getting batch data from Feature Store...')
+fancy_header('\n☁️ Getting data from Feature Store...')
 
-start_date = datetime.now() - timedelta(days=1)
-start_time = int(start_date.timestamp()) * 1000
+# filter new games that are scheduled for today
+# the pipeline has saved these with a game_id starting at 20000001
+ds_query = rolling_stats_fg.filter(rolling_stats_fg.game_id < 20000100)
+df_todays_matches = ds_query.read()
 
-X = feature_view.get_batch_data(start_time=start_time)
-progress_bar.progress(50)
+progress_bar.progress(40)
 
-#latest_date_unix = str(X.date.values[0])[:10]
-#latest_date = time.ctime(int(latest_date_unix))
+# prepare data for prediction
 
-#st.write(f"⏱ Data for {latest_date}")
+df_todays_matches = convert_feature_names(df_todays_matches)
 
-#X = X.drop(columns=["date"]).fillna(0)
+df_todays_matches = fix_datatypes(df_todays_matches)
 
+drop_columns = ['TARGET', 'GAME_DATE_EST', 'GAME_ID', ] 
+df_todays_matches = df_todays_matches.drop(drop_columns, axis=1)
+
+use_columns = remove_non_rolling(df_todays_matches)
+
+X = df_todays_matches[use_columns]
+
+
+print(use_columns)
+
+X_dmatrix = xgb.DMatrix(X)
 
 
 progress_bar.progress(60)
 
 st.write(36 * "-")
-fancy_header(f"🗺 Processing the map...")
+fancy_header(f"🗺 Predicting Win Probabilities...")
 
-
-
-progress_bar.progress(80)
-st.sidebar.write("-" * 36)
 
 
 model = get_model(project=project,
-                  model_name="gradient_boost_model",
-                  evaluation_metric="f1_score",
+                  model_name="xgboost",
+                  evaluation_metric="AUC",
                   sort_metrics_by="max")
 
-preds = model.predict(X)
+preds = model.predict(X_dmatrix)
 
 
+print(preds)
 
-#next_day_date = datetime.today() + timedelta(days=1)
-#next_day = next_day_date.strftime ('%d/%m/%Y')
-#df = pd.DataFrame(data=preds, index=cities, columns=[f"AQI Predictions for {next_day}"], dtype=int)
+
+df = pd.DataFrame(data=preds, columns=[f"Predictions for Today's Games"])
 
 st.sidebar.write(df)
 progress_bar.progress(100)
