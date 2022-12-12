@@ -147,6 +147,7 @@ st.write("Predicting win probabilities for today's games...")
 #                  evaluation_metric="AUC",
 #                  sort_metrics_by="max")
 
+# debug testing
 model = joblib.load("model.pkl")
 
 preds = model.predict(X_dmatrix)
@@ -154,9 +155,6 @@ preds = model.predict(X_dmatrix)
 df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
 
 st.dataframe(df_todays_matches[['MATCHUP', 'HOME_TEAM_WIN_PROBABILITY']])
-
-
-
 
 
 progress_bar.progress(100)
