@@ -122,11 +122,6 @@ st.write("Successfully retrieved!✔️")
 progress_bar.progress(40)
 
 
-# Add a column that displays the matchup using the team names 
-# this will make the display more meaningful
-df_todays_matches['MATCHUP'] = df_todays_matches['VISITOR_TEAM_ID'].map(nba_team_names) + " @ " + df_todays_matches['HOME_TEAM_ID'].map(nba_team_names)
-
-
 
 # Prepare data for prediction
 st.write(36 * "-")
@@ -134,16 +129,24 @@ fancy_header('\n☁️ Processing Data for prediction...')
 
 # convert feature names back to mixed case
 df_todays_matches = convert_feature_names(df_todays_matches)
+
+# Add a column that displays the matchup using the team names 
+# this will make the display more meaningful
+df_todays_matches['MATCHUP'] = df_todays_matches['VISITOR_TEAM_ID'].map(nba_team_names) + " @ " + df_todays_matches['HOME_TEAM_ID'].map(nba_team_names)
+
 # fix date and other types
 df_todays_matches = fix_datatypes(df_todays_matches)
+
 # remove features not used by model
 drop_columns = ['TARGET', 'GAME_DATE_EST', 'GAME_ID', ] 
 df_todays_matches = df_todays_matches.drop(drop_columns, axis=1)
+
 # remove stats from today's games - these are blank (the game hasn't been played) and are not used by the model
 use_columns = remove_non_rolling(df_todays_matches)
-
 X = df_todays_matches[use_columns]
-X = X.drop('MATCHUP', axis=1) # MATCHUP is just for informational display, not used by model
+
+# MATCHUP is just for informational display, not used by model
+X = X.drop('MATCHUP', axis=1) 
 
 X_dmatrix = xgb.DMatrix(X) # convert to DMatrix for XGBoost
 
@@ -170,6 +173,8 @@ progress_bar.progress(80)
 # Predict winning probabilities of home team
 st.write(36 * "-")
 fancy_header(f"Predicting Winning Probabilities...")
+
+# https://discuss.streamlit.io/t/frustrated-streamlit-frontend-disconnects-from-apps-with-long-running-processes/11612/22?page=2
 
 preds = model.predict(X_dmatrix)
 
