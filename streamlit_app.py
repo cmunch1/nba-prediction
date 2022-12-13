@@ -19,6 +19,9 @@ from src.feature_engineering import (
     remove_non_rolling,
 )
 
+
+# Load hopsworks API key from .env file
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -46,6 +49,9 @@ def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     model = joblib.load("model.pkl")
 
     return model
+
+
+# dictionary to convert team ids to team names
 
 nba_team_names = {
     1610612737: "Atlanta Hawks",
@@ -80,8 +86,7 @@ nba_team_names = {
     1610612766: "Charlotte Hornets",
 }
 
-
-
+# Streamlit app
 st.title('NBA Prediction Project')
 
 progress_bar = st.sidebar.header('⚙️ Working Progress')
@@ -89,6 +94,8 @@ progress_bar = st.sidebar.progress(0)
 st.write(36 * "-")
 fancy_header('\n📡 Connecting to Hopsworks Feature Store...')
 
+
+# Connect to Hopsworks Feature Store and get Feature Group
 project = hopsworks.login(api_key_value=HOPSWORKS_API_KEY)
 fs = project.get_feature_store()
 
@@ -97,65 +104,78 @@ rolling_stats_fg = fs.get_feature_group(
     version=1,
 )
 
-
 st.write("Successfully connected!✔️")
 progress_bar.progress(20)
 
+
+
+# Get data from Feature Store
 st.write(36 * "-")
-fancy_header('\n☁️ Getting data from Feature Store...')
+fancy_header('\n☁️ Retrieving data from Feature Store...')
 
 # filter new games that are scheduled for today
 # the pipeline has saved these with a game_id starting at 20000001
 ds_query = rolling_stats_fg.filter(rolling_stats_fg.game_id < 20000100)
 df_todays_matches = ds_query.read()
 
+st.write("Successfully retrieved!✔️")
 progress_bar.progress(40)
 
-# prepare data for prediction
+
+# Add a column that displays the matchup using the team names 
+# this will make the display more meaningful
+df_todays_matches['MATCHUP'] = df_todays_matches['VISITOR_TEAM_ID'].map(nba_team_names) + " @ " + df_todays_matches['HOME_TEAM_ID'].map(nba_team_names)
+
+
+
+# Prepare data for prediction
+st.write(36 * "-")
+fancy_header('\n☁️ Processing Data for prediction...')
 
 # convert feature names back to mixed case
 df_todays_matches = convert_feature_names(df_todays_matches)
-
+# fix date and other types
 df_todays_matches = fix_datatypes(df_todays_matches)
-
+# remove features not used by model
 drop_columns = ['TARGET', 'GAME_DATE_EST', 'GAME_ID', ] 
 df_todays_matches = df_todays_matches.drop(drop_columns, axis=1)
-
-df_todays_matches['MATCHUP'] = df_todays_matches['VISITOR_TEAM_ID'].map(nba_team_names) + " @ " + df_todays_matches['HOME_TEAM_ID'].map(nba_team_names)
-
+# remove stats from today's games - these are blank (the game hasn't been played) and are not used by the model
 use_columns = remove_non_rolling(df_todays_matches)
 
 X = df_todays_matches[use_columns]
-X = X.drop('MATCHUP', axis=1)
+X = X.drop('MATCHUP', axis=1) # MATCHUP is just for informational display, not used by model
+
+X_dmatrix = xgb.DMatrix(X) # convert to DMatrix for XGBoost
 
 st.write(df_todays_matches['MATCHUP'])
 
-print(use_columns)
-
-X_dmatrix = xgb.DMatrix(X)
-
-
+st.write("Successfully processed!✔️")
 progress_bar.progress(60)
 
+
+# Load model from Hopsworks Model Registry
 st.write(36 * "-")
-fancy_header(f"🗺 Predicting Win Probabilities...")
+fancy_header(f"Loading Best Model...")
 
-st.write("Predicting win probabilities for today's games...")
+model = get_model(project=project,
+                  model_name="xgboost",
+                  evaluation_metric="AUC",
+                  sort_metrics_by="max")
 
-#model = get_model(project=project,
-#                  model_name="xgboost",
-#                  evaluation_metric="AUC",
-#                  sort_metrics_by="max")
+st.write("Successfully loaded!✔️")
+progress_bar.progress(80)
 
-# debug testing
-model = joblib.load("model.pkl")
+
+
+# Predict winning probabilities of home team
+st.write(36 * "-")
+fancy_header(f"Predicting Winning Probabilities...")
 
 preds = model.predict(X_dmatrix)
 
 df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
 
 st.dataframe(df_todays_matches[['MATCHUP', 'HOME_TEAM_WIN_PROBABILITY']])
-
 
 progress_bar.progress(100)
 st.button("Re-run")
