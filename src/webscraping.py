@@ -261,7 +261,7 @@ def get_todays_matchups(driver) -> list:
     # All of todays games are in the specified div block
     CLASS_TODAYS_GAMES = "ScheduleDay_sdGames__NGdO5"
     todays_games = source.find('div', {'class':CLASS_TODAYS_GAMES})
-    print(todays_games)
+    
     # Get the teams playing
     # Each team listed in todays block will have a href with the specified anchor class
     # e.g. <a href="/team/1610612743/nuggets/" class="Anchor_anchor__cSc3P Link_styled__okbXW" ...
