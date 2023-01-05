@@ -286,19 +286,20 @@ def get_todays_matchups(driver) -> list:
 
     # Get Game IDs
     # Each game listed in todays block will have a link with the specified anchor class
+    # <a class="Anchor_anchor__cSc3P TabLink_link__f_15h" data-content="SAC @ MEM, 2023-01-01" data-content-id="0022200547" data-has-children="true" data-has-more="false" data-id="nba:schedule:main:preview:cta" data-is-external="false" data-text="PREVIEW" data-track="click" data-type="cta" href="/game/sac-vs-mem-0022200547">PREVIEW</a>
+    # *** there may be multiple links for each game, for buying tickets, watching game, etc... ***
+    # all using the same anchor class, so we will filter out those just for watching the game
     CLASS_ID = "Anchor_anchor__cSc3P TabLink_link__f_15h"
     links = todays_games.find_all('a', {'class':CLASS_ID})
+    #print(links)
+    links = [i for i in links if "WATCH" in i]
     game_id_list = [i.get("href") for i in links]
-    
-    # *** there may be two links for each game, one for PREVIEW and one for buying tickets ***
-    # both use the same anchor class, so we will use text partition to ignore the one for tickets
-    # example output:
-    # <a class="Anchor_anchor__cSc3P TabLink_link__f_15h" data-content="SAC @ MEM, 2023-01-01" data-content-id="0022200547" data-has-children="true" data-has-more="false" data-id="nba:schedule:main:preview:cta" data-is-external="false" data-text="PREVIEW" data-track="click" data-type="cta" href="/game/sac-vs-mem-0022200547">PREVIEW</a>
-  
+    #print(game_id_list)
+   
     games = []
     for game in game_id_list:
-        game_id = game.partition("-00")[2] # extract team id from text for PREVIEW link
-        if len(game_id) > 0:               # nothing will be extracted for ticket link, so ignore
+        game_id = game.partition("-00")[2].partition("?")[0] # extract team id from text for link
+        if len(game_id) > 0:               
             games.append(game_id)   
     
     return matchups, games
