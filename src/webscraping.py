@@ -71,9 +71,11 @@ def activate_web_driver_chromium():
         "--disable-extensions",
         "--start-maximized",
         "--remote-debugging-port=9222", #https://stackoverflow.com/questions/56637973/how-to-fix-selenium-devtoolsactiveport-file-doesnt-exist-exception-in-python
+        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
         #"--disable-blink-features=AutomationControlled",
         ]
 
+    
     for option in options:
         chrome_options.add_argument(option)
 
@@ -125,7 +127,7 @@ def scrape_to_dataframe(driver, Season, DateFrom, DateTo):
     time.sleep(60)
     
     source = soup(driver.page_source, 'html.parser')
-
+    
     #driver.implicitly_wait(30)
     
     #check for more than one page
