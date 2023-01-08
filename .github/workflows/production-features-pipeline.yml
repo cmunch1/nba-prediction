@@ -29,7 +29,13 @@ jobs:
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@latest
         
+        
+      - name: Setup chromedriver
+      - uses: nanasess/setup-chromedriver@v1
 
+      - run: |
+          export DISPLAY=:99
+          chromedriver --url-base=/wd/hub &
      
       - name: execute python workflows from notebook
         env: 
