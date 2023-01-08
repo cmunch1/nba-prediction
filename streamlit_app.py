@@ -63,24 +63,24 @@ nba_team_names = {
     1610612743: "Denver Nuggets",
     1610612744: "Golden State Warriors",
     1610612745: "Houston Rockets",
-    1610612746: "Indiana Pacers",
-    1610612747: "LA Clippers",
-    1610612748: "Los Angeles Lakers",
-    1610612749: "Memphis Grizzlies",
-    1610612750: "Miami Heat",
-    1610612751: "Milwaukee Bucks",
-    1610612752: "Minnesota Timberwolves",
-    1610612753: "Brooklyn Nets",
-    1610612754: "New York Knicks",
-    1610612755: "Orlando Magic",
-    1610612756: "Philadelphia 76ers",
-    1610612757: "Phoenix Suns",
-    1610612758: "Portland Trail Blazers",
-    1610612759: "Sacramento Kings",
-    1610612760: "San Antonio Spurs",
-    1610612761: "Oklahoma City Thunder",
-    1610612762: "Toronto Raptors",
-    1610612763: "Utah Jazz",
+    1610612746: "LA Clippers",
+    1610612754: "Indiana Pacers",
+    1610612747: "Los Angeles Lakers",
+    1610612763: "Memphis Grizzlies",
+    1610612748: "Miami Heat",
+    1610612749: "Milwaukee Bucks",
+    1610612750: "Minnesota Timberwolves",
+    1610612751: "Brooklyn Nets",
+    1610612752: "New York Knicks",
+    1610612753: "Orlando Magic",
+    1610612755: "Philadelphia 76ers",
+    1610612756: "Phoenix Suns",
+    1610612757: "Portland Trail Blazers",
+    1610612758: "Sacramento Kings",
+    1610612759: "San Antonio Spurs",
+    1610612760: "Oklahoma City Thunder",
+    1610612761: "Toronto Raptors",
+    1610612762: "Utah Jazz",
     1610612764: "Washington Wizards",
     1610612765: "Detroit Pistons",
     1610612766: "Charlotte Hornets",
@@ -120,7 +120,7 @@ df_todays_matches = ds_query.read()
 
 st.write("Successfully retrieved!✔️")
 progress_bar.progress(40)
-
+print(df_todays_matches.head(5))
 
 
 # Prepare data for prediction
