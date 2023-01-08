@@ -70,6 +70,7 @@ def activate_web_driver_chromium():
         "--ignore-certificate-errors",
         "--disable-extensions",
         "--start-maximized",
+        "--remote-debugging-port=9222", #https://stackoverflow.com/questions/56637973/how-to-fix-selenium-devtoolsactiveport-file-doesnt-exist-exception-in-python
         #"--disable-blink-features=AutomationControlled",
         ]
 
