@@ -26,17 +26,8 @@ jobs:
           python -m pip install jupyter nbconvert nbformat
         
         
-      #- name: Setup Chrome
-      #  uses: browser-actions/setup-chrome@latest
-        
-      - name: Setup Firefox
-        uses: browser-actions/setup-firefox@latest
-        with:
-          firefox-version: latest
-          geckodriver-version: latest
-       
-
-  
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@latest
         
 
      
