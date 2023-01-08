@@ -39,8 +39,8 @@ jobs:
         run: sudo apt install -y chromium-browser
         
         
-      - name: Setup chromedriver
-        uses: nanasess/setup-chromedriver@v1
+      #- name: Setup chromedriver
+      #  uses: nanasess/setup-chromedriver@v1
      
       - name: execute python workflows from notebook
         env: 
