@@ -27,7 +27,7 @@ jobs:
         
         
       - name: Setup Chrome
-        uses: browser-actions/setup-chrome@v105.0.5195
+        uses: browser-actions/setup-chrome@v105
         
         
       - name: Setup chromedriver
