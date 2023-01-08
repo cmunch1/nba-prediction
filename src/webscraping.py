@@ -253,14 +253,17 @@ def get_todays_matchups(driver) -> list:
 
     # Get how many games are scheduled for today
     # The specified heading lists the number of games (e.g. "8 GAMES")
-    CLASS_TODAYS_HEADING = "ScheduleDay_sdWeek__iiTmo"
-    game_count = (source.find('h6', {'class':CLASS_TODAYS_HEADING})).text
-    game_count = int(list(filter(str.isdigit, game_count))[0]) #strip-out just numeric part
+    #CLASS_TODAYS_HEADING = "ScheduleDay_sdWeek__iiTmo"
+    #game_count = (source.find('h6', {'class':CLASS_TODAYS_HEADING})).text
+    #game_count = int(list(filter(str.isdigit, game_count))[0]) #strip-out just numeric part
 
     # Get the block of all of todays games
-    # All of todays games are in the specified div block
-    CLASS_TODAYS_GAMES = "ScheduleDay_sdGames__NGdO5"
-    todays_games = source.find('div', {'class':CLASS_TODAYS_GAMES})
+    # In the morning, the results of yesterday's games are listed first, then todays games are listed
+    # Later in the day, yesterday's games are no longer listed
+    # We plan to run this on a schedule everyday in the morning, so we need the second div
+    CLASS_GAMES_PER_DAY = "ScheduleDay_sdGames__NGdO5"
+    yesterdays_games = source.find('div', {'class':CLASS_GAMES_PER_DAY}) # first div is yesterday's games
+    todays_games = yesterdays_games.find_next('div', {'class':CLASS_GAMES_PER_DAY}) # second div is todays games
     
     # Get the teams playing
     # Each team listed in todays block will have a href with the specified anchor class
@@ -287,12 +290,12 @@ def get_todays_matchups(driver) -> list:
     # Get Game IDs
     # Each game listed in todays block will have a link with the specified anchor class
     # <a class="Anchor_anchor__cSc3P TabLink_link__f_15h" data-content="SAC @ MEM, 2023-01-01" data-content-id="0022200547" data-has-children="true" data-has-more="false" data-id="nba:schedule:main:preview:cta" data-is-external="false" data-text="PREVIEW" data-track="click" data-type="cta" href="/game/sac-vs-mem-0022200547">PREVIEW</a>
-    # *** there may be multiple links for each game, for buying tickets, watching game, etc... ***
-    # all using the same anchor class, so we will filter out those just for watching the game
+    # Each game will have two links with the specified anchor class, one for the preview and one to buy tickets
+    # all using the same anchor class, so we will filter out those just for PREVIEW
     CLASS_ID = "Anchor_anchor__cSc3P TabLink_link__f_15h"
     links = todays_games.find_all('a', {'class':CLASS_ID})
     #print(links)
-    links = [i for i in links if "WATCH" in i]
+    links = [i for i in links if "PREVIEW" in i]
     game_id_list = [i.get("href") for i in links]
     #print(game_id_list)
    
