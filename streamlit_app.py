@@ -114,8 +114,8 @@ st.write(36 * "-")
 fancy_header('\n☁️ Retrieving data from Feature Store...')
 
 # filter new games that are scheduled for today
-# the pipeline has saved these with a game_id starting at 20000001
-ds_query = rolling_stats_fg.filter(rolling_stats_fg.game_id < 20000100)
+# these are games where no points have been scored yet
+ds_query = rolling_stats_fg.filter(rolling_stats_fg.pts_home == 0)
 df_todays_matches = ds_query.read()
 
 st.write("Successfully retrieved!✔️")
