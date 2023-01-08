@@ -38,9 +38,11 @@ jobs:
       - name: Install a new Chromium
         run: sudo apt install -y chromium-browser
         
-        
-      #- name: Setup chromedriver
-      #  uses: nanasess/setup-chromedriver@v1
+      # code from https://github.com/MarketingPipeline/Python-Selenium-Action/blob/main/.github/workflows/Selenium-Action_Template.yaml
+      - name: Installing all necessary packages
+        run: pip install chromedriver-autoinstaller pyvirtualdisplay
+      - name: Install xvfb
+        run: sudo apt-get install xvfb
      
       - name: execute python workflows from notebook
         env: 
