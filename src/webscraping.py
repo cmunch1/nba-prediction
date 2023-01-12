@@ -311,5 +311,7 @@ def get_todays_matchups(driver) -> list:
         game_id = game.partition("-00")[2].partition("?")[0] # extract team id from text for link
         if len(game_id) > 0:               
             games.append(game_id)   
+
+
     
     return matchups, games
