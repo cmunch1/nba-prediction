@@ -27,18 +27,18 @@ jobs:
         
         
       
-      - name: Setup Chrome
-        uses: browser-actions/setup-chrome@latest
+      #- name: Setup Chrome
+      #  uses: browser-actions/setup-chrome@latest
         
       #chromium setup
-      #- name: Installed package list
-      #  run: apt list --installed
-      #- name: Remove Chrome
-      #  run: sudo apt purge google-chrome-stable
-      #- name: Remove default Chromium
-      #  run: sudo apt purge chromium-browser
-      #- name: Install a new Chromium
-      #  run: sudo apt install -y chromium-browser
+      - name: Installed package list
+        run: apt list --installed
+      - name: Remove Chrome
+        run: sudo apt purge google-chrome-stable
+      - name: Remove default Chromium
+        run: sudo apt purge chromium-browser
+      - name: Install a new Chromium
+        run: sudo apt install -y chromium-browser
         
       # code from https://github.com/MarketingPipeline/Python-Selenium-Action/blob/main/.github/workflows/Selenium-Action_Template.yaml
       #- name: Installing all necessary packages
