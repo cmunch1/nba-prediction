@@ -66,7 +66,7 @@ def activate_web_driver_chromium():
 
     chrome_options = Options() 
     options = [
-        "--headless",
+        #"--headless",
         "--no-sandbox",
         "--disable-dev-shm-usage",
         "--disable-gpu",
@@ -74,6 +74,8 @@ def activate_web_driver_chromium():
         "--ignore-certificate-errors",
         "--disable-extensions",
         "--start-maximized",
+        "--disable-popup-blocking",
+        "--disable-notifications",
         "--remote-debugging-port=9222", #https://stackoverflow.com/questions/56637973/how-to-fix-selenium-devtoolsactiveport-file-doesnt-exist-exception-in-python
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
         #"--disable-blink-features=AutomationControlled",
@@ -111,7 +113,7 @@ def parse_ids(data_table):
     
     return team_id, game_id
 
-def scrape_to_dataframe(driver, Season, DateFrom, DateTo):
+def scrape_to_dataframe(driver, Season, DateFrom="NONE", DateTo="NONE", stat_type='standard'):
     
     # go to boxscores webpage at nba.com
     # check if the data table is split over multiple pages 
@@ -121,43 +123,54 @@ def scrape_to_dataframe(driver, Season, DateFrom, DateTo):
     # and add these to dataframe
     
     # if season not provided, then will default to current season
-    if not Season:
-        nba_url = "https://www.nba.com/stats/teams/boxscores?DateFrom=" + DateFrom + "&DateTo=" + DateTo
+    # if DateFrom and DateTo not provided, then don't include in url - pull the whole season
+    if stat_type == 'standard':
+        nba_url = "https://www.nba.com/stats/teams/boxscores"
     else:
-        nba_url = "https://www.nba.com/stats/teams/boxscores?Season=" + Season + "&DateFrom=" + DateFrom + "&DateTo=" + DateTo
+        nba_url = "https://www.nba.com/stats/teams/boxscores-"+ stat_type 
+        
+    if not Season:
+        nba_url = nba_url + "?DateFrom=" + DateFrom + "&DateTo=" + DateTo
+    else:
+        if DateFrom == "NONE" and DateTo == "NONE":
+            nba_url = nba_url + "?Season=" + Season
+        else:
+            nba_url = nba_url + "?Season=" + Season + "&DateFrom=" + DateFrom + "&DateTo=" + DateTo
+
+    print(nba_url)
     
     
     driver.get(nba_url)
-    time.sleep(60)
+    time.sleep(10)
     
     source = soup(driver.page_source, 'html.parser')
+    
     
     #driver.implicitly_wait(30)
     
     #check for more than one page
     CLASS_ID_PAGINATION = "Pagination_pageDropdown__KgjBU" #determined by visual inspection of page source code
     pagination = source.find('div', {'class':CLASS_ID_PAGINATION})
-    
-    time.sleep(15)
-    
+       
+    #print(source)
     if pagination is not None:
         # if multiple pages, first activate pulldown option for All pages to show all rows on one page
         CLASS_ID_DROPDOWN = "DropDown_select__4pIg9" #determined by visual inspection of page source code
         page_dropdown = driver.find_element(By.XPATH, "//*[@class='" + CLASS_ID_PAGINATION + "']//*[@class='" + CLASS_ID_DROPDOWN + "']")
-        time.sleep(15)
+    
         page_dropdown.send_keys("ALL") # show all pages
-        #page_dropdown.click()
-        time.sleep(15)
+        #page_dropdown.click() doesn't work in headless mode
+        time.sleep(3)
         driver.execute_script('arguments[0].click()', page_dropdown) #click() didn't work in headless mode, used this workaround (https://stackoverflow.com/questions/57741875)
         
         #refresh page data now that it contains all rows of the table
-        time.sleep(60)
+        time.sleep(3)
         source = soup(driver.page_source, 'html.parser')
-    time.sleep(15)
+        print("all pages loaded")
+  
     # pull out html table from page source and convert it to a dataframe
     CLASS_ID_TABLE = 'Crom_table__p1iZz' #determined by visual inspection of page source code
     data_table = source.find('table', {'class':CLASS_ID_TABLE})
-    time.sleep(15)
     dfs = pd.read_html(str(data_table), header=0) 
     df = pd.concat(dfs)
 
