@@ -66,7 +66,7 @@ def activate_web_driver_chromium():
 
     chrome_options = Options() 
     options = [
-        #"--headless",
+        "--headless",
         "--no-sandbox",
         "--disable-dev-shm-usage",
         "--disable-gpu",
