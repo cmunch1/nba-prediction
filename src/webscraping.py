@@ -56,9 +56,9 @@ def activate_web_driver_firefox():
 def activate_web_driver_chromium():
 
     #virtual display from https://github.com/MarketingPipeline/Python-Selenium-Action/blob/main/Selenium-Template.py
-    from pyvirtualdisplay import Display
-    display = Display(visible=0, size=(1920, 1200))  
-    display.start()
+    #from pyvirtualdisplay import Display
+    #display = Display(visible=0, size=(1920, 1200))  
+    #display.start()
     
     service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
     
@@ -66,7 +66,7 @@ def activate_web_driver_chromium():
 
     chrome_options = Options() 
     options = [
-        #"--headless",
+        "--headless",
         "--no-sandbox",
         "--disable-dev-shm-usage",
         "--disable-gpu",
@@ -78,7 +78,7 @@ def activate_web_driver_chromium():
         "--disable-notifications",
         "--remote-debugging-port=9222", #https://stackoverflow.com/questions/56637973/how-to-fix-selenium-devtoolsactiveport-file-doesnt-exist-exception-in-python
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
-        #"--disable-blink-features=AutomationControlled",
+        "--disable-blink-features=AutomationControlled",
         ]
 
     
