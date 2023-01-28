@@ -9,10 +9,6 @@ from bs4 import BeautifulSoup
 
 nba_url = "https://www.nba.com/stats/teams/boxscores"
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
 
 
 client = ScrapingAntClient(token=os.environ['SCRAPINGANT_API_KEY'])
