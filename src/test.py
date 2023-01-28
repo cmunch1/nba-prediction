@@ -45,7 +45,7 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 nba_url = "https://www.nba.com/stats/teams/boxscores"
 
 driver.get(nba_url)
-
+time.sleep(20)
 source = soup(driver.page_source, 'html.parser')
 
 print(source)
