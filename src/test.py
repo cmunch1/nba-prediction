@@ -20,7 +20,7 @@ service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).i
 
 chrome_options = Options() 
 options = [
-    "--headless",
+    #"--headless",
     "--no-sandbox",
     "--disable-dev-shm-usage",
     "--disable-gpu",
