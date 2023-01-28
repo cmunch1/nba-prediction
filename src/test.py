@@ -12,6 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 from bs4 import BeautifulSoup as soup
 
+import time
     
 ### CHROMIUM WEBDRIVER ###
 service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
