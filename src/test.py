@@ -49,3 +49,9 @@ driver.get(nba_url)
 source = soup(driver.page_source, 'html.parser')
 
 print(source)
+
+#save source to file
+with open('nba_boxscores.html', 'w') as file:
+    file.write(str(source))
+
+driver.close()

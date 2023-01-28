@@ -1,0 +1,62 @@
+
+name: test
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 8 * * *'
+
+jobs:
+  scrape_features:
+    #runs-on: windows-latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo content
+        uses: actions/checkout@v2
+
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9.13'
+          
+      - name: install python packages
+        run: |
+          python -m pip install --upgrade pip
+          #pip install -r requirements.txt
+          python -m pip install jupyter selenium bs4 webdriver_manager
+        
+        
+      
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@latest
+        
+      #chromium setup
+      #- name: Installed package list
+      #  run: apt list --installed
+      #- name: Remove Chrome
+      #  run: sudo apt purge google-chrome-stable
+      #- name: Remove default Chromium
+      #  run: sudo apt purge chromium-browser
+      #- name: Install a new Chromium
+      #  run: sudo apt install -y chromium-browser
+        
+      # code from https://github.com/MarketingPipeline/Python-Selenium-Action/blob/main/.github/workflows/Selenium-Action_Template.yaml
+      #- name: Installing all necessary packages
+      #  run: pip install chromedriver-autoinstaller pyvirtualdisplay
+      #- name: Install xvfb
+      #  run: sudo apt-get install xvfb
+     
+      - name: run test script
+        env: 
+          HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+          NEPTUNE_API_TOKEN: ${{ secrets.NEPTUNE_API_TOKEN }}
+          
+        run: 
+          test.py
+
+      - name: save results
+        uses: actions/upload-artifact@v3
+        with:
+          name: nba_boxscores
+          path: nba_boxscores.html
+
