@@ -52,7 +52,7 @@ jobs:
           NEPTUNE_API_TOKEN: ${{ secrets.NEPTUNE_API_TOKEN }}
           
         run: 
-          test.py
+          python test.py
 
       - name: save results
         uses: actions/upload-artifact@v3
