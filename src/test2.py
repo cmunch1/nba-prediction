@@ -28,7 +28,6 @@ source = BeautifulSoup(html_response, 'html.parser')
 print(source)
 
 #save source to file
-with open('nba_boxscores.html', 'w') as file:
+with open('nba_boxscores.html', 'w', encoding="utf-8") as file:
     file.write(str(source))
 
-driver.close()
