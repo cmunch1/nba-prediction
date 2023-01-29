@@ -1,15 +1,15 @@
+### This version uses the ScrapingAnt API to scrape the data from the web. An account is required.
+
+
+
 import pandas as pd
 import numpy as np
 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromiumService
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.core.utils import ChromeType
-from webdriver_manager.chrome import ChromeDriverManager
+import os   
 
-from selenium.webdriver.firefox.service import Service as FirefoxService
-from webdriver_manager.firefox import GeckoDriverManager
+import asyncio
+
+from scrapingant_client import ScrapingAntClient
 
 
 from bs4 import BeautifulSoup as soup
@@ -23,72 +23,6 @@ DATAPATH = Path(r'data')
 import time
 
 
-def activate_web_driver(browser):
-    
-    if browser == "firefox":
-        driver = activate_web_driver_firefox()
-    else:
-        driver = activate_web_driver_chromium()
-        
-    return driver
-
-
-def activate_web_driver_firefox():
-    
-    service = FirefoxService(executable_path=GeckoDriverManager().install())
-    
-    firefox_options = webdriver.FirefoxOptions()
-    options = [
-        "--window-size=1920,1080",
-        "--start-maximized",
-        "--headless",
-        ]
-    
-    for option in options:
-        firefox_options.add_argument(option)
-
-    driver = webdriver.Firefox(service=service, options=firefox_options)
-    
-    
-    return driver
-
-
-def activate_web_driver_chromium():
-
-    #virtual display from https://github.com/MarketingPipeline/Python-Selenium-Action/blob/main/Selenium-Template.py
-    #from pyvirtualdisplay import Display
-    #display = Display(visible=0, size=(1920, 1200))  
-    #display.start()
-    
-    service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
-    
-    # copied from https://github.com/jsoma/selenium-github-actions
-
-    chrome_options = Options() 
-    options = [
-        "--headless",
-        "--no-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--window-size=1920,1200",
-        "--ignore-certificate-errors",
-        "--disable-extensions",
-        "--start-maximized",
-        "--disable-popup-blocking",
-        "--disable-notifications",
-        "--remote-debugging-port=9222", #https://stackoverflow.com/questions/56637973/how-to-fix-selenium-devtoolsactiveport-file-doesnt-exist-exception-in-python
-        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
-        "--disable-blink-features=AutomationControlled",
-        ]
-
-    
-    for option in options:
-        chrome_options.add_argument(option)
-
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-   
-    
-    return driver
 
 def parse_ids(data_table):
     
@@ -113,7 +47,7 @@ def parse_ids(data_table):
     
     return team_id, game_id
 
-def scrape_to_dataframe(driver, Season, DateFrom="NONE", DateTo="NONE", stat_type='standard'):
+def scrape_to_dataframe(api_key, Season, DateFrom="NONE", DateTo="NONE", stat_type='standard'):
     
     # go to boxscores webpage at nba.com
     # check if the data table is split over multiple pages 
@@ -139,35 +73,19 @@ def scrape_to_dataframe(driver, Season, DateFrom="NONE", DateTo="NONE", stat_typ
 
     print(nba_url)
     
-    
-    driver.get(nba_url)
-    time.sleep(10)
-    
-    source = soup(driver.page_source, 'html.parser')
-    
-    
-    #driver.implicitly_wait(30)
-    
+    client = ScrapingAntClient(token=api_key)
+
+    #async def main():
+    result = client.general_request(nba_url)
+    source = soup(result.content, 'html.parser')
+
+
     #check for more than one page
     CLASS_ID_PAGINATION = "Pagination_pageDropdown__KgjBU" #determined by visual inspection of page source code
     pagination = source.find('div', {'class':CLASS_ID_PAGINATION})
-       
-    #print(source)
-    if pagination is not None:
-        # if multiple pages, first activate pulldown option for All pages to show all rows on one page
-        CLASS_ID_DROPDOWN = "DropDown_select__4pIg9" #determined by visual inspection of page source code
-        page_dropdown = driver.find_element(By.XPATH, "//*[@class='" + CLASS_ID_PAGINATION + "']//*[@class='" + CLASS_ID_DROPDOWN + "']")
     
-        page_dropdown.send_keys("ALL") # show all pages
-        #page_dropdown.click() doesn't work in headless mode
-        time.sleep(3)
-        driver.execute_script('arguments[0].click()', page_dropdown) #click() didn't work in headless mode, used this workaround (https://stackoverflow.com/questions/57741875)
-        
-        #refresh page data now that it contains all rows of the table
-        time.sleep(3)
-        source = soup(driver.page_source, 'html.parser')
-        print("all pages loaded")
-  
+    #print(source)
+
     # pull out html table from page source and convert it to a dataframe
     CLASS_ID_TABLE = 'Crom_table__p1iZz' #determined by visual inspection of page source code
     data_table = source.find('table', {'class':CLASS_ID_TABLE})
@@ -178,6 +96,8 @@ def scrape_to_dataframe(driver, Season, DateFrom="NONE", DateTo="NONE", stat_typ
     TEAM_ID, GAME_ID = parse_ids(data_table)
     df['TEAM_ID'] = TEAM_ID
     df['GAME_ID'] = GAME_ID
+
+    #asyncio.run(main())
     
     return df
     
@@ -258,7 +178,7 @@ def combine_home_visitor(df):
 
     return df
 
-def get_todays_matchups(driver) -> list:
+def get_todays_matchups(api_key) -> list:
 
     '''
     Goes to NBA Schedule and scrapes the teams playing today
@@ -266,9 +186,12 @@ def get_todays_matchups(driver) -> list:
     
     NBA_SCHEDULE = "https://www.nba.com/schedule"
 
-    driver.get(NBA_SCHEDULE)
+        
+    client = ScrapingAntClient(token=api_key)
 
-    source = soup(driver.page_source, 'html.parser')
+    #async def main():
+    result = client.general_request(NBA_SCHEDULE )
+    source = soup(result.content, 'html.parser')
 
 
     # Get how many games are scheduled for today
@@ -318,13 +241,13 @@ def get_todays_matchups(driver) -> list:
     links = [i for i in links if "PREVIEW" in i]
     game_id_list = [i.get("href") for i in links]
     #print(game_id_list)
-   
+
     games = []
     for game in game_id_list:
         game_id = game.partition("-00")[2].partition("?")[0] # extract team id from text for link
         if len(game_id) > 0:               
             games.append(game_id)   
 
-
+    #asyncio.run(main())
     
     return matchups, games
