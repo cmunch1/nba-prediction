@@ -1,20 +1,49 @@
 # NBA Game Predictor Project
 
-## The goal of this project is to develop an NBA game-winner predictor model capable of winning money in a sports betting situation better than typical online betting advice.
+## The goal of this project is to develop an NBA game-winner predictor model that can be used to develop profitable betting strategies. Initially, the focus will be on the predictor model, and then later, betting strategy models may be explored.
 
 ### Plan
 
-The model will determine the probability for each game that the home team will win, and this will  be used in conjunction with a betting strategy that attempts to optimize win probability vs payout odds. Bets will be selected only for games that match a profitable criteria.
+Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online using a streamlit app to predict and report wining probabilities every day. https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/
 
-The model will be deployed online to predict winners of NBA games each day when the season is active. Performance metrics will also be charted as the season goes by. 
 
-If the model proves successful, possible revenue options include:
- - Betting on games (where legal)
- - Providing the software as a service with paid ads or subscriptions
+### Overview
 
-### DATA
+ - Historical game data is retrieved from Kaggle.
+ - EDA, Data Processing, and Feature Engineering are used to develop best model in either XGboost or LightGBM.
+ - Data and model is added to serverless Feature Store and Model Registry
+ - Model is deployed online as a Streamlit app
+ - Pipelines are setup to:
+ -- Scrape new data from NBA website and add to Feature Store every day using Github Actions
+ -- Retrain model and tune hyperparameters
 
-Data from the 2013 thru 2021 season has been archived on Kaggle. The NBA provides an API to access current data each day as the season goes by. 
+ Tools Used:
+
+ - Pandas - data manipulation
+ - XGboost - modeling
+ - LightGBM - modeling
+ - Optuna - hyperparamter tuning
+ - Neptune.ai - experiment tracking
+ - Selenium - data scraping and processing
+ - ScrapingAnt - data scraping
+ - BeautifulSoup - data processing of scraped data
+ - Hopsworks.ai - Feature Store and Model Registry
+ - Github Actions - running notebooks to scrape new data, predict winning probabilities, and retrain models
+ - Streamlit - user interface
+
+
+### Structure
+
+Jupyter Notebooks were used for initial development and testing and are labeled 01 through 10 in the main directory. Notebooks 01 thru 06 are primarily just historical records and notes for the development process.
+
+Key functions were moved to .py files in src directory once the functions were stable.
+
+Notebooks 07, 09, and 10 are used in production.
+
+
+### Data
+
+Data from the 2013 thru 2021 season has been archived on Kaggle. New data is scraped from NBA website. 
 
 Currently available data includes:
 
@@ -25,114 +54,72 @@ Currently available data includes:
  - teams.csv .......... (index of team info such as city and arena names and also head coach) 
  
  NOTES 
- - games and ranking will need to be linked by SEASON->SEASON_ID, GAME_DATE_EST->STANDINGSDATE(-1 day), HOME_TEAM_ID->TEAM_ID / VISITOR_TEAM_ID->TEAM_ID
- - games and game_details will need to be linked by GAME_ID->GAME_ID, HOME_TEAM_ID->TEAM_ID / VISITOR_TEAM_ID->TEAM_ID
- - just very basic stats are provided, but the data is there to generate much more, particulary running averages and other agreggates
- - some games during COVID were played in the "Bubble" - not true home arenas. These will need to be flagged at the least.
- - preseason games should be dropped. Post season probably as well.
- 
- games.csv
- - 99 games from early 2003 are missing data; they seem fairly evenly distributed among the teams and probably not worth the effort to manually repopulate. Probably drop these.
- - GAME_ID format:
-    - 1st digit: 1=pre-season, 2=regular season, >2 = post season,
-    - 2nd & 3rd digit: last two digits of season year (eg 103######## represents preseason game in 2003)
- - redundant fields in games.csv: HOME_TEAM_ID / TEAM_ID_home and VISITOR_TEAM_ID / TEAM_ID_away
- - it appears that certain fields can be dropped: 'GAME_STATUS_TEXT', 'TEAM_ID_home', 'TEAM_ID_away'
- - some overtime games have as much as 168 points scored by a single team, but data does not indicate if overtime game or not.
- - outlier games may need to be flagged - overtime games, blow-outs, etc...
- - PTS, REB, AST have trended up the last several seasons, but Home win ratio is down
- - Strongest postive correlations: FG_PCT and AST to PTS.
- - Strongest negative correlation: REB_PCT_away to FG_PCT_home 
- - Strongest correlations to winning (in order): FG_PCT, PTS, FG3_PCT, AST, REB, FT_PCT (same ordering for either home or away)
- - When limiting winning correlations to just 2021 season or to just the last 5 seasons, then FG_PCT and PTS are reversed for away teams as is AST_away and REB_away (PTS, FG_PCT, FG3_PCT, REB, AST, FT_PCT for away teams).
- 
- ranking.csv
- - this is primarily just supplemental data that needs to be integrated with the games data
- - RETURNTOPLAY field only used for a small portion of ranking stats (East conference March 2020 thru Dec 2020)
- - LEAGUE_ID always 0, can drop
- - SEASON_ID beginning with 1 appears to be preseason standings, while regular season standings start with a 2
- - My initial plan is to focus just on regular season games, so preseason standings can be removed from the updated dataset
- - Fields to be dropped: 'LEAGUE_ID', 'RETURNTOPLAY', 'TEAM'
- - HOME_RECORD and ROAD_RECORD each needs to be split into games won, games lost, and win percentage
- 
- games_details.csv
- - this contains all individual players stats for each game
- - 105603 records have NaN for all stats - the player did not play that game
- - TEAM_ABBREVIATION, TEAM_CITY, PLAYER_NAME, NICKNAME are not needed and can be found in index tables if needed
- - COMMENT field will denote why player did not play, usually in a "XXX -" format (e.g. DNP - Injury/Illness) , but 1121 records do not follow the format
- - START_POSITION is null for both players that played but did not start and for players that did not play - maybe separate these two
- - MIN (minutes played) contains mixed formats: integers and MIN:SEC
- - MIN contains 12 records with negative values
- - 19 records have players over 60 minutes and seem to be overtime games
- - several other outlier stats have been verified as correct
- 
- 
- ### DATA PROCESSING SUMMARY
-
-Games.csv and ranking.csv will be merged after initial data processing. Since all the features are *post* game data (final score, winning percentage after the game, etc...) they cannot be used as predictors for the current game. All the features will be used as predictors for the "next game", so the data will need to adjusted so that the TARGET (HOME_TEAM_WINS) is in the same row as the predictors. 
-
-The easiest approach seems to be add a field called TARGET that denotes whether the home team won its *next* game or not.
-
-Game_details.csv will intially be held in reserve for feature engineering. With a roster of 24 players per game and 21 features per player, the initial plan is NOT to add all these 500 features indiscriminately but to instead try to find useful features and incorporate these.
-
-Scaling and power-transforms will not be used at this time since the plan is to use GBTs (gradient boosted trees) such as XGBoost where these tranforms are not needed. These transforms may be needed later for PCA and other techniques, though.
+ - games.csv is the primary data source and will be the only data used initially
+ - games_details.csv details individual player stats for each game and may be added to the model later
+ - ranking.csv data is essentially cumulative averages from the beginning of the season and is not really needed as these and other rolling averages can be calculated from the games.csv data 
 
 
-duplicates
+**New Data**
 
- - both games.csv and ranking.csv contain several duplicated rows from Dec 2020 (covid season) that the pandas function *df.duplicated()* failed to detect in EDA. These will be filtered out using subsets instead of the entire dataframe.
+New data is scraped from https://www.nba.com/stats/teams/boxscores.
 
- games.csv
  
- - delete preseason games (this will also take care of the null games from early 2003)
- - keep only games where GAME_STATUS_TEXT = 'Final' (for better utility in the future)
- - remove duplicated records 
- - flag postseason games 
- - drop 'GAME_STATUS_TEXT', 'TEAM_ID_home', 'TEAM_ID_away'
+**Data Leakage**
 
-ranking.csv
- 
- - drop preseason rankings (SEASON_ID begins with 1)
- - split HOME_RECORD into HOME_W, HOME_L, and HOME_W_PCT
- - split ROAD_RECORD into ROAD_W, ROAD_L, and ROAD_W_PCT
- - numericaly encode CONFERENCE (East or West)
- - remove duplicated records
- - drop 'SEASON_ID', 'LEAGUE_ID', 'RETURNTOPLAY', 'TEAM', 'HOME_RECORD', 'ROAD_RECORD'
+The data for each game are stats for the *completed* game. We want to predict the winner *before* the game is played, not after. The model should only use data that would be available before the game is played. Our model features will primarily be rolling stats for the previous games (e.g. average assists for previous 5 games) while excluding the current game.
 
- game_details.csv
- 
- - fix mixed formats in MIN and convert to float
- - fix negatives in MIN
- - if MIN is null, edit START_POSITION to 'NP' (not played)
- - any START_POSITION remaining null, convert to NS (not start, but still played)
- - drop TEAM_ABBREVIATION, TEAM_CITY, PLAYER_NAME, NICKNAME, COMMENT
- 
- Join games with ranking
- 
-  - LINK: games.GAME_DATE_EST, games.HOME_TEAM_ID, -> ranking.STANDINGSDATE, ranking.TEAM_ID 
-  - ADD: CONFERENCE, G, W, L, W_PCT, HOME_W, HOME_L, HOME_W_PCT, ROAD_W, ROAD_L, ROAD_W_PCT
-  - repeat with AWAY_TEAM_ID instead of HOME_TEAM_ID
-  
- Add TARGET
- 
-  - Sort games by HOME_TEAM_ID and GAME_ID
-  - for each SEASON and HOME_TEAM_ID, shift HOME_TEAM_WINS down to TARGET for previous game
-  - remove games with null TARGETs (last game played each season by each team will have no null TARGET)
-  
-  ### Train / Test Split
+If the goal is simply to predict which stats are important for winning games, then the model can be trained on the entire dataset. However, if the goal is to predict the winner of a game like we are trying to do, then the model must be trained on data that would only be available before the game is played.
+
+### Train / Test Split
   
   - Latest season is used as Test data and previous seasons are used as Train data
   
-  ### Baseline Models
+### Baseline Models
   
 Simple If-Then Models
 
- - Team with best record wins (Accuracy = 0.56, AUC = 0.58 on Test data)
- - Home team always wins (Accuracy = 0.55, AUC = 0.50 on Test data)
- - Home team wins unless they have losing home record (Accuracy = 0.59, AUC = 0.57 on Test data)
- - Home team wins unless they have lost last 3 home games (Accuracy = 0.59, AUC = 0.55 on Test data)
+ - Home team always wins (Accuracy = 0.59, AUC = 0.50 on Train data, Accuracy = 0.49, AUC = 0.50 on Test data
  
 ML Models
 
- - LightGBM (Accuracy = 0.59, AUC = 0.62 on Test data)
- - XGBoost (Accuracy = 0.56, AUC = 0.57 on Test data)
+ - LightGBM (Accuracy = 0.58, AUC = 0.64 on Test data)
+ - XGBoost (Accuracy = 0.59, AUC = 0.61 on Test data)
+
+### Feature Engineering
+
+ - Covert game date to month only
+ - Compile rolling means for various time periods for each team as home team and as visitor team 
+ - Compile current win streak for each team as home team and as visitor team
+ - Compile head-to-head matchup data for each team pair 
+ - Compile rolling means for various time periods for each team regardless of home or visitor status
+ - Compile current win streak for each team regardless of home or visitor status
+ 
+### Model Testing
+
+  Both LightGBM and XGBoost are used for testing.
+
+  Notebook 07 integrates Neptune.ai for experiment tracking and Optuna for hyperparameter tuning.
+
+  Experiment tracking logs can be viewed here: https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602
+
+### Production Features Pipeline
+
+Notebook 09 is run from a Github Actions every morning.
+
+- It scrapes the stats from the previous day's games and adds them to the Feature Store.
+- It scrapes the upcoming game matchups for the current day and adds them to the Feature Store so that the streamlit app can use these to make it's daily predictions.
+
+09a uses ScrapingAnt to scrape the data, while 09b uses Selenium. 
+
+ - The Selenium notebook worked fine when ran locally, but there were issues when running the notebook in Github Actions, likely due to the ip address and anti-bot measures on the NBA website (which would require a proxy server to address)
+ - ScrapingAnt is a cloud-based scraper with a Python API than handles the proxy server issues. An account is required, but the free account is sufficient for this project.
+
+### Model Training Pipeline
+
+Notebook 10 retrieves data from the Feature Store, trains the model, and adds the model to the Model Registry.
+
+### Streamlit App
+
+The streamlit app is deployed at streamlit.io and can be accessed here: https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/
+
+It uses the model in the Model Registry to predict the win probability of the home team for the current day's upcoming games.
