@@ -73,21 +73,6 @@ def process_games_details(details):
     return details
 
 
-def merge_games_ranking (games, ranking):
-    
-    # first merge ranking data for home team and then again for away team
-    
-    # rename columns for merging Home Team ranking data
-    ranking = ranking.rename(columns={'STANDINGSDATE': 'GAME_DATE_EST', 'TEAM_ID': 'HOME_TEAM_ID'})
-    games_ranking_home = pd.merge(games, ranking, how="left", on=["GAME_DATE_EST", "HOME_TEAM_ID"])
-
-    # rename columns for merging Visitor Team ranking data
-    ranking = ranking.rename(columns={'HOME_TEAM_ID': 'VISITOR_TEAM_ID'})
-    games_ranking = pd.merge(games_ranking_home, ranking, how="left", on=["GAME_DATE_EST", "VISITOR_TEAM_ID"])
-    
-    return games_ranking
-
-
 def add_TARGET(games_ranking):
 
     games_ranking['TARGET'] = games_ranking['HOME_TEAM_WINS']
