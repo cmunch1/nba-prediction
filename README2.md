@@ -4,7 +4,7 @@
 
 ### Plan
 
-Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online to predict and report wining probabiliites every day.
+Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online using a streamlit app to predict and report wining probabilities every day. https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/
 
 
 ### Overview
@@ -25,6 +25,7 @@ Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determin
  - Optuna - hyperparamter tuning
  - Neptune.ai - experiment tracking
  - Selenium - data scraping and processing
+ - ScrapingAnt - data scraping
  - BeautifulSoup - data processing of scraped data
  - Hopsworks.ai - Feature Store and Model Registry
  - Github Actions - running notebooks to scrape new data, predict winning probabilities, and retrain models
