@@ -194,19 +194,21 @@ def get_todays_matchups(api_key) -> list:
     source = soup(result.content, 'html.parser')
 
 
-    # Get how many games are scheduled for today
-    # The specified heading lists the number of games (e.g. "8 GAMES")
-    #CLASS_TODAYS_HEADING = "ScheduleDay_sdWeek__iiTmo"
-    #game_count = (source.find('h6', {'class':CLASS_TODAYS_HEADING})).text
-    #game_count = int(list(filter(str.isdigit, game_count))[0]) #strip-out just numeric part
-
     # Get the block of all of todays games
-    # In the morning, the results of yesterday's games are listed first, then todays games are listed
-    # Later in the day, yesterday's games are no longer listed
-    # We plan to run this on a schedule everyday in the morning, so we need the second div
-    CLASS_GAMES_PER_DAY = "ScheduleDay_sdGames__NGdO5"
-    yesterdays_games = source.find('div', {'class':CLASS_GAMES_PER_DAY}) # first div is yesterday's games
-    todays_games = yesterdays_games.find_next('div', {'class':CLASS_GAMES_PER_DAY}) # second div is todays games
+    # Sometimes, the results of yesterday's games are listed first, then todays games are listed
+    # Other times, yesterday's games are not listed
+    # We will check the date for the first div, if it is yesterday's date, then we will use the second div
+    CLASS_GAMES_PER_DAY = "ScheduleDay_sdGames__NGdO5" # the div containing all games for a day
+    CLASS_DAY = "ScheduleDay_sdDay__3s2Xt" # the heading with the date for the games (e.g. "Wednesday, February 1")
+    yesterdays_games = source.find('div', {'class':CLASS_GAMES_PER_DAY}) # first div may or may not be yesterday's games
+    game_day = source.find('h4', {'class':CLASS_DAY})
+    game_day = game_day.text[:3] # just first 3 letters to avoid issues with leading 0 in day of month
+    today = datetime.today().strftime('%A, %B %d')[:3]
+
+    if game_day == today:  
+         todays_games = yesterdays_games
+    else:
+        todays_games = yesterdays_games.find_next('div', {'class':CLASS_GAMES_PER_DAY}) # second div is todays games
     
     # Get the teams playing
     # Each team listed in todays block will have a href with the specified anchor class
