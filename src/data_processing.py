@@ -1,5 +1,17 @@
 
-def process_games(games):
+import pandas as pd
+
+def process_games(games: pd.DataFrame) -> pd.DataFrame:
+    """Performs basic data cleaning on the games dataset.
+
+    Args:
+        games (pd.DataFrame): the raw games dataframe
+
+    Returns:
+        the cleaned games dataframe
+
+    """
+        
    
     # remove preseason games (GAME_ID begins with a 1)
     games = games[games['GAME_ID'] > 20000000]
@@ -19,7 +31,17 @@ def process_games(games):
     return games
 
 
-def process_ranking(ranking):
+def process_ranking(ranking: pd.DataFrame) -> pd.DataFrame:
+    """Performs basic data cleaning on the ranking dataset.
+    
+    Args:  
+        ranking (pd.DataFrame): the raw ranking dataframe
+
+    Returns:
+        the cleaned ranking dataframe
+      
+    """
+
 
     # remove preseason rankings (SEASON_ID begins with 1)
     ranking = ranking[ranking['SEASON_ID'] > 20000]
@@ -46,7 +68,17 @@ def process_ranking(ranking):
     return ranking
 
 
-def process_games_details(details):
+def process_games_details(details: pd.DataFrame) -> pd.DataFrame:
+    """Performs basic data cleaning on the games_details dataset.
+
+    Args:
+        details (pd.DataFrame): the raw games_details dataframe
+    
+    Returns:
+        the cleaned games_details dataframe
+
+    """
+
     
     # convert MIN:SEC to float
     df = details.loc[details['MIN'].str.contains(':',na=False)]
@@ -73,13 +105,34 @@ def process_games_details(details):
     return details
 
 
-def add_TARGET(games_ranking):
+def add_TARGET(df: pd.DataFrame) -> pd.DataFrame:
+    """Adds a TARGET column to the dataframe using HOME_TEAM_WINS.
 
-    games_ranking['TARGET'] = games_ranking['HOME_TEAM_WINS']
+    Args:
+        df (pd.DataFrame): the dataframe to add the TARGET column to
+
+    Returns:
+        the games dataframe with a TARGET column
+
+    """
+
+    df['TARGET'] = df['HOME_TEAM_WINS']
     
-    return games_ranking
+    return df
 
-def split_train_test(df):
+def split_train_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Splits the dataframe into train and test sets.
+
+    Splits the latest season as the test set and the rest as the train set.
+    The second latest season included with the test set to allow for feature engineering.
+
+    Args:
+        df (pd.DataFrame): the dataframe to split
+
+    Returns:
+        the train and test dataframes
+
+    """
 
     latest_season = df['SEASON'].unique().max()
 
