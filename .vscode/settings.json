@@ -3,10 +3,14 @@
         "dataframe",
         "DATAPATH",
         "dotenv",
+        "hyperparameters",
+        "importances",
         "isin",
         "matchups",
         "nbformat",
+        "Optuna",
         "pytz",
+        "Shapley",
         "webscraping",
         "xgboost"
     ]
