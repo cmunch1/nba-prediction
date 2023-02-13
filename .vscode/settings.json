@@ -10,6 +10,7 @@
         "nbformat",
         "Optuna",
         "pytz",
+        "SCRAPINGANT",
         "Shapley",
         "webscraping",
         "xgboost"
