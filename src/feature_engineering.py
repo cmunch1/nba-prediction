@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def process_features(df: pd.DataFrame)-> pd.DataFrame:
+def process_features(df: pd.DataFrame) -> pd.DataFrame:
     
     '''
     Feature engineering to add: 
@@ -40,9 +40,7 @@ def process_features(df: pd.DataFrame)-> pd.DataFrame:
 
     #add these features back to main dataframe
     df = combine_new_features(df,df_consecutive) 
-    
-    #df = remove_non_rolling(df)
-    
+        
     df = process_x_minus_y(df)
     
     return df
@@ -332,7 +330,7 @@ def process_x_minus_league_avg(df: pd.DataFrame, feature_list: list, team_featur
     Subtract the league average of each stat for that day in time from the team's current stat
     
     feature_list = list of features to be subtracted, e.g. [PTS_AVG_LAST_5_ALL, REB_AVG_LAST_20_ALL]
-    team_feature = "HOME_TEAM_ID" or "VISITOR_TEAM_ID"
+    team_feature = "HOME_TEAM_ID", "VISITOR_TEAM_ID", or "TEAM1"
 
     This provides a measure of how good the team is compared to the the rest of the league
     '''
@@ -342,15 +340,17 @@ def process_x_minus_league_avg(df: pd.DataFrame, feature_list: list, team_featur
     # whether that team played or not. 
     # We will front-fill from previous days to ensure that every day has stats for every team
     
+    df.to_csv("df.csv",index=False)
     
     # create feature list for temp dataframe to hold league averages
     temp_feature_list = feature_list.copy()
     temp_feature_list.append(team_feature)
     temp_feature_list.append("GAME_DATE_EST")
-    df_columns = df.columns.to_list()
-    #print(df_columns)
+
     df_temp = df[temp_feature_list]
-    #print(temp_feature_list)
+    print(temp_feature_list)
+    df_temp.to_csv("df_temp.csv",index=False)
+    
 
     # populate the dataframe with all days played and forward fill previous value if a particular team did not play that day
     # https://stackoverflow.com/questions/70362869
@@ -390,7 +390,7 @@ def combine_new_features(df: pd.DataFrame, df_consecutive: pd.DataFrame)-> pd.Da
     # add back all the new features created in the consecutive dataframe to the main dataframe
     # all data for TEAM1 will be applied to the home team and then again to the visitor team
     # except for head-to-head MATCHUP data, which will only be applied to home team (redundant to include for both)
-    # the letter '_x' will be appeneded to feature names when adding to home team
+    # the letter '_x' will be appended to feature names when adding to home team
     # the letter '_y' will be appended to feature names when adding to visitor team
     # to match the existing convention in the dataset
     
@@ -445,7 +445,7 @@ def process_x_minus_y(df: pd.DataFrame)-> pd.DataFrame:
     
     comparison_features = [x for x in useful_features if "_y" in x]
     
-    #don't include redunant features. (x - league_avg) - (y - league_avg) = x-y
+    #don't include redundant features. (x - league_avg) - (y - league_avg) = x-y
     comparison_features = [x for x in comparison_features if "_MINUS_LEAGUE_AVG" not in x]
     
     for feature in comparison_features:
