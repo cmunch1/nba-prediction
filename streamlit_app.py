@@ -101,7 +101,7 @@ fs = project.get_feature_store()
 
 rolling_stats_fg = fs.get_feature_group(
     name="rolling_stats",
-    version=1,
+    version=2,
 )
 
 st.write("Successfully connected!✔️")
