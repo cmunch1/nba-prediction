@@ -106,8 +106,8 @@ def activate_web_driver_chromium():
 
 def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
 
-    # set search for previous days games; use 5 days to catch up in case of failed runs
-    DAYS = 5
+    # set search for previous days games; use 2 days to catch up in case of a failed run
+    DAYS = 2
     SEASON = "" #no season will cause website to default to current season, format is "2022-23"
     TODAY = datetime.now(timezone('EST')) #nba.com uses US Eastern Standard Time
     LASTWEEK = (TODAY - timedelta(days=DAYS))
@@ -300,6 +300,8 @@ def combine_home_visitor(df):
     season = game_id[3:5]
     season = str(20) + season
     df['SEASON'] = season
+    
+    print(df)
     
     #convert all object columns to int64
     for field in df.select_dtypes(include=['object']).columns.tolist():
