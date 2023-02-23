@@ -1,1 +1,1 @@
-{"model_name": "xgboost", "metrics": {"AUC": 0.6570152168414614, "Accuracy": 0.615536862939139}}
+{"model_name": "xgboost", "metrics": {"AUC": 0.6293465325110894, "Accuracy": 0.6100731112916328}}
