@@ -1,3 +1,15 @@
+import pandas as pd
+import numpy as np
+
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+
+from sklearn.calibration import (
+    CalibrationDisplay,
+)
+
+
+
 def fix_datatypes(df, date_columns, long_integer_columns):
     
     for field in date_columns:
@@ -40,3 +52,43 @@ def encode_categoricals(df, category_columns, MODEL_NAME, ENABLE_CATEGORICAL):
 
     return df
 
+def plot_calibration_curve(clf_list, X_train, y_train, X_test, y_test, n_bins=10):
+    fig = plt.figure(figsize=(10, 10))
+    gs = GridSpec(4, 2)
+    colors = plt.cm.get_cmap("Dark2")
+
+    ax_calibration_curve = fig.add_subplot(gs[:2, :2])
+    calibration_displays = {}
+    for i, (clf, name) in enumerate(clf_list):
+        clf.fit(X_train, y_train)
+        display = CalibrationDisplay.from_estimator(
+            clf,
+            X_test,
+            y_test,
+            n_bins=n_bins,
+            name=name,
+            ax=ax_calibration_curve,
+            color=colors(i),
+        )
+        calibration_displays[name] = display
+
+    ax_calibration_curve.grid()
+    ax_calibration_curve.set_title(f"Calibration plots (bins = {n_bins})")
+
+    # Add histogram
+    grid_positions = [(2, 0), (2, 1), (3, 0), (3, 1)]
+    for i, (_, name) in enumerate(clf_list):
+        row, col = grid_positions[i]
+        ax = fig.add_subplot(gs[row, col])
+
+        ax.hist(
+            calibration_displays[name].y_prob,
+            range=(0, 1),
+            bins=n_bins,
+            label=name,
+            color=colors(i),
+        )
+        ax.set(title=name, xlabel="Mean predicted probability", ylabel="Count")
+
+    plt.tight_layout()
+    plt.show()
