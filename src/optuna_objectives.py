@@ -1,17 +1,28 @@
+import numpy as np
+import pandas as pd
+
+import xgboost as xgb
+
+import lightgbm as lgb
+from lightgbm import (
+    early_stopping,
+    log_evaluation,
+)
+
+from sklearn.model_selection import (
+    StratifiedKFold, 
+    TimeSeriesSplit,
+)
+
+from sklearn.metrics import (
+    accuracy_score,
+    roc_auc_score,
+)
+
+
+
 def XGB_objective(trial, train, target, STATIC_PARAMS, ENABLE_CATEGORICAL, NUM_BOOST_ROUND, OPTUNA_CV, OPTUNA_FOLDS, SEED):
     
-    import numpy as np
-    import xgboost as xgb
-    
-    from sklearn.model_selection import (
-        StratifiedKFold, 
-        TimeSeriesSplit,
-    )
-    
-    from sklearn.metrics import (
-        accuracy_score,
-        roc_auc_score,
-    )
 
     train_oof = np.zeros((train.shape[0],))
     
@@ -72,22 +83,7 @@ def XGB_objective(trial, train, target, STATIC_PARAMS, ENABLE_CATEGORICAL, NUM_B
 
 def LGB_objective(trial, train, target, category_columns, STATIC_PARAMS, ENABLE_CATEGORICAL, NUM_BOOST_ROUND, OPTUNA_CV, OPTUNA_FOLDS, SEED, EARLY_STOPPING):
 
-    import numpy as np
-    import lightgbm as lgb
-    from lightgbm import (
-        early_stopping,
-        log_evaluation,
-    )
-    
-    from sklearn.model_selection import (
-        StratifiedKFold, 
-        TimeSeriesSplit,
-    )
-    
-    from sklearn.metrics import (
-        accuracy_score,
-        roc_auc_score,
-    )
+
     
     train_oof = np.zeros((train.shape[0],))
     
