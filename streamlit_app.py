@@ -45,10 +45,15 @@ def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     model = mr.get_best_model(model_name,
                                 evaluation_metric,
                                 sort_metrics_by)
-    
-    model = joblib.load("model.pkl")
+      
+    # download model from Hopsworks
+    model_dir = model.download()
+    print(model_dir)
+    with open(model_dir, 'rb') as f:
+        loaded_model = joblib.load(f)
 
-    return model
+
+    return loaded_model
 
 
 # dictionary to convert team ids to team names
@@ -148,7 +153,7 @@ X = df_todays_matches[use_columns]
 # MATCHUP is just for informational display, not used by model
 X = X.drop('MATCHUP', axis=1) 
 
-X_dmatrix = xgb.DMatrix(X) # convert to DMatrix for XGBoost
+#X_dmatrix = xgb.DMatrix(X) # convert to DMatrix for XGBoost
 
 st.write(df_todays_matches['MATCHUP'])
 
@@ -174,9 +179,9 @@ progress_bar.progress(80)
 st.write(36 * "-")
 fancy_header(f"Predicting Winning Probabilities...")
 
-# https://discuss.streamlit.io/t/frustrated-streamlit-frontend-disconnects-from-apps-with-long-running-processes/11612/22?page=2
 
-preds = model.predict(X_dmatrix)
+#preds = model.predict(X_dmatrix)
+preds = model.predict(X)
 
 df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
 
