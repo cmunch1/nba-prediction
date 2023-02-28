@@ -181,7 +181,7 @@ fancy_header(f"Predicting Winning Probabilities...")
 
 
 #preds = model.predict(X_dmatrix)
-preds = model.predict(X)
+preds = model.predict_proba(X)
 
 df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
 
