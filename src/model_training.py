@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+from collections import defaultdict
+
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
@@ -8,6 +10,14 @@ from sklearn.calibration import (
     CalibrationDisplay,
 )
 
+from sklearn.metrics import (
+    precision_score,
+    recall_score,
+    f1_score,
+    brier_score_loss,
+    log_loss,
+    roc_auc_score,
+)
 
 
 def fix_datatypes(df, date_columns, long_integer_columns):
@@ -53,6 +63,9 @@ def encode_categoricals(df, category_columns, MODEL_NAME, ENABLE_CATEGORICAL):
     return df
 
 def plot_calibration_curve(clf_list, X_train, y_train, X_test, y_test, n_bins=10):
+
+    # FROM: https://scikit-learn.org/stable/auto_examples/calibration/plot_calibration_curve.html
+
     fig = plt.figure(figsize=(10, 10))
     gs = GridSpec(4, 2)
     colors = plt.cm.get_cmap("Dark2")
@@ -92,3 +105,33 @@ def plot_calibration_curve(clf_list, X_train, y_train, X_test, y_test, n_bins=10
 
     plt.tight_layout()
     plt.show()
+
+def calculate_classification_metrics(clf_list, X_train, y_train, X_test, y_test ):
+
+    # FROM: https://scikit-learn.org/stable/auto_examples/calibration/plot_calibration_curve.html
+
+    scores = defaultdict(list)
+
+    for i, (clf, name) in enumerate(clf_list):
+        clf.fit(X_train, y_train)
+        y_prob = clf.predict_proba(X_test)
+        y_pred = clf.predict(X_test)
+        scores["Classifier"].append(name)
+
+        for metric in [brier_score_loss, log_loss]:
+            score_name = metric.__name__.replace("_", " ").replace("score", "").capitalize()
+            scores[score_name].append(metric(y_test, y_prob[:, 1]))
+
+        for metric in [precision_score, recall_score, f1_score, roc_auc_score]:
+            score_name = metric.__name__.replace("_", " ").replace("score", "").capitalize()
+            scores[score_name].append(metric(y_test, y_pred))
+
+        score_df = pd.DataFrame(scores).set_index("Classifier")
+        score_df.round(decimals=3)
+
+        #update clf_list with the trained model
+        clf_list[i] = (clf, name)
+
+    
+
+    return score_df, clf_list
