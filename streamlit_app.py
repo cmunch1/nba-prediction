@@ -45,11 +45,11 @@ def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     model = mr.get_best_model(model_name,
                                 evaluation_metric,
                                 sort_metrics_by)
-      
+    
     # download model from Hopsworks
-    model_dir = model.download()
-    print(model_dir)
-    with open(model_dir, 'rb') as f:
+    #model_dir = model.download()
+    #print(model_dir)
+    with open("model.pkl", 'rb') as f:
         loaded_model = joblib.load(f)
 
 
@@ -181,7 +181,7 @@ fancy_header(f"Predicting Winning Probabilities...")
 
 
 #preds = model.predict(X_dmatrix)
-preds = model.predict_proba(X)
+preds = model.predict(X)
 
 df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
 
