@@ -4,7 +4,7 @@
 
 ### Plan
 
-Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online using a streamlit app to predict and report wining probabilities every day. https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/
+Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The model probability will be calibrated against the true probability distribution using sklearn's CalibratedClassifierCV. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online using a streamlit app to predict and report wining probabilities every day. https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/
 
 
 ### Overview
@@ -22,6 +22,7 @@ Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determin
  - Pandas - data manipulation
  - XGboost - modeling
  - LightGBM - modeling
+ - Scikit-learn - probability calibration
  - Optuna - hyperparamter tuning
  - Neptune.ai - experiment tracking
  - Selenium - data scraping and processing
@@ -78,7 +79,7 @@ If the goal is simply to predict which stats are important for winning games, th
   
 Simple If-Then Models
 
- - Home team always wins (Accuracy = 0.59, AUC = 0.50 on Train data, Accuracy = 0.49, AUC = 0.50 on Test data
+ - Home team always wins (Accuracy = 0.59, AUC = 0.50 on Train data, Accuracy = 0.49, AUC = 0.50 on Test data)
  
 ML Models
 
@@ -96,7 +97,9 @@ ML Models
  
 ### Model Testing
 
-  Both LightGBM and XGBoost are used for testing.
+  Both LightGBM and XGBoost are used for testing. The native Python API (rather than the Scikit-learn wrapper) is used for initial testing of both models because of ease of built-in Shapley values, which are used for feature importance analysis and for adversarial validation (since Shapley values are local to each dataset, they can be used to determine if the train and test datasets have the same feature importances. If they do not, then it may indicate that the model does not generalize very well.)
+  
+  The Scikit-learn wrapper is used later because it allows for easier probability calibration using sklearn's CalibratedClassifierCV to ensure that the model probabilities are calibrated against the true probability distribution. The Brier loss score is used to automatically select the best calibration method (sigmoid, isotonic, or none).
 
   Notebook 07 integrates Neptune.ai for experiment tracking and Optuna for hyperparameter tuning.
 
@@ -109,14 +112,14 @@ Notebook 09 is run from a Github Actions every morning.
 - It scrapes the stats from the previous day's games and adds them to the Feature Store.
 - It scrapes the upcoming game matchups for the current day and adds them to the Feature Store so that the streamlit app can use these to make it's daily predictions.
 
-09a uses ScrapingAnt to scrape the data, while 09b uses Selenium. 
+A variable can be set to either use Selenium or ScrapingAnt for scraping the data. ScrapingAnt is used in production because of its built-in proxy server.
 
  - The Selenium notebook worked fine when ran locally, but there were issues when running the notebook in Github Actions, likely due to the ip address and anti-bot measures on the NBA website (which would require a proxy server to address)
  - ScrapingAnt is a cloud-based scraper with a Python API than handles the proxy server issues. An account is required, but the free account is sufficient for this project.
 
 ### Model Training Pipeline
 
-Notebook 10 retrieves data from the Feature Store, trains the model, and adds the model to the Model Registry.
+Notebook 10 retrieves the most current data, executes Notebook 07 to handle hyperparameter tuning, model training, and calibration, and then adds the model to the Model Registry.
 
 ### Streamlit App
 
