@@ -1,5 +1,7 @@
 # NBA Game Predictor Project
 
+![image info](./images/basketball_money2.jpg)
+
 ## Problem: Increase the profitability of betting on NBA games
 
 ### Initial Step: Predict the probability that the home team will win each game
@@ -12,7 +14,7 @@ In reality, a betting strategy is a rather complex problem with many elements be
 
 ### Plan
 
-Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The model probability will be calibrated against the true probability distribution using sklearn's CalibratedClassifierCV. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online using a streamlit app to predict and report wining probabilities every day. https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/
+Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The model probability will be calibrated against the true probability distribution using sklearn's CalibratedClassifierCV. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online using a [streamlit app](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/) to predict and report wining probabilities every day. 
 
 
 ### Overview
