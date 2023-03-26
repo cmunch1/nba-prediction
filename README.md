@@ -12,7 +12,7 @@ This is intended to be a learning project to demonstrate the use of machine lear
 
 In reality, a betting strategy is a rather complex problem with many elements beyond simply picking the winner of each game. Huge amounts of manpower and money have been invested in developing such strategies, and it is not likely that a learning project will be able to compete very well with such efforts. However, it may provide an extra element of insight that could be used to improve the profitability of an existing betting strategy.
 
-[Project Repository](https://github.com/cmunch1/nba-prediction
+Project Repository: https://github.com/cmunch1/nba-prediction
 
 ### Plan
 
