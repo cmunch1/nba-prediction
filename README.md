@@ -12,7 +12,7 @@ This is intended to be a learning project to demonstrate the use of machine lear
 
 In reality, a betting strategy is a rather complex problem with many elements beyond simply picking the winner of each game. Huge amounts of manpower and money have been invested in developing such strategies, and it is not likely that a learning project will be able to compete very well with such efforts. However, it may provide an extra element of insight that could be used to improve the profitability of an existing betting strategy.
 
-Project Repository: https://github.com/cmunch1/nba-prediction
+Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.com/cmunch1/nba-prediction)
 
 ### Plan
 
@@ -81,7 +81,7 @@ Currently available data includes:
 
 **New Data**
 
-New data is scraped from https://www.nba.com/stats/teams/boxscores.
+New data is scraped from [https://www.nba.com/stats/teams/boxscores](https://www.nba.com/stats/teams/boxscores)
 
  
 **Data Leakage**
@@ -122,7 +122,7 @@ ML Models
 
   Notebook 07 integrates Neptune.ai for experiment tracking and Optuna for hyperparameter tuning.
 
-  Experiment tracking logs can be viewed here: https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602
+  Experiment tracking logs can be viewed here: [https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602](https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602)
 
 ### Production Features Pipeline
 
@@ -142,6 +142,6 @@ Notebook 10 retrieves the most current data, executes Notebook 07 to handle hype
 
 ### Streamlit App
 
-The streamlit app is deployed at streamlit.io and can be accessed here: https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/
+The streamlit app is deployed at streamlit.io and can be accessed here: [https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/)
 
 It uses the model in the Model Registry to predict the win probability of the home team for the current day's upcoming games.
