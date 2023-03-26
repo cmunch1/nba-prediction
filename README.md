@@ -14,8 +14,8 @@ Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determin
  - Data and model is added to serverless Feature Store and Model Registry
  - Model is deployed online as a Streamlit app
  - Pipelines are setup to:
- -- Scrape new data from NBA website and add to Feature Store every day using Github Actions
- -- Retrain model and tune hyperparameters
+   - Scrape new data from NBA website and add to Feature Store every day using Github Actions
+   - Retrain model and tune hyperparameters
 
  Tools Used:
 
@@ -23,14 +23,14 @@ Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determin
  - XGboost - modeling
  - LightGBM - modeling
  - Scikit-learn - probability calibration
- - Optuna - hyperparamter tuning
+ - Optuna - hyperparameter tuning
  - Neptune.ai - experiment tracking
  - Selenium - data scraping and processing
  - ScrapingAnt - data scraping
  - BeautifulSoup - data processing of scraped data
  - Hopsworks.ai - Feature Store and Model Registry
  - Github Actions - running notebooks to scrape new data, predict winning probabilities, and retrain models
- - Streamlit - user interface
+ - Streamlit - web app deployment
 
 
 ### Structure
@@ -39,7 +39,12 @@ Jupyter Notebooks were used for initial development and testing and are labeled 
 
 Key functions were moved to .py files in src directory once the functions were stable.
 
-Notebooks 07, 09, and 10 are used in production.
+Notebooks 07, 09, and 10 are used in production. I chose to keep the notebooks instead of full conversion to scripts because:
+
+ - I think they look better in terms of documentation
+ - I prefer to peruse the notebook output after model testing and retraining sometimes instead of relying just on experiment tracking logs
+ - I haven't yet conceptually decided on my preferred way of structuring my model testing pipelines for best reusability and maintainability (e.g. should I use custom wrapper functions to invoke experiment logging so that I can easily change providers, or should I just choose one provider and stick with their API?)
+
 
 
 ### Data
