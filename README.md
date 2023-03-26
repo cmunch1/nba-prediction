@@ -1,6 +1,14 @@
 # NBA Game Predictor Project
 
-## The goal of this project is to develop an NBA game-winner predictor model that can be used to develop profitable betting strategies. Initially, the focus will be on the predictor model, and then later, betting strategy models may be explored.
+## Problem: Increase the profitability of betting on NBA games
+
+### Initial Step: Predict the probability that the home team will win each game
+
+Machine learning classification models will be used to predict the probability of the winner of each game based upon historical data. This is a first step in developing a betting strategy that will increase the profitability of betting on NBA games. 
+
+This is intended to be a learning project to demonstrate the use of machine learning to predict daily events and have a system in place to present these predictions through a website. 
+
+In reality, a betting strategy is a rather complex problem with many elements beyond simply picking the winner of each game. Huge amounts of manpower and money have been invested in developing such strategies, and it is not likely that a learning project will be able to compete very well with such efforts. However, it may provide an extra element of insight that could be used to improve the profitability of an existing betting strategy.
 
 ### Plan
 
@@ -19,6 +27,7 @@ Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determin
 
  Tools Used:
 
+ - VS Code w/ Copilot - IDE
  - Pandas - data manipulation
  - XGboost - modeling
  - LightGBM - modeling
