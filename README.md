@@ -113,6 +113,8 @@ ML Models
  - Compile head-to-head matchup data for each team pair 
  - Compile rolling means for various time periods for each team regardless of home or visitor status
  - Compile current win streak for each team regardless of home or visitor status
+ - Subtract the league average rolling means from each team's rolling means
+
  
 ### Model Testing
 
