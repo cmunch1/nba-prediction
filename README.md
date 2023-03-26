@@ -6,7 +6,7 @@
 
 Machine learning classification models will be used to predict the probability of the winner of each game based upon historical data. This is a first step in developing a betting strategy that will increase the profitability of betting on NBA games. 
 
-This is intended to be a learning project to demonstrate the use of machine learning to predict daily events and have a system in place to present these predictions through a website. 
+This is intended to be a learning project to demonstrate the use of machine learning to predict daily events and have a system in place to present these predictions through a website (as well as demonstrate my ability to quickly learn new tools and technologies.)
 
 In reality, a betting strategy is a rather complex problem with many elements beyond simply picking the winner of each game. Huge amounts of manpower and money have been invested in developing such strategies, and it is not likely that a learning project will be able to compete very well with such efforts. However, it may provide an extra element of insight that could be used to improve the profitability of an existing betting strategy.
 
