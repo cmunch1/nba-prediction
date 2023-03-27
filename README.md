@@ -150,8 +150,10 @@ It uses the model in the Model Registry to predict the win probability of the ho
 
 ### Feedback
 
-Thanks for reviewing my project. This is my primary "portfolio" project for my quest to change careers and find an entry level position in Machine Learning / Data Science. I appreciate any feedback.
+Thanks for taking the time to read about my project. This is my primary "portfolio" project for my quest to change careers and find an entry level position in Machine Learning / Data Science. I appreciate any feedback.
 
 Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.com/cmunch1/nba-prediction)
 
 My Linked-In profile: [https://www.linkedin.com/in/chris-munch/](https://www.linkedin.com/in/chris-munch/)
+
+Twitter: [https://twitter.com/curiovana](https://twitter.com/curiovana)
