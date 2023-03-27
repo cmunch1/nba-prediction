@@ -16,7 +16,7 @@ Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.c
 
 ### Plan
 
-Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The model probability will be calibrated against the true probability distribution using sklearn's CalibratedClassifierCV. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online using a [streamlit app](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/) to predict and report wining probabilities every day. 
+Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The model probability will be calibrated against the true probability distribution using sklearn's CalibratedClassifierCV. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online using a [streamlit app](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/) to predict and report winning probabilities every day. 
 
 ![image info](./images/streamlit_example.jpg)
 
@@ -136,7 +136,7 @@ Notebook 09 is run from a Github Actions every morning.
 A variable can be set to either use Selenium or ScrapingAnt for scraping the data. ScrapingAnt is used in production because of its built-in proxy server.
 
  - The Selenium notebook worked fine when ran locally, but there were issues when running the notebook in Github Actions, likely due to the ip address and anti-bot measures on the NBA website (which would require a proxy server to address)
- - ScrapingAnt is a cloud-based scraper with a Python API than handles the proxy server issues. An account is required, but the free account is sufficient for this project.
+ - ScrapingAnt is a cloud-based scraper with a Python API that handles the proxy server issues. An account is required, but the free account is sufficient for this project.
 
 ### Model Training Pipeline
 
@@ -147,3 +147,11 @@ Notebook 10 retrieves the most current data, executes Notebook 07 to handle hype
 The streamlit app is deployed at streamlit.io and can be accessed here: [https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/)
 
 It uses the model in the Model Registry to predict the win probability of the home team for the current day's upcoming games.
+
+### Feedback
+
+Thanks for reviewing my project. This is my primary "portfolio" project for my quest to change careers and find an entry level position in Machine Learning / Data Science. I appreciate any feedback.
+
+Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.com/cmunch1/nba-prediction)
+
+My Linked-In profile: [https://www.linkedin.com/in/chris-munch/](https://www.linkedin.com/in/chris-munch/)
