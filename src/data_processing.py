@@ -2,7 +2,8 @@
 import pandas as pd
 
 def process_games(games: pd.DataFrame) -> pd.DataFrame:
-    """Performs basic data cleaning on the games dataset.
+    """
+    Performs basic data cleaning on the games dataset.
 
     Args:
         games (pd.DataFrame): the raw games dataframe
@@ -32,7 +33,8 @@ def process_games(games: pd.DataFrame) -> pd.DataFrame:
 
 
 def process_ranking(ranking: pd.DataFrame) -> pd.DataFrame:
-    """Performs basic data cleaning on the ranking dataset.
+    """
+    Performs basic data cleaning on the ranking dataset.
     
     Args:  
         ranking (pd.DataFrame): the raw ranking dataframe
@@ -69,7 +71,8 @@ def process_ranking(ranking: pd.DataFrame) -> pd.DataFrame:
 
 
 def process_games_details(details: pd.DataFrame) -> pd.DataFrame:
-    """Performs basic data cleaning on the games_details dataset.
+    """
+    Performs basic data cleaning on the games_details dataset.
 
     Args:
         details (pd.DataFrame): the raw games_details dataframe
@@ -106,7 +109,8 @@ def process_games_details(details: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_TARGET(df: pd.DataFrame) -> pd.DataFrame:
-    """Adds a TARGET column to the dataframe using HOME_TEAM_WINS.
+    """
+    Adds a TARGET column to the dataframe by copying HOME_TEAM_WINS.
 
     Args:
         df (pd.DataFrame): the dataframe to add the TARGET column to
@@ -121,7 +125,8 @@ def add_TARGET(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def split_train_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Splits the dataframe into train and test sets.
+    """
+    Splits the dataframe into train and test sets.
 
     Splits the latest season as the test set and the rest as the train set.
     The second latest season included with the test set to allow for feature engineering.

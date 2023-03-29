@@ -11,9 +11,21 @@ import sweetviz as sv
 from datetime import datetime
 
 
-def plot_corr_barchart(df1, drop_cols, n=30):
+def plot_corr_barchart(df1: pd.DataFrame, drop_cols: list, n: int = 30) -> None:
     """
-    plot a color-gradient barchart showing top n correlations between features
+    Plots a color-gradient bar chart showing top n correlations between features
+
+    Args:
+        df1 (pd.DataFrame): the dataframe to plot
+        drop_cols (list): list of columns not to include in plot
+        n (int): number of top n correlations to plot
+
+    Returns:
+        None
+
+    Sources: 
+    https://typefully.com/levikul09/j6qzwR0
+    https://stackoverflow.com/questions/17778394/list-highest-correlation-pairs-from-a-large-correlation-matrix-in-pandas
 
     """
 
@@ -51,10 +63,18 @@ def plot_corr_barchart(df1, drop_cols, n=30):
     return
 
 
-def plot_corr_vs_target(df1, target, drop_cols, n=30):
-    
+def plot_corr_vs_target(target: str, df1: pd.DataFrame, drop_cols: list, n: int = 30) -> None:
     """
-    plot a color-gradient barchart showing top n correlations between features and target
+    Plots a color-gradient bar chart showing top n correlations between features and target
+
+    Args:
+        target (str): the name of the target column
+        df1 (pd.DataFrame): the dataframe to plot
+        drop_cols (list): list of columns not to include in plot
+        n (int): number of top n correlations to plot
+
+    Returns:
+        None
 
     """
     
@@ -78,11 +98,11 @@ def plot_corr_vs_target(df1, target, drop_cols, n=30):
     return
 
 
-def plot_confusion_matrix(cm,
-                          target_names,
-                          title='Confusion matrix',
-                          cmap=None,
-                          normalize=True):
+def plot_confusion_matrix(cm: np.ndarray,
+                          target_names: list,
+                          title: str ='Confusion matrix',
+                          cmap: plt.Colormap =None,
+                          normalize: bool =True):
     """
     given a sklearn confusion matrix (cm), make a nice plot
 
@@ -110,9 +130,12 @@ def plot_confusion_matrix(cm,
                           target_names = y_labels_vals,       # list of names of the classes
                           title        = best_estimator_name) # title of graph
 
-    Citiation
+    Citation
     ---------
     http://scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+
+    Source:
+    https://stackoverflow.com/questions/19233771/sklearn-plot-confusion-matrix-with-labels/50386871#50386871
 
     """
     
@@ -155,7 +178,14 @@ def plot_confusion_matrix(cm,
     
     return fig
 
-def run_sweetviz_report(df, TARGET):
+def run_sweetviz_report(df: pd.DataFrame, TARGET: str) -> None:
+    """
+    Generates a sweetviz report and saves it to a html file
+
+    Args:
+        df (pd.DataFrame): the dataframe to analyze
+        TARGET (str): the name of the target column
+    """
     
     report_label = datetime.today().strftime('%Y-%m-%d_%H_%M')
     
@@ -165,8 +195,18 @@ def run_sweetviz_report(df, TARGET):
     return
 
 
-def run_sweetviz_comparison(df1, df1_name, df2, df2_name, TARGET, report_label):
-    
+def run_sweetviz_comparison(df1: pd.DataFrame, df1_name: str, df2: pd.DataFrame, df2_name: str, TARGET: str, report_label: str) -> None:
+    """
+    Generates a sweetviz comparison report between two dataframes and saves it to a html file
+
+    Args:
+        df1 (pd.DataFrame): the first dataframe to analyze
+        df1_name (str): the name of the first dataframe
+        df2 (pd.DataFrame): the second dataframe to analyze
+        df2_name (str): the name of the second dataframe
+        TARGET (str): the name of the target column
+        report_label (str): identifier incorporated into the filename of the report
+    """
     
     report_label = report_label + datetime.today().strftime('%Y-%m-%d_%H_%M')
     
