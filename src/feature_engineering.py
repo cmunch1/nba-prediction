@@ -35,6 +35,7 @@ def process_features(df: pd.DataFrame) -> pd.DataFrame:
     """
     
     # lengths of rolling averages and streaks to calculate for each team
+    # we will try a variety of lengths to see which works best
     home_visitor_roll_list = [3, 7, 10]  #lengths to use when restricting to home or visitor role
     all_roll_list = [3, 7, 10, 15] #lengths to use when NOT restricting to home or visitor role
     
@@ -284,12 +285,17 @@ def process_games_consecutively(df_data: pd.DataFrame)-> pd.DataFrame:
 
 
 def add_matchups(df: pd.DataFrame, roll_list: list)-> pd.DataFrame:
+    """
+    Add rolling win pcts and win/lose steaks for each time when Team A played Team B for a variety of rolling windows
 
-    '''
-    Add rolling win pcts and win/lose steaks for each time when Team A played Team B
-    
-    roll_list = list of number of games for each rolling mean, e.g. [3, 5, 7, 10, 15]
-    '''
+    Args:
+        df (pd.DataFrame): the dataframe to process
+        roll_list (list): list of number of games for each rolling mean, e.g. [3, 5, 7, 10, 15] 
+
+    Returns:
+        the processed dataframe
+    """
+
 
     # group all the games that 2 teams played each other 
     # calculate home team win pct and the home team win/lose streak
@@ -308,13 +314,18 @@ def add_matchups(df: pd.DataFrame, roll_list: list)-> pd.DataFrame:
     
     return df
 
+
 def add_past_performance_all(df: pd.DataFrame, roll_list: list)-> pd.DataFrame:
-    
-    '''
+    """
     Add rolling avgs, win/lose streak, and home/away streak no matter if playing as home or visitor team.
-    
-    roll_list = list of number of games for each rolling mean, e.g. [3, 5, 7, 10, 15]
-    '''
+
+    Args:
+        df (pd.DataFrame): the dataframe to process
+        roll_list (list): list of number of games for each rolling mean, e.g. [3, 5, 7, 10, 15] 
+
+    Returns:
+        the processed dataframe
+    """
        
     # add features showing how well each team has done in its last games
     # regardless whether they were at home or away
@@ -369,15 +380,20 @@ def add_past_performance_all(df: pd.DataFrame, roll_list: list)-> pd.DataFrame:
 
 
 def process_x_minus_league_avg(df: pd.DataFrame, feature_list: list, team_feature: str)-> pd.DataFrame:
+    """
+    Calculate the league average for every day of the season and then subtract the league average of each stat from the team's current stat for that day.
 
-    '''
-    Subtract the league average of each stat for that day in time from the team's current stat
-    
-    feature_list = list of features to be subtracted, e.g. [PTS_AVG_LAST_5_ALL, REB_AVG_LAST_20_ALL]
-    team_feature = "HOME_TEAM_ID", "VISITOR_TEAM_ID", or "TEAM1"
+    This provides a measure of how good the team is compared to the the rest of the league at that moment in time.
 
-    This provides a measure of how good the team is compared to the the rest of the league
-    '''
+    Args:
+        df (pd.DataFrame): the dataframe to process
+        feature_list (list): list of features to be used for subtraction, e.g. [PTS_AVG_LAST_5_ALL, REB_AVG_LAST_20_ALL]
+        team_feature (str): the team's role (subset of data) that is being worked upon ("HOME_TEAM_ID", "VISITOR_TEAM_ID", or "TEAM1" for all roles)
+
+    Returns:
+        the processed dataframe
+
+    """
 
     # create a temp dataframe so that every date can be front-filled
     # we need the current average for all 30 teams for every day during the season
@@ -426,10 +442,19 @@ def process_x_minus_league_avg(df: pd.DataFrame, feature_list: list, team_featur
 
 
 def combine_new_features(df: pd.DataFrame, df_consecutive: pd.DataFrame)-> pd.DataFrame:
-    
-    '''
-    Combine back home team and visitor team features so each game has only one row again
-    '''
+    """
+    Re-combine back the features created in the consecutive dataframe to the main dataframe.
+
+    The consecutive dataframe was used to derive features regardless of whether the team was home or away, and now we need to add those features back to the main dataframe.
+
+    Args:
+        df (pd.DataFrame): the main dataframe where each row is a game with both a home team and a visitor team
+        df_consecutive (pd.DataFrame): the dataframe where each row is a game with only one team (either home or visitor)
+
+    Returns:
+        the merged dataframe
+    """
+
      
     # add back all the new features created in the consecutive dataframe to the main dataframe
     # all data for TEAM1 will be applied to the home team and then again to the visitor team
@@ -477,10 +502,17 @@ def combine_new_features(df: pd.DataFrame, df_consecutive: pd.DataFrame)-> pd.Da
 
 
 def process_x_minus_y(df: pd.DataFrame)-> pd.DataFrame:
+    """
+    Subtract visitor team rolling stats from home rolling stats.
+
+    This may (or may not) be useful for the model to explicitly see the difference between the two teams. GBM models may be able to handle this automatically, but other models may not.
     
-    '''
-    Subtract visitor team rolling stats from home rolling stats
-    '''
+    Args:
+        df (pd.DataFrame): the dataframe to process
+
+    Returns:
+        the processed dataframe
+    """
 
     # field_x - field_y
     
@@ -500,11 +532,18 @@ def process_x_minus_y(df: pd.DataFrame)-> pd.DataFrame:
         
     return df
 
+
 def remove_non_rolling(df: pd.DataFrame) -> list:
-    
-    '''
+    """
     Returns a list of columns in a dataframe with the current games stats removed, leaving only rolling averages and streaks
-    '''
+
+    Args:
+        df (pd.DataFrame): the dataframe to process
+
+    Returns:
+        list: only the columns that are rolling averages and streaks
+    """
+ 
     # remove non-rolling features - these are data leaks
     # they are stats from the actual game that decides winner/loser, 
     # but we don't know these stats before a game is played
