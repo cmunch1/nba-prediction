@@ -133,7 +133,7 @@ The Scikit-learn wrapper is used later in production because it allows for easie
 
  <img src="/images/train_vs_test_shapley.svg" alt= “” width="500" height="250">
  
- ![<img src="/images/train_vs_test_shapley.svg" width="100"/>](./images/train_vs_test_shapley.jpg)
+ ![<img src="/images/train_vs_test_shapley.svg" width="100"/>](./images/train_vs_test_shapley.svg)
  
  
 **Experiment Tracking**
