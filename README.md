@@ -131,7 +131,7 @@ The Scikit-learn wrapper is used later in production because it allows for easie
  - Shapley values compared: Train set vs Test/Validation set
  - Test/Validation set is split: early half vs later half
 
- ![<img src="/images/train_vs_test_shapley.svg" alt= “” width="500" height="250">]
+ <img src="https://github.com/cmunch1/nba-prediction/blob/main/images/train_vs_test_shapley.svg" alt= “” width="500" height="250">
  
 **Experiment Tracking**
  
