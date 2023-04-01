@@ -130,6 +130,9 @@ The Scikit-learn wrapper is used later in production because it allows for easie
  - AUC is primary metric, Accuracy is secondary metric (it is more meaningful to casual users)
  - Shapley values compared: Train set vs Test/Validation set
  - Test/Validation set is split: early half vs later half
+
+ <img src="./images/train_vs_test_shapley.svg" alt= “” width="500" height="250">
+ 
  
 **Experiment Tracking**
  
