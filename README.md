@@ -88,11 +88,11 @@ New data is scraped from [https://www.nba.com/stats/teams/boxscores](https://www
 
 The data for each game are stats for the *completed* game. We want to predict the winner *before* the game is played, not after. The model should only use data that would be available before the game is played. Our model features will primarily be rolling stats for the previous games (e.g. average assists for previous 5 games) while excluding the current game.
 
-If the goal is simply to predict which stats are important for winning games, then the model can be trained on the entire dataset. However, if the goal is to predict the winner of a game like we are trying to do, then the model must be trained on data that would only be available before the game is played.
+I mention this because I did see several similar projects online that failed to take this into account. If the goal is simply to predict which stats are important for winning games, then the model can be trained on the entire dataset. However, if the goal is to predict the winner of a game like we are trying to do, then the model must be trained on data that would only be available before the game is played.
 
-### Train / Test Split
+### Train / Test/Validation Split
   
-  - Latest season is used as Test data and previous seasons are used as Train data
+  - Latest season is used as Test/Validation data and previous seasons are used as Train data
   
 ### Baseline Models
   
@@ -115,22 +115,38 @@ ML Models
  - Compile current win streak for each team regardless of home or visitor status
  - Subtract the league average rolling means from each team's rolling means
 
+
+### Model Training/Testing
+
+**Models**
+ - LightGBM 
+ - XGBoost 
+
+The native Python API (rather than the Scikit-learn wrapper) is used for initial testing of both models because of ease of built-in Shapley values, which are used for feature importance analysis and for adversarial validation (since Shapley values are local to each dataset, they can be used to determine if the train and test datasets have the same feature importances. If they do not, then it may indicate that the model does not generalize very well.)
+
+The Scikit-learn wrapper is used later in production because it allows for easier probability calibration using sklearn's CalibratedClassifierCV.
+
+**Evaluation**
+ - AUC is primary metric, Accuracy is secondary metric (it is more meaningful to casual users)
+ - Shapley values compared: Train set vs Test/Validation set
+ - Test/Validation set is split: early half vs later half
  
-### Model Testing
+**Experiment Tracking**
+ 
+Notebook 07 integrates Neptune.ai for experiment tracking and Optuna for hyperparameter tuning.
 
-  Both LightGBM and XGBoost are used for testing. The native Python API (rather than the Scikit-learn wrapper) is used for initial testing of both models because of ease of built-in Shapley values, which are used for feature importance analysis and for adversarial validation (since Shapley values are local to each dataset, they can be used to determine if the train and test datasets have the same feature importances. If they do not, then it may indicate that the model does not generalize very well.)
-  
-  The Scikit-learn wrapper is used later because it allows for easier probability calibration using sklearn's CalibratedClassifierCV to ensure that the model probabilities are calibrated against the true probability distribution. The Brier loss score is used to automatically select the best calibration method (sigmoid, isotonic, or none).
+Experiment tracking logs can be viewed here: [https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602](https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602)
 
-  Notebook 07 integrates Neptune.ai for experiment tracking and Optuna for hyperparameter tuning.
+**Probability Calibration**
 
-  Experiment tracking logs can be viewed here: [https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602](https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602)
+SKlearn's CalibratedClassifierCV is used to ensure that the model probabilities are calibrated against the true probability distribution. The Brier loss score is used to by the software to automatically select the best calibration method (sigmoid, isotonic, or none).
+
 
 ### Production Features Pipeline
 
 Notebook 09 is run from a Github Actions every morning.
 
-- It scrapes the stats from the previous day's games and adds them to the Feature Store.
+- It scrapes the stats from the previous day's games, updates all the rolling statistics and streaks, and adds them to the Feature Store.
 - It scrapes the upcoming game matchups for the current day and adds them to the Feature Store so that the streamlit app can use these to make it's daily predictions.
 
 A variable can be set to either use Selenium or ScrapingAnt for scraping the data. ScrapingAnt is used in production because of its built-in proxy server.
@@ -140,7 +156,7 @@ A variable can be set to either use Selenium or ScrapingAnt for scraping the dat
 
 ### Model Training Pipeline
 
-Notebook 10 retrieves the most current data, executes Notebook 07 to handle hyperparameter tuning, model training, and calibration, and then adds the model to the Model Registry.
+Notebook 10 retrieves the most current data, executes Notebook 07 to handle hyperparameter tuning, model training, and calibration, and then adds the model to the Model Registry. The time periods used for the train set and test set can be adjusted so that the model can be tested only on the most current games.
 
 ### Streamlit App
 
