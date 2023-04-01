@@ -101,7 +101,7 @@ def plot_corr_vs_target(target: str, df1: pd.DataFrame, drop_cols: list, n: int 
 def plot_confusion_matrix(cm: np.ndarray,
                           target_names: list,
                           title: str ='Confusion matrix',
-                          cmap: plt.Colormap =None,
+                          cmap: plt.colormaps =None,
                           normalize: bool =True):
     """
     given a sklearn confusion matrix (cm), make a nice plot
