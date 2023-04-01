@@ -138,7 +138,8 @@ Notebook 07 integrates Neptune.ai for experiment tracking and Optuna for hyperpa
 Experiment tracking logs can be viewed here: [https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602](https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602)
 
 **Probability Calibration**
-SKlearn's CalibratedClassifierCV to ensure that the model probabilities are calibrated against the true probability distribution. The Brier loss score is used to automatically select the best calibration method (sigmoid, isotonic, or none).
+
+SKlearn's CalibratedClassifierCV is used to ensure that the model probabilities are calibrated against the true probability distribution. The Brier loss score is used to by the software to automatically select the best calibration method (sigmoid, isotonic, or none).
 
 
 ### Production Features Pipeline
