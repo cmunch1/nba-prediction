@@ -18,7 +18,8 @@ Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.c
 
 Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The model probability will be calibrated against the true probability distribution using sklearn's CalibratedClassifierCV. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online using a [streamlit app](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/) to predict and report winning probabilities every day. 
 
-![image info](./images/streamlit_example.jpg)
+<img src="./images/streamlit_example.jpg" width="800"/>
+
 
 ### Overview
 
@@ -90,6 +91,19 @@ The data for each game are stats for the *completed* game. We want to predict th
 
 I mention this because I did see several similar projects online that failed to take this into account. If the goal is simply to predict which stats are important for winning games, then the model can be trained on the entire dataset. However, if the goal is to predict the winner of a game like we are trying to do, then the model must be trained on data that would only be available before the game is played.
 
+### EDA and Data Processing
+
+Exploratory Data Analysis (EDA) and Data Processing are summarized and detailed in the notebooks. Some examples include:
+
+Histograms of various features
+
+<img src="./images/distributions.png" width="500"/> 
+
+Correlations between features
+
+<img src="./images/correlation_bar_chart.png" width="500"/>
+
+
 ### Train / Test/Validation Split
   
   - Latest season is used as Test/Validation data and previous seasons are used as Train data
@@ -126,13 +140,15 @@ The native Python API (rather than the Scikit-learn wrapper) is used for initial
 
 The Scikit-learn wrapper is used later in production because it allows for easier probability calibration using sklearn's CalibratedClassifierCV.
 
+<img src="./images/train_vs_test_shapley.jpg" width="500"/>
+
 **Evaluation**
  - AUC is primary metric, Accuracy is secondary metric (it is more meaningful to casual users)
  - Shapley values compared: Train set vs Test/Validation set
  - Test/Validation set is split: early half vs later half
 
- <img src="./images/train_vs_test_shapley.svg" alt= “” width="500" height="250">
- 
+<img src="./images/confusion_matrix.png" width="300"/>
+
  
 **Experiment Tracking**
  
@@ -140,9 +156,15 @@ Notebook 07 integrates Neptune.ai for experiment tracking and Optuna for hyperpa
 
 Experiment tracking logs can be viewed here: [https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602](https://app.neptune.ai/cmunch1/nba-prediction/experiments?split=tbl&dash=charts&viewId=979e20ed-e172-4c33-8aae-0b1aa1af3602)
 
+<img src="./images/neptune.png" width="500"/>
+
+
 **Probability Calibration**
 
 SKlearn's CalibratedClassifierCV is used to ensure that the model probabilities are calibrated against the true probability distribution. The Brier loss score is used to by the software to automatically select the best calibration method (sigmoid, isotonic, or none).
+
+<img src="./images/calibration.png" width="500"/>
+
 
 
 ### Production Features Pipeline
@@ -166,6 +188,8 @@ Notebook 10 retrieves the most current data, executes Notebook 07 to handle hype
 The streamlit app is deployed at streamlit.io and can be accessed here: [https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/)
 
 It uses the model in the Model Registry to predict the win probability of the home team for the current day's upcoming games.
+
+<img src="./images/streamlit2.png" width="500"/>
 
 ### Feedback
 
