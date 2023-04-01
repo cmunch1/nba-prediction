@@ -146,7 +146,7 @@ SKlearn's CalibratedClassifierCV is used to ensure that the model probabilities 
 
 Notebook 09 is run from a Github Actions every morning.
 
-- It scrapes the stats from the previous day's games and adds them to the Feature Store.
+- It scrapes the stats from the previous day's games, updates all the rolling statistics and streaks, and adds them to the Feature Store.
 - It scrapes the upcoming game matchups for the current day and adds them to the Feature Store so that the streamlit app can use these to make it's daily predictions.
 
 A variable can be set to either use Selenium or ScrapingAnt for scraping the data. ScrapingAnt is used in production because of its built-in proxy server.
