@@ -20,26 +20,6 @@ from sklearn.metrics import (
 )
 
 
-def fix_datatypes(df, date_columns, long_integer_columns):
-    
-    for field in date_columns:
-        df[field] = pd.to_datetime(df[field])
- 
-
-    #convert long integer fields to int32 from int64
-    for field in long_integer_columns:
-        df[field] = df[field].astype('int32')
-    
-    #convert the remaining int64s to int8
-    for field in df.select_dtypes(include=['int64']).columns.tolist():
-        df[field] = df[field].astype('int8')
-        
-    #convert float64s to float16s
-    for field in df.select_dtypes(include=['float64']).columns.tolist():
-        df[field] = df[field].astype('float16')
-        
-    return df
-
 def encode_categoricals(df, category_columns, MODEL_NAME, ENABLE_CATEGORICAL):
     
     # To use special category feature capabalities in XGB and LGB, categoricals must be ints from 0 to N-1

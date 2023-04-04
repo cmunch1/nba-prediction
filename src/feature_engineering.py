@@ -38,8 +38,12 @@ def process_features(df: pd.DataFrame) -> pd.DataFrame:
     # we will try a variety of lengths to see which works best
     home_visitor_roll_list = [3, 7, 10]  #lengths to use when restricting to home or visitor role
     all_roll_list = [3, 7, 10, 15] #lengths to use when NOT restricting to home or visitor role
+
+    long_integer_fields = ['GAME_ID', 'HOME_TEAM_ID', 'VISITOR_TEAM_ID', 'SEASON']
+    short_integer_fields = ['PTS_home', 'AST_home', 'REB_home', 'PTS_away', 'AST_away', 'REB_away']
+    date_fields = ['GAME_DATE_EST']
     
-    df = fix_datatypes(df)
+    df = fix_datatypes(df, date_fields, short_integer_fields, long_integer_fields)
     df = add_date_features(df)
     df = remove_playoff_games(df)
     df = add_rolling_home_visitor(df, "HOME", home_visitor_roll_list)
@@ -57,7 +61,7 @@ def process_features(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def fix_datatypes(df: pd.DataFrame)-> pd.DataFrame:
+def fix_datatypes(df: pd.DataFrame, date_columns: list, short_integer_fields: list, long_integer_fields: list)-> pd.DataFrame:
     """
     Converts date to proper format and reduces memory footprint of ints and floats
 
@@ -69,11 +73,8 @@ def fix_datatypes(df: pd.DataFrame)-> pd.DataFrame:
 
     """
 
-    
-    df['GAME_DATE_EST'] = pd.to_datetime(df['GAME_DATE_EST'])
-
-    long_integer_fields = ['GAME_ID', 'HOME_TEAM_ID', 'VISITOR_TEAM_ID', 'SEASON']
-    short_integer_fields = ['PTS_home', 'AST_home', 'REB_home', 'PTS_away', 'AST_away', 'REB_away']
+    for field in date_columns:
+        df[field] = pd.to_datetime(df[field])
 
     #convert long integer fields to int32 from int64
     for field in long_integer_fields:
