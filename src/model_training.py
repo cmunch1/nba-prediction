@@ -20,12 +20,26 @@ from sklearn.metrics import (
 )
 
 
-def encode_categoricals(df, category_columns, MODEL_NAME, ENABLE_CATEGORICAL):
+def encode_categoricals(df: pd.dataframe, category_columns: list, MODEL_NAME: str, ENABLE_CATEGORICAL: bool) -> pd.dataframe:
+    """
+    Encode categorical features as integers for use in XGBoost and LightGBM
+
+    Args:
+        df (pd.DataFrame): the dataframe to process
+        category_columns (list): list of columns to encode as categorical
+        MODEL_NAME (str): the name of the model being used
+        ENABLE_CATEGORICAL (bool): whether or not to enable categorical features in the model
     
-    # To use special category feature capabalities in XGB and LGB, categoricals must be ints from 0 to N-1
+    Returns:
+        the dataframe with categorical features encoded
+    
+
+    """
+
+    # To use special category feature capabilities in XGB and LGB, categorical features must be ints from 0 to N-1
     # Conversion can be accomplished by simple subtraction for several features
     # (these category capabilities may or may not be used, but encoding does not hurt anything)
-    
+
     first_team_ID = df['HOME_TEAM_ID'].min()
     first_season = df['SEASON'].min()
    
@@ -42,9 +56,25 @@ def encode_categoricals(df, category_columns, MODEL_NAME, ENABLE_CATEGORICAL):
 
     return df
 
-def plot_calibration_curve(clf_list, X_train, y_train, X_test, y_test, n_bins=10):
 
-    # FROM: https://scikit-learn.org/stable/auto_examples/calibration/plot_calibration_curve.html
+def plot_calibration_curve(clf_list: list, X_train: pd.dataframe, y_train: pd.dataframe, X_test: pd.dataframe, y_test: pd.dataframe, n_bins: int = 10) -> None:
+    """
+    Plots calibration curves for a list of classifiers vs ideal probability distribution
+
+    Args:
+        clf_list (list): the classifiers to plot
+        X_train (pd.dataframe): training data
+        y_train (pd.dataframe): labels for training data
+        X_test (pd.dataframe): test data
+        y_test (pd.dataframe): labels for test data
+        n_bins (int, optional): how many bins to use for calibration. Defaults to 10.
+
+    Returns:
+        None
+
+    FROM: https://scikit-learn.org/stable/auto_examples/calibration/plot_calibration_curve.html
+    """
+    
 
     fig = plt.figure(figsize=(10, 10))
     gs = GridSpec(4, 2)
@@ -86,9 +116,27 @@ def plot_calibration_curve(clf_list, X_train, y_train, X_test, y_test, n_bins=10
     plt.tight_layout()
     plt.show()
 
-def calculate_classification_metrics(clf_list, X_train, y_train, X_test, y_test ):
+    return
 
-    # FROM: https://scikit-learn.org/stable/auto_examples/calibration/plot_calibration_curve.html
+
+def calculate_classification_metrics(clf_list: list, X_train: pd.dataframe, y_train: pd.dataframe, X_test: pd.dataframe, y_test: pd.dataframe) -> tuple[pd.dataframe, list]:
+    """
+    Calculates classification metrics for a list of classifiers. Brier score, log loss, precision, recall, f1, and roc_auc are calculated.
+
+    Args:
+        clf_list (list): the classifiers to calculate metrics for
+        X_train (pd.dataframe): training data
+        y_train (pd.dataframe): labels for training data
+        X_test (pd.dataframe): test data
+        y_test (pd.dataframe): labels for test data
+
+    Returns:
+       tuple: (dataframe) of the metrics and (list) containing the fitted models and names of the models as strings
+
+    FROM: https://scikit-learn.org/stable/auto_examples/calibration/plot_calibration_curve.html
+    """
+
+    # this is 
 
     scores = defaultdict(list)
 
@@ -109,9 +157,8 @@ def calculate_classification_metrics(clf_list, X_train, y_train, X_test, y_test 
         score_df = pd.DataFrame(scores).set_index("Classifier")
         score_df.round(decimals=3)
 
-        #update clf_list with the trained model
+        # update clf_list with the trained model
         clf_list[i] = (clf, name)
 
-    
 
     return score_df, clf_list
