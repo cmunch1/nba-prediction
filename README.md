@@ -71,7 +71,7 @@ Continual improvements might include:
  - More feature engineering/selection
  - More data sources (player stats, injuries, etc...)
  - A/B testing against outside and internal models (e.g. other predictor projects, Vegas odds, betting site odds, etc...)
- - Track model performance over time testing for model drift, etc...
+ - Track model performance over time, testing for model drift, etc...
  - Develop optimized retraining criteria (e.g. time periods, number of games, model drift, etc...)
  - Better data visualizations of model predictions and performance
  - Develop betting strategies based upon model predictions
