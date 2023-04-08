@@ -2,13 +2,26 @@
 
 ![image info](./images/basketball_money2.jpg)
 
+
+## Introduction ##
+
+This project is a demonstration of my ability to develop and deploy end-to-end machine learning technologies to predict daily events and have a system in place to present these predictions through a website (as well as demonstrate my ability to quickly learn new tools and technologies.) 
+
+I chose to predict the winner of NBA games because:
+ - multiple games are played every day during the season so I can see how my model performs on a daily basis
+ - picking a game winner is simple and easy for a casual audience to understand
+ - there is a lot of data available
+ - it can be used to make money (via betting strategies)
+
+I am actually not really a big fan of the NBA but have watched a few games and have basic knowledge. I love to learn new things and figure stuff out, so this projects does show how I can adapt to new domains and learn new things quickly. In addition, prior to this project I had never even heard of some of the technologies I employed.
+
 ## Problem: Increase the profitability of betting on NBA games
 
 ### Initial Step: Predict the probability that the home team will win each game
 
 Machine learning classification models will be used to predict the probability of the winner of each game based upon historical data. This is a first step in developing a betting strategy that will increase the profitability of betting on NBA games. 
 
-This is intended to be a learning project to demonstrate the use of machine learning to predict daily events and have a system in place to present these predictions through a website (as well as demonstrate my ability to quickly learn new tools and technologies.)
+*Disclaimer*
 
 In reality, a betting strategy is a rather complex problem with many elements beyond simply picking the winner of each game. Huge amounts of manpower and money have been invested in developing such strategies, and it is not likely that a learning project will be able to compete very well with such efforts. However, it may provide an extra element of insight that could be used to improve the profitability of an existing betting strategy.
 
@@ -54,9 +67,12 @@ Continual improvements might include:
  - More feature engineering/selection
  - More data sources (player stats, injuries, etc...)
  - A/B testing against outside and internal models (e.g. other predictor projects, Vegas odds, betting site odds, etc...)
+ - Track model performance over time testing for model drift, etc...
+ - Develop optimized retraining criteria (e.g. time periods, number of games, model drift, etc...)
  - Better data visualizations of model predictions and performance
  - Develop betting strategies based upon model predictions
  - Ensemble betting strategies with other models and strategies, including human experts
+ - Track model performance against other models and betting strategies
 
 
 ### Structure
