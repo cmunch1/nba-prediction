@@ -47,6 +47,17 @@ Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determin
  - Github Actions - running notebooks to scrape new data, predict winning probabilities, and retrain models
  - Streamlit - web app deployment
 
+### Future Possibilities
+
+Continual improvements might include:
+
+ - More feature engineering/selection
+ - More data sources (player stats, injuries, etc...)
+ - A/B testing against outside and internal models (e.g. other predictor projects, Vegas odds, betting site odds, etc...)
+ - Better data visualizations of model predictions and performance
+ - Develop betting strategies based upon model predictions
+ - Ensemble betting strategies with other models and strategies, including human experts
+
 
 ### Structure
 
