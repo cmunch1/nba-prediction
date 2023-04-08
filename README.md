@@ -11,9 +11,9 @@ I chose to predict the winner of NBA games because:
  - multiple games are played every day during the season so I can see how my model performs on a daily basis
  - picking a game winner is simple and easy for a casual audience to understand
  - there is a lot of data available
- - it can be used to make money (via betting strategies)
+ - it can be used to make money (via betting strategies). I have always been interested in making money.
 
-I am actually not really a big fan of the NBA but have watched a few games and have basic knowledge. I love to learn new things and figure stuff out, so this projects does show how I can adapt to new domains and learn new things quickly. In addition, prior to this project I had never even heard of some of the technologies I employed.
+I am actually not really a big fan of the NBA but have watched a few games and have basic knowledge. I have never done any sports betting either, but I do love to learn new things and figure stuff out, so this projects does demonstrate how I can adapt to new domains and learn new things quickly. I have always loved exploration and discovery.
 
 ## Problem: Increase the profitability of betting on NBA games
 
