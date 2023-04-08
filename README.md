@@ -28,8 +28,12 @@ In reality, a betting strategy is a rather complex problem with many elements be
 Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.com/cmunch1/nba-prediction)
 
 ### Plan
-
-Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. The model probability will be calibrated against the true probability distribution using sklearn's CalibratedClassifierCV. The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values. The model will be deployed online using a [streamlit app](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/) to predict and report winning probabilities every day. 
+ 
+ - Gradient boosted tree models (Xgboost and LightGBM) will be utilized to determine the probability that the home team will win each game. 
+ - The model probability will be calibrated against the true probability distribution using sklearn's CalibratedClassifierCV. 
+ - The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values.
+ - Pipelines will be setup to scrape new data from NBA website every day and retrain the model when desired.
+ - The model will be deployed online using a [streamlit app](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/) to predict and report winning probabilities every day. 
 
 <img src="./images/streamlit_example.jpg" width="800"/>
 
