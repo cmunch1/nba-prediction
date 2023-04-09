@@ -5,7 +5,7 @@
 
 ## Introduction ##
 
-This project is a demonstration of my ability to develop and deploy end-to-end machine learning technologies to predict daily events and have a system in place to present these predictions through a website (as well as demonstrate my ability to quickly learn new tools and technologies.) 
+This project is a demonstration of my ability to quickly learn, develop, and deploy end-to-end machine learning technologies. I am currently seeking to change careers into Machine Learning / Data Science.
 
 I chose to predict the winner of NBA games because:
  - multiple games are played every day during the season so I can see how my model performs on a daily basis
