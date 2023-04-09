@@ -1,6 +1,3 @@
-### This version uses the ScrapingAnt API to scrape the data from the web. An account is required.
-
-
 
 import pandas as pd
 import numpy as np
@@ -9,8 +6,10 @@ import os
 
 import asyncio
 
+#if using scrapingant, import these
 from scrapingant_client import ScrapingAntClient
 
+# if using selenium and chrome, import these
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromiumService
 from selenium.webdriver.common.by import By
@@ -18,6 +17,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.core.utils import ChromeType
 from webdriver_manager.chrome import ChromeDriverManager
 
+# if using selenium and firefox, import these
 from selenium.webdriver.firefox.service import Service as FirefoxService
 from webdriver_manager.firefox import GeckoDriverManager
 
@@ -34,73 +34,54 @@ import time
 
 
 
-def activate_web_driver(browser):
-    
-    if browser == "firefox":
-        driver = activate_web_driver_firefox()
-    else:
-        driver = activate_web_driver_chromium()
-        
-    return driver
 
+def activate_web_driver(browser: str) -> webdriver:
+    """
+    Activate selenium web driver for use in scraping
 
-def activate_web_driver_firefox():
+    Args:
+        browser (str): the name of the browser to use, either "firefox" or "chromium"
+
+    Returns:
+        the selected webdriver
+    """
     
-    service = FirefoxService(executable_path=GeckoDriverManager().install())
-    
-    firefox_options = webdriver.FirefoxOptions()
+    # options for selenium webdrivers, used to assist headless scraping. Still ran into issues, so I used scrapingant instead when running from github actions
     options = [
-        "--window-size=1920,1080",
+        "--headless",
+        "--window-size=1920,1200",
         "--start-maximized",
-        "--headless",
-        ]
-    
-    for option in options:
-        firefox_options.add_argument(option)
-
-    driver = webdriver.Firefox(service=service, options=firefox_options)
-    
-    
-    return driver
-
-
-def activate_web_driver_chromium():
-
-    #virtual display from https://github.com/MarketingPipeline/Python-Selenium-Action/blob/main/Selenium-Template.py
-    #from pyvirtualdisplay import Display
-    #display = Display(visible=0, size=(1920, 1200))  
-    #display.start()
-    
-    service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
-    
-    # copied from https://github.com/jsoma/selenium-github-actions
-
-    chrome_options = Options() 
-    options = [
-        "--headless",
         "--no-sandbox",
         "--disable-dev-shm-usage",
         "--disable-gpu",
-        "--window-size=1920,1200",
         "--ignore-certificate-errors",
         "--disable-extensions",
-        "--start-maximized",
         "--disable-popup-blocking",
         "--disable-notifications",
         "--remote-debugging-port=9222", #https://stackoverflow.com/questions/56637973/how-to-fix-selenium-devtoolsactiveport-file-doesnt-exist-exception-in-python
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
         "--disable-blink-features=AutomationControlled",
         ]
-
     
-    for option in options:
-        chrome_options.add_argument(option)
+    if browser == "firefox":
+        service = FirefoxService(executable_path=GeckoDriverManager().install())
+        
+        firefox_options = webdriver.FirefoxOptions()
+        for option in options:
+            firefox_options.add_argument(option)
+        
+        driver = webdriver.Firefox(service=service, options=firefox_options)
+    
+    else:
+        service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())  
+        
+        chrome_options = Options() 
+        for option in options:
+            chrome_options.add_argument(option)
 
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-   
+        driver = webdriver.Chrome(service=service, options=chrome_options)    
     
     return driver
-
 
 
 
@@ -119,7 +100,7 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
 
     df = convert_columns(df)
 
-    print(df.info())
+   
     df = combine_home_visitor(df)
 
     return df
@@ -301,7 +282,7 @@ def combine_home_visitor(df):
     season = str(20) + season
     df['SEASON'] = season
     
-    print(df)
+    #print(df)
     
     #convert all object columns to int64
     for field in df.select_dtypes(include=['object']).columns.tolist():
@@ -330,19 +311,26 @@ def get_todays_matchups(api_key: str, driver: webdriver) -> list:
 
     # Get the block of all of todays games
     # Sometimes, the results of yesterday's games are listed first, then todays games are listed
-    # Other times, yesterday's games are not listed
-    # We will check the date for the first div, if it is yesterday's date, then we will use the second div
+    # Other times, yesterday's games are not listed, or when the playoffs approach, future games are listed
+    # We will check the date for the first div, if it is not todays date, then we will look for the next div
     CLASS_GAMES_PER_DAY = "ScheduleDay_sdGames__NGdO5" # the div containing all games for a day
     CLASS_DAY = "ScheduleDay_sdDay__3s2Xt" # the heading with the date for the games (e.g. "Wednesday, February 1")
-    yesterdays_games = source.find('div', {'class':CLASS_GAMES_PER_DAY}) # first div may or may not be yesterday's games
-    game_day = source.find('h4', {'class':CLASS_DAY})
-    game_day = game_day.text[:3] # just first 3 letters to avoid issues with leading 0 in day of month
-    today = datetime.today().strftime('%A, %B %d')[:3]
+    div_games = source.find('div', {'class':CLASS_GAMES_PER_DAY}) # first div may or may not be yesterday's games or even future games when playoffs approach
+    div_game_day = source.find('h4', {'class':CLASS_DAY})
+    today = datetime.today().strftime('%A, %B %d')[:3] # e.g. "Wednesday, February 1" -> "Wed" for convenience with leading zeros
 
-    if game_day == today:  
-         todays_games = yesterdays_games
-    else:
-        todays_games = yesterdays_games.find_next('div', {'class':CLASS_GAMES_PER_DAY}) # second div is todays games
+    while div_games:
+        print(div_game_day.text[:3]) 
+        if today == div_game_day.text[:3]:  
+            todays_games = div_games
+            break
+        else:
+            # move to next div
+            div_games = div_games.find_next('div', {'class':CLASS_GAMES_PER_DAY}) 
+            div_game_day = div_game_day.find_next('h4', {'class':CLASS_DAY})
+
+
+           
     
     # Get the teams playing
     # Each team listed in todays block will have a href with the specified anchor class
