@@ -124,7 +124,13 @@ ds_query = rolling_stats_fg.filter(rolling_stats_fg.pts_home == 0)
 df_todays_matches = ds_query.read()
 
 if df_todays_matches.shape[0] == 0:
+    progress_bar.progress(100)
+    st.write()
     fancy_header('\n 🤷‍♂️ No games scheduled for today! 🤷‍♂️')
+    st.write()
+    st.write("Try again tomorrow!")
+    st.write()
+    st.write("NBA season and postseason usually runs from October to June.")
     st.stop()
 
 st.write("Successfully retrieved!✔️")
