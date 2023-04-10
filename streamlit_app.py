@@ -124,7 +124,7 @@ ds_query = rolling_stats_fg.filter(rolling_stats_fg.pts_home == 0)
 df_todays_matches = ds_query.read()
 
 if df_todays_matches.shape[0] == 0:
-    st.write("No games scheduled for today!🤷‍♂️")
+    fancy_header('\n 🤷‍♂️ No games scheduled for today! 🤷‍♂️')
     st.stop()
 
 st.write("Successfully retrieved!✔️")

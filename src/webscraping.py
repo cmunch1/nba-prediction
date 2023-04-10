@@ -317,8 +317,9 @@ def get_todays_matchups(api_key: str, driver: webdriver) -> list:
     CLASS_DAY = "ScheduleDay_sdDay__3s2Xt" # the heading with the date for the games (e.g. "Wednesday, February 1")
     div_games = source.find('div', {'class':CLASS_GAMES_PER_DAY}) # first div may or may not be yesterday's games or even future games when playoffs approach
     div_game_day = source.find('h4', {'class':CLASS_DAY})
-    today = datetime.today().strftime('%A, %B %d')[:3] # e.g. "Wednesday, February 1" -> "Wed" for convenience with leading zeros
-
+    today = datetime.today().strftime('%A, %B %d')[:3] # e.g. "Wednesday, February 1" -> "Wed" for convenience with dealing with leading zeros
+    todays_games = None
+    
     while div_games:
         print(div_game_day.text[:3]) 
         if today == div_game_day.text[:3]:  
@@ -329,9 +330,10 @@ def get_todays_matchups(api_key: str, driver: webdriver) -> list:
             div_games = div_games.find_next('div', {'class':CLASS_GAMES_PER_DAY}) 
             div_game_day = div_game_day.find_next('h4', {'class':CLASS_DAY})
 
+    if todays_games is None:
+        # no games today
+        return None, None
 
-           
-    
     # Get the teams playing
     # Each team listed in todays block will have a href with the specified anchor class
     # e.g. <a href="/team/1610612743/nuggets/" class="Anchor_anchor__cSc3P Link_styled__okbXW" ...
