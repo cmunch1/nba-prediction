@@ -133,7 +133,7 @@ def remove_playoff_games(df: pd.DataFrame)-> pd.DataFrame:
     
     # Filter to only non-playoff games and then drop the PLAYOFF feature
     
-    df = df[df["PLAYOFF"] == 0] 
+    #df = df[df["PLAYOFF"] == 0] # keep playoff games for now so that the model can be demonstrated during the playoffs
     df = df.drop("PLAYOFF", axis = 1) 
     
     return df
