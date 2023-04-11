@@ -150,7 +150,11 @@ df_todays_matches = convert_feature_names(df_todays_matches)
 df_todays_matches['MATCHUP'] = df_todays_matches['VISITOR_TEAM_ID'].map(nba_team_names) + " @ " + df_todays_matches['HOME_TEAM_ID'].map(nba_team_names)
 
 # fix date and other types
-df_todays_matches = fix_datatypes(df_todays_matches)
+long_integer_fields = ['GAME_ID', 'HOME_TEAM_ID', 'VISITOR_TEAM_ID', 'SEASON']
+short_integer_fields = ['PTS_home', 'AST_home', 'REB_home', 'PTS_away', 'AST_away', 'REB_away']
+date_fields = ['GAME_DATE_EST']
+
+df_todays_matches = fix_datatypes(df_todays_matches ,date_fields, short_integer_fields, long_integer_fields)
 
 # remove features not used by model
 drop_columns = ['TARGET', 'GAME_DATE_EST', 'GAME_ID', ] 
