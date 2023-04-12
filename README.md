@@ -1,6 +1,6 @@
 <div align="center">
     <h1>NBA Game Predictor Project</h1>
-    <i>Click <a href="https://cmunch1-nba-prediction-streamlit-app-3o02zc.streamlit.app/">HERE </a>to see it in action</i>
+    <i>Click <a href="https://cmunch1-nba-prediction-streamlit-app-3o02zc.streamlit.app">HERE</a> to see it in action</i>
 </div>
 <br />
 <div align="center">
