@@ -33,5 +33,5 @@ jobs:
           SCRAPINGANT_API_KEY: ${{ secrets.SCRAPINGANT_API_KEY }}
           
         run: 
-          jupyter nbconvert --to notebook --execute 09_production_features_pipeline.ipynb
+          jupyter nbconvert --to notebook --execute notebooks/09_production_features_pipeline.ipynb
 
