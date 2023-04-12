@@ -121,7 +121,7 @@ def plot_calibration_curve(clf_list: list, X_train: pd.dataframe, y_train: pd.da
 
 def calculate_classification_metrics(clf_list: list, X_train: pd.dataframe, y_train: pd.dataframe, X_test: pd.dataframe, y_test: pd.dataframe) -> tuple[pd.dataframe, list]:
     """
-    Calculates classification metrics for a list of classifiers. Brier score, log loss, precision, recall, f1, and roc_auc are calculated.
+    Calculates classification metrics for a list of classifiers and returns the fitted models as well. Brier score, log loss, precision, recall, f1, and roc_auc are calculated.
 
     Args:
         clf_list (list): the classifiers to calculate metrics for

@@ -1,0 +1,1 @@
+{"num_round": 868, "learning_rate": 0.018405745552075914, "max_bin": 558, "max_depth": 2, "alpha": 8.281713514214621, "gamma": 11.304706114754095, "reg_lambda": 11.806523119478767, "colsample_bytree": 0.4339252336236323, "subsample": 0.5326856953922422, "min_child_weight": 6.179632416051588, "scale_pos_weight": 1}

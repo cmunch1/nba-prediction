@@ -7,11 +7,16 @@
         "importances",
         "isin",
         "matchups",
+        "matplotlib",
         "nbformat",
         "Optuna",
+        "pyplot",
         "pytz",
         "SCRAPINGANT",
         "Shapley",
+        "sklearn's",
+        "STARTDATE",
+        "sweetviz",
         "webscraping",
         "xgboost"
     ]
