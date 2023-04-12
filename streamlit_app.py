@@ -93,6 +93,10 @@ nba_team_names = {
 
 # Streamlit app
 st.title('NBA Prediction Project')
+st.write(36 * "-")
+st.write("This app uses a machine learning model to predict the winner of NBA games.")
+st.write("The model is trained on historical data.")
+st.write("Note: NBA season and postseason usually runs from October to June.")
 
 progress_bar = st.sidebar.header('⚙️ Working Progress')
 progress_bar = st.sidebar.progress(0)
@@ -133,9 +137,9 @@ if df_todays_matches.shape[0] == 0:
     st.write("NBA season and postseason usually runs from October to June.")
     st.stop()
 
-st.write("Successfully retrieved!✔️")
+today = datetime.today().strftime('%Y-%m-%d')
+st.write("Successfully retrieved games for " + today + "!✔️")
 progress_bar.progress(40)
-print(df_todays_matches.head(5))
 
 
 # Prepare data for prediction
