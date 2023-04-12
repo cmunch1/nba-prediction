@@ -96,14 +96,36 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
     DATEFROM = LASTWEEK.strftime("%m/%d/%y")
 
 
-    df = scrape_to_dataframe(api_key=SCRAPINGANT_API_KEY, driver=driver, Season=SEASON, DateFrom=DATEFROM, DateTo=DATETO, )
-
-    df = convert_columns(df)
-
+    # NBA boxscores page is filtered by season type 
+    # so to limit the number of scrape attempts, only try to scrape for games in the current season type
+    # April is typically the transition month, so we need to scrape for regular season, play-in, and playoffs
+    # May and June are typically playoffs only
    
-    df = combine_home_visitor(df)
+    CURRENT_MONTH = TODAY.strftime("%m")
+    print(f"Current month is {CURRENT_MONTH}")
+    if int(CURRENT_MONTH) > 6 and int(CURRENT_MONTH) < 10:
+        # off-season, no games being played
+        return pd.DataFrame()
+    elif int(CURRENT_MONTH) < 4 or int(CURRENT_MONTH) > 9:
+        season_types = ["Regular+Season"]
+    elif int(CURRENT_MONTH) == 4:
+        season_types = ["Regular+Season", "PlayIn", "Playoffs"]
+    elif int(CURRENT_MONTH) > 4:
+        season_types = ["Playoffs"]
 
-    return df
+    all_season_types = pd.DataFrame()
+
+    for season_type in season_types:
+        
+        df = scrape_to_dataframe(api_key=SCRAPINGANT_API_KEY, driver=driver, Season=SEASON, DateFrom=DATEFROM, DateTo=DATETO, season_type=season_type)
+
+        if not(df.empty):
+            df = convert_columns(df)
+            df = combine_home_visitor(df)
+            all_season_types = all_season_types.append(df)
+            
+
+    return all_season_types
 
 
 
@@ -132,7 +154,7 @@ def parse_ids(data_table):
 
 
 
-def scrape_to_dataframe(api_key, driver, Season, DateFrom="NONE", DateTo="NONE", stat_type='standard'):
+def scrape_to_dataframe(api_key, driver, Season, DateFrom="NONE", DateTo="NONE", stat_type='standard', season_type: str = "Regular+Season"):
     
     # go to boxscores webpage at nba.com
     # check if the data table is split over multiple pages 
@@ -143,18 +165,22 @@ def scrape_to_dataframe(api_key, driver, Season, DateFrom="NONE", DateTo="NONE",
     
     # if season not provided, then will default to current season
     # if DateFrom and DateTo not provided, then don't include in url - pull the whole season
+
+    
     if stat_type == 'standard':
-        nba_url = "https://www.nba.com/stats/teams/boxscores"
+        nba_url = "https://www.nba.com/stats/teams/boxscores?SeasonType=" + season_type
     else:
-        nba_url = "https://www.nba.com/stats/teams/boxscores-"+ stat_type 
+        nba_url = "https://www.nba.com/stats/teams/boxscores-"+ stat_type + "?SeasonType=" + season_type
         
     if not Season:
-        nba_url = nba_url + "?DateFrom=" + DateFrom + "&DateTo=" + DateTo
+        nba_url = nba_url + "&DateFrom=" + DateFrom + "&DateTo=" + DateTo
     else:
         if DateFrom == "NONE" and DateTo == "NONE":
-            nba_url = nba_url + "?Season=" + Season
+            nba_url = nba_url + "&Season=" + Season
         else:
-            nba_url = nba_url + "?Season=" + Season + "&DateFrom=" + DateFrom + "&DateTo=" + DateTo
+            nba_url = nba_url + "&Season=" + Season + "&DateFrom=" + DateFrom + "&DateTo=" + DateTo
+
+    print(f"Scraping {nba_url}")
 
     #try 3 times to load page correctly; scrapingant can fail sometimes on it first try
     for i in range(3): 
@@ -175,7 +201,11 @@ def scrape_to_dataframe(api_key, driver, Season, DateFrom="NONE", DateTo="NONE",
             time.sleep(10)
         else:
             break
-        
+
+    if data_table is None:
+        # if data table still not found, then there is no data for the date range
+        # this may happen at the end of the season when there are no more games
+        return pd.DataFrame()     
 
     #check for more than one page
     CLASS_ID_PAGINATION = "Pagination_pageDropdown__KgjBU" #determined by visual inspection of page source code
