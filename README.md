@@ -33,7 +33,7 @@ Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.c
  - The model probability will be calibrated against the true probability distribution using sklearn's CalibratedClassifierCV. 
  - The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values.
  - Pipelines will be setup to scrape new data from NBA website every day and retrain the model when desired.
- - The model will be deployed online using a [streamlit app](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/) to predict and report winning probabilities every day. 
+ - The model will be deployed online using a [streamlit app](https://cmunch1-nba-prediction-streamlit-app-3o02zc.streamlit.app/) to predict and report winning probabilities every day. 
 
 <img src="./images/streamlit_example.jpg" width="800"/>
 
@@ -216,7 +216,7 @@ Notebook 10 retrieves the most current data, executes Notebook 07 to handle hype
 
 ### Streamlit App
 
-The streamlit app is deployed at streamlit.io and can be accessed here: [https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/](https://cmunch1-nba-prediction-streamlit-app-fs5l47.streamlit.app/)
+The streamlit app is deployed at streamlit.io and can be accessed here: [https://cmunch1-nba-prediction-streamlit-app-3o02zc.streamlit.app](https://cmunch1-nba-prediction-streamlit-app-3o02zc.streamlit.app)
 
 It uses the model in the Model Registry to predict the win probability of the home team for the current day's upcoming games.
 
