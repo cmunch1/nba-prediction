@@ -3,6 +3,12 @@ import json
 import hopsworks
 
 from datetime import datetime, timedelta
+from pathlib import Path  #for Windows/Linux compatibility
+
+
+
+CONFIGS_PATH = Path.cwd() / "configs"
+FEATURE_NAMES_FILE = CONFIGS_PATH / "feature_names.json" # dictionary of {lower case feature names : original mixed-case feature names}
 
 def save_feature_names(df: pd.DataFrame) -> str:
     """
@@ -25,7 +31,7 @@ def save_feature_names(df: pd.DataFrame) -> str:
     # create a dictionary
     feature_mapper = {hopsworks_f_names[i]: original_f_names[i] for i in range(len(hopsworks_f_names))}
 
-    with open("feature_names.json", "w") as fp:
+    with open(FEATURE_NAMES_FILE, "w") as fp:
         json.dump(feature_mapper, fp)
         
     return "File Saved."
@@ -45,8 +51,9 @@ def convert_feature_names(df: pd.DataFrame) -> pd.DataFrame:
     # hopsworks converts all feature names to lower-case, while the original feature names use mixed-case
     # converting these back to original format is needed for optimal code re-useability.
 
+
     # read in list of original feature names
-    with open('feature_names.json', 'rb') as fp:
+    with open(FEATURE_NAMES_FILE, 'rb') as fp:
         feature_mapper = json.load(fp)
         
     df = df.rename(columns=feature_mapper)

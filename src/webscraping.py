@@ -109,7 +109,7 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
     elif int(CURRENT_MONTH) < 4 or int(CURRENT_MONTH) > 9:
         season_types = ["Regular+Season"]
     elif int(CURRENT_MONTH) == 4:
-        season_types = ["Regular+Season", "PlayIn", "Playoffs"]
+        season_types = ["PlayIn", "Playoffs"]
     elif int(CURRENT_MONTH) > 4:
         season_types = ["Playoffs"]
 
@@ -182,8 +182,8 @@ def scrape_to_dataframe(api_key, driver, Season, DateFrom="NONE", DateTo="NONE",
 
     print(f"Scraping {nba_url}")
 
-    #try 3 times to load page correctly; scrapingant can fail sometimes on it first try
-    for i in range(3): 
+    #try 2 times to load page correctly; scrapingant can fail sometimes on it first try
+    for i in range(1, 2): 
         if api_key == "": #if no api key, then use selenium
             driver.get(nba_url)
             time.sleep(10)

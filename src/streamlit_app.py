@@ -10,11 +10,18 @@ import time
 from datetime import timedelta, datetime
 import xgboost as xgb
 
-from src.hopsworks_utils import (
+from pathlib import Path
+
+
+print(f"Current directory: {Path.cwd()}")
+print(f"Home directory: {Path.home()}")
+print(f"Parent directory: {Path.cwd().parent}")
+
+from hopsworks_utils import (
     convert_feature_names,
 )
 
-from src.feature_engineering import (
+from feature_engineering import (
     fix_datatypes,
     remove_non_rolling,
 )
@@ -49,7 +56,8 @@ def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     # download model from Hopsworks
     #model_dir = model.download()
     #print(model_dir)
-    with open("model.pkl", 'rb') as f:
+    model_dir  = Path.cwd() / "models"
+    with open(model_dir / "model.pkl", 'rb') as f:
         loaded_model = joblib.load(f)
 
 

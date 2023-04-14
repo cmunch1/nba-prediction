@@ -401,7 +401,7 @@ def process_x_minus_league_avg(df: pd.DataFrame, feature_list: list, team_featur
     # whether that team played or not. 
     # We will front-fill from previous days to ensure that every day has stats for every team
     
-    df.to_csv("df.csv",index=False)
+ 
     
     # create feature list for temp dataframe to hold league averages
     temp_feature_list = feature_list.copy()
@@ -409,10 +409,8 @@ def process_x_minus_league_avg(df: pd.DataFrame, feature_list: list, team_featur
     temp_feature_list.append("GAME_DATE_EST")
 
     df_temp = df[temp_feature_list]
-    print(temp_feature_list)
-    df_temp.to_csv("df_temp.csv",index=False)
-    
 
+    
     # populate the dataframe with all days played and forward fill previous value if a particular team did not play that day
     # https://stackoverflow.com/questions/70362869
     df_temp = (df_temp.set_index('GAME_DATE_EST',)
