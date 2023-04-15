@@ -34,7 +34,7 @@ Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.c
 
 ## Introduction ##
 
-This project is a demonstration of my ability to quickly learn, develop, and deploy end-to-end machine learning technologies. I am currently seeking to change careers into Machine Learning / Data Science.
+This project is a demonstration of my ability to quickly learn, develop, and deploy end-to-end machine learning technologies. I am currently seeking to change careers into Machine Learning / Data Science. (This is still kind of a work in progress - I wanted to get the end-to-end process setup, and then go back and iterate improvements.)
 
 I chose to predict the winner of NBA games because:
  - multiple games are played every day during the season so I can see how my model performs on a daily basis
