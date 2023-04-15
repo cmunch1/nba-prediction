@@ -1,6 +1,6 @@
 <div align="center">
     <h1>NBA Game Predictor Project</h1>
-    <i>Click <a href="https://cmunch1-nba-prediction-streamlit-app-3o02zc.streamlit.app">HERE</a> to see it in action</i>
+    <i>Click <a href="https://cmunch1-nba-prediction.streamlit.app/">HERE</a> to see it in action</i>
 </div>
 <br />
 <div align="center">
@@ -34,7 +34,7 @@ Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.c
 
 ## Introduction ##
 
-This project is a demonstration of my ability to quickly learn, develop, and deploy end-to-end machine learning technologies. I am currently seeking to change careers into Machine Learning / Data Science. (This is still kind of a work in progress - I wanted to get the end-to-end process setup, and then go back and iterate improvements.)
+This project is a demonstration of my ability to quickly learn, develop, and deploy end-to-end machine learning technologies. I am currently seeking to change careers into Machine Learning / Data Science. (This is still kind of a work in progress - I wanted to get the end-to-end process setup, and then go back and iterate improvements, which I am constantly doing now.)
 
 I chose to predict the winner of NBA games because:
  - multiple games are played every day during the season so I can see how my model performs on a daily basis
@@ -60,7 +60,7 @@ In reality, a betting strategy is a rather complex problem with many elements be
  - The model probability will be calibrated against the true probability distribution using sklearn's CalibratedClassifierCV. 
  - The probability of winning will be important in developing betting strategies because such strategies will not bet on every game, just on games with better expected values.
  - Pipelines will be setup to scrape new data from NBA website every day and retrain the model when desired.
- - The model will be deployed online using a [streamlit app](https://cmunch1-nba-prediction-streamlit-app-3o02zc.streamlit.app/) to predict and report winning probabilities every day. 
+ - The model will be deployed online using a [streamlit app](https://cmunch1-nba-prediction.streamlit.app/p/) to predict and report winning probabilities every day. 
 
 <img src="./images/streamlit_example.jpg" width="800"/>
 
@@ -243,7 +243,7 @@ Notebook 10 retrieves the most current data, executes Notebook 07 to handle hype
 
 ### Streamlit App
 
-The streamlit app is deployed at streamlit.io and can be accessed here: [https://cmunch1-nba-prediction-streamlit-app-3o02zc.streamlit.app](https://cmunch1-nba-prediction-streamlit-app-3o02zc.streamlit.app)
+The streamlit app is deployed at streamlit.io and can be accessed here: [https://cmunch1-nba-prediction.streamlit.app/](https://cmunch1-nba-prediction.streamlit.app/)
 
 It uses the model in the Model Registry to predict the win probability of the home team for the current day's upcoming games.
 
