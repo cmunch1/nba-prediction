@@ -20,18 +20,18 @@ from sklearn.metrics import (
 )
 
 
-def encode_categoricals(df: pd.dataframe, category_columns: list, MODEL_NAME: str, ENABLE_CATEGORICAL: bool) -> pd.dataframe:
+def encode_categoricals(df: pd.DataFrame, category_columns: list, MODEL_NAME: str, ENABLE_CATEGORICAL: bool) -> pd.DataFrame:
     """
     Encode categorical features as integers for use in XGBoost and LightGBM
 
     Args:
-        df (pd.DataFrame): the dataframe to process
+        df (pd.DataFrame): the DataFrame to process
         category_columns (list): list of columns to encode as categorical
         MODEL_NAME (str): the name of the model being used
         ENABLE_CATEGORICAL (bool): whether or not to enable categorical features in the model
     
     Returns:
-        the dataframe with categorical features encoded
+        the DataFrame with categorical features encoded
     
 
     """
@@ -57,16 +57,16 @@ def encode_categoricals(df: pd.dataframe, category_columns: list, MODEL_NAME: st
     return df
 
 
-def plot_calibration_curve(clf_list: list, X_train: pd.dataframe, y_train: pd.dataframe, X_test: pd.dataframe, y_test: pd.dataframe, n_bins: int = 10) -> None:
+def plot_calibration_curve(clf_list: list, X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame, n_bins: int = 10) -> None:
     """
     Plots calibration curves for a list of classifiers vs ideal probability distribution
 
     Args:
         clf_list (list): the classifiers to plot
-        X_train (pd.dataframe): training data
-        y_train (pd.dataframe): labels for training data
-        X_test (pd.dataframe): test data
-        y_test (pd.dataframe): labels for test data
+        X_train (pd.DataFrame): training data
+        y_train (pd.DataFrame): labels for training data
+        X_test (pd.DataFrame): test data
+        y_test (pd.DataFrame): labels for test data
         n_bins (int, optional): how many bins to use for calibration. Defaults to 10.
 
     Returns:
@@ -119,19 +119,19 @@ def plot_calibration_curve(clf_list: list, X_train: pd.dataframe, y_train: pd.da
     return
 
 
-def calculate_classification_metrics(clf_list: list, X_train: pd.dataframe, y_train: pd.dataframe, X_test: pd.dataframe, y_test: pd.dataframe) -> tuple[pd.dataframe, list]:
+def calculate_classification_metrics(clf_list: list, X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame) -> tuple[pd.DataFrame, list]:
     """
     Calculates classification metrics for a list of classifiers and returns the fitted models as well. Brier score, log loss, precision, recall, f1, and roc_auc are calculated.
 
     Args:
         clf_list (list): the classifiers to calculate metrics for
-        X_train (pd.dataframe): training data
-        y_train (pd.dataframe): labels for training data
-        X_test (pd.dataframe): test data
-        y_test (pd.dataframe): labels for test data
+        X_train (pd.DataFrame): training data
+        y_train (pd.DataFrame): labels for training data
+        X_test (pd.DataFrame): test data
+        y_test (pd.DataFrame): labels for test data
 
     Returns:
-       tuple: (dataframe) of the metrics and (list) containing the fitted models and names of the models as strings
+       tuple: (DataFrame) of the metrics and (list) containing the fitted models and names of the models as strings
 
     FROM: https://scikit-learn.org/stable/auto_examples/calibration/plot_calibration_curve.html
     """
