@@ -247,8 +247,8 @@ df_current_season['HOME_TEAM_WIN_PROBABILITY'] = preds
 df_current_season = df_current_season.rename(columns={'TARGET': 'HOME_WINS'})
 
 # add column to show if prediction was correct
-#df_current_season['CORRECT_PREDICTION'] = ((df_current_season['HOME_TEAM_WIN_PROBABILITY'] > 0.5) and (df_current_season['HOME_WINS'] == 1)) or ((df_current_season['HOME_TEAM_WIN_PROBABILITY'] < 0.5) and (df_current_season['HOME_WINS'] == 0))
-df_current_season['CORRECT_PREDICTION'] = int(df_current_season['HOME_TEAM_WIN_PROBABILITY']) == df_current_season['HOME_WINS'] 
+df_current_season['HOME_TEAM_WIN_PROBABILITY_INT'] = df_current_season['HOME_TEAM_WIN_PROBABILITY'].round().astype(int)
+df_current_season['CORRECT_PREDICTION'] = df_current_season['HOME_TEAM_WIN_PROBABILITY_INT'] == df_current_season['HOME_WINS'] 
 
 st.dataframe(df_current_season[['GAME_DATE_EST','MATCHUP', 'HOME_TEAM_WIN_PROBABILITY', 'HOME_WINS', 'CORRECT_PREDICTION']])
 
