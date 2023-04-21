@@ -257,6 +257,8 @@ df_current_season = df_current_season.sort_values(by=['GAME_DATE_EST'], ascendin
 # format date
 df_current_season["GAME_DATE_EST"] = df_current_season["GAME_DATE_EST"].dt.strftime('%Y-%m-%d')
 
+# dont show index
+df_current_season = df_current_season.reset_index(drop=True)
 st.dataframe(df_current_season[['GAME_DATE_EST','MATCHUP', 'HOME_TEAM_WIN_PROBABILITY', 'HOME_WINS', 'CORRECT_PREDICTION']])
 
 # Show accuracy
