@@ -266,7 +266,7 @@ df_current_season = df_current_season.reset_index(drop=True)
 st.dataframe(df_current_season[['GAME_DATE','MATCHUP', 'HOME_WIN_PROB', 'HOME_WINS', 'CORRECT']])
 
 # Show accuracy
-st.write("Accuracy: " + str(df_current_season['CORRECT_PREDICTION'].sum() / df_current_season.shape[0]))
+st.write("Accuracy: " + str(df_current_season['CORRECT'].sum() / df_current_season.shape[0]))
 
 
 progress_bar.progress(100)
