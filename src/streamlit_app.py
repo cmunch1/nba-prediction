@@ -229,6 +229,9 @@ preds = model.predict_proba(X)[:,1]
 
 df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
 
+# drop index row from display
+
+df_todays_matches = df_todays_matches.reset_index(drop=True)
 st.dataframe(df_todays_matches[['MATCHUP', 'HOME_TEAM_WIN_PROBABILITY']])
 
 progress_bar.progress(85)
@@ -257,7 +260,7 @@ df_current_season = df_current_season.sort_values(by=['GAME_DATE_EST'], ascendin
 # format date
 df_current_season["GAME_DATE_EST"] = df_current_season["GAME_DATE_EST"].dt.strftime('%Y-%m-%d')
 
-# dont show index
+
 df_current_season = df_current_season.reset_index(drop=True)
 st.dataframe(df_current_season[['GAME_DATE_EST','MATCHUP', 'HOME_TEAM_WIN_PROBABILITY', 'HOME_WINS', 'CORRECT_PREDICTION']])
 
