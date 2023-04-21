@@ -199,7 +199,7 @@ X = df_todays_matches[use_columns]
 # MATCHUP is just for informational display, not used by model
 X = X.drop('MATCHUP', axis=1) 
 
-
+df_todays_matches = df_todays_matches.reset_index(drop=True)
 st.write(df_todays_matches['MATCHUP'])
 
 st.write("Successfully processed!✔️")
@@ -229,7 +229,7 @@ preds = model.predict_proba(X)[:,1]
 
 df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
 
-# drop index row from display
+
 
 df_todays_matches = df_todays_matches.reset_index(drop=True)
 st.dataframe(df_todays_matches[['MATCHUP', 'HOME_TEAM_WIN_PROBABILITY']])
@@ -260,9 +260,10 @@ df_current_season = df_current_season.sort_values(by=['GAME_DATE_EST'], ascendin
 # format date
 df_current_season["GAME_DATE_EST"] = df_current_season["GAME_DATE_EST"].dt.strftime('%Y-%m-%d')
 
-
+# clean up display
+df_current_season = df_current_season.rename(columns={'GAME_DATE_EST': 'GAME_DATE', 'HOME_TEAM_WIN_PROBABILITY': 'HOME_WIN_PROB', 'CORRECT_PREDICTION': 'CORRECT'})
 df_current_season = df_current_season.reset_index(drop=True)
-st.dataframe(df_current_season[['GAME_DATE_EST','MATCHUP', 'HOME_TEAM_WIN_PROBABILITY', 'HOME_WINS', 'CORRECT_PREDICTION']])
+st.dataframe(df_current_season[['GAME_DATE','MATCHUP', 'HOME_WIN_PROB', 'HOME_WINS', 'CORRECT']])
 
 # Show accuracy
 st.write("Accuracy: " + str(df_current_season['CORRECT_PREDICTION'].sum() / df_current_season.shape[0]))
