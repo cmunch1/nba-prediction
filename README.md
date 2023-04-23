@@ -30,7 +30,9 @@ Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.c
 - [Feature engineering](#feature-engineering)
 - [Model training/testing](#model-training-pipeline)
 - [Streamlit app](#streamlit-app)
+- [Model Performance](#model-performance)
 - [Feedback](#feedback)
+- [Acknowledgements](#acknowledgements)
 
 ## Introduction ##
 
@@ -255,6 +257,19 @@ It uses the model in the Model Registry to predict the win probability of the ho
 
 <img src="./images/streamlit2.png" width="500"/>
 
+### Model Performance 
+
+The current model was tested over the completed 2022-2023 regular season (not playoffs) and had an accuracy of 0.615.
+
+Baseline performance of "home team always wins" is 0.58 for this same time period.
+
+One of the [top public prediction models](https://nflpickwatch.com/profile/nba/157/) had an accuracy of 0.656 for this same time period.
+
+Overall, the performance for the regular season is not bad, but there is room for improvement.
+
+<img src="./images/regular_season_accuracy.png" width="800"/>
+
+
 ### Feedback
 
 Thanks for taking the time to read about my project. This is my primary "portfolio" project for my quest to change careers and find an entry level position in Machine Learning / Data Science. I appreciate any feedback.
@@ -264,3 +279,7 @@ Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.c
 My Linked-In profile: [https://www.linkedin.com/in/chris-munch/](https://www.linkedin.com/in/chris-munch/)
 
 Twitter: [https://twitter.com/curiovana](https://twitter.com/curiovana)
+
+### Acknowledgements
+
+Pau Labarto Bajo mentored me on this project, providing valuable feedback and insights. He provides online tutorials, training courses, and a blog at his website: [https://datamachines.xyz/](https://datamachines.xyz/)
