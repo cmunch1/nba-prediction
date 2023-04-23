@@ -75,6 +75,10 @@ In reality, a betting strategy is a rather complex problem with many elements be
    - Scrape new data from NBA website and add to Feature Store every day using Github Actions
    - Retrain model and tune hyperparameters
 
+*Production Pipeline*
+
+<img src="./images/production_pipeline.png" width="600"/>
+
  Tools Used:
 
  - VS Code w/ Copilot - IDE
@@ -90,6 +94,8 @@ In reality, a betting strategy is a rather complex problem with many elements be
  - Hopsworks.ai - Feature Store and Model Registry
  - Github Actions - running notebooks to scrape new data, predict winning probabilities, and retrain models
  - Streamlit - web app deployment
+
+
 
 ### Future Possibilities
 
