@@ -122,7 +122,7 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
         if not(df.empty):
             df = convert_columns(df)
             df = combine_home_visitor(df)
-            all_season_types = all_season_types.append(df)
+            all_season_types = pd.concat([all_season_types, df], axis=0)
             
 
     return all_season_types
