@@ -77,10 +77,16 @@ In reality, a betting strategy is a rather complex problem with many elements be
    - Scrape new data from NBA website and add to Feature Store every day using Github Actions
    - Retrain model and tune hyperparameters
 
+*Initial Data Setup*
+
+<img src="./images/initial_setup.png" width="600"/>
+
+
 *Production Pipeline*
 
 <img src="./images/production_pipeline.png" width="600"/>
 
+ 
  Tools Used:
 
  - VS Code w/ Copilot - IDE
@@ -187,7 +193,7 @@ ML Models
 
 ### Feature Engineering
 
- - Covert game date to month only
+ - Convert game date to month only
  - Compile rolling means for various time periods for each team as home team and as visitor team 
  - Compile current win streak for each team as home team and as visitor team
  - Compile head-to-head matchup data for each team pair 
