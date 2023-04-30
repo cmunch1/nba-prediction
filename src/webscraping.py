@@ -86,8 +86,20 @@ def activate_web_driver(browser: str) -> webdriver:
 
 
 def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
+    """
+    Retrieve new completed games from nba.com and convert to pandas DataFrame
 
+    Args:
+        SCRAPINGANT_API_KEY (str): api key for webscraping service, is empty str if using selenium
+        driver (webdriver): selenium webdriver, is None if using scrapingant
+
+    Returns:
+        Dataframe with scraped and processed data
+    """
+
+    # this is intended to be run daily to update the feature store with stats from the previous day's games
     # set search for previous days games; use 2 days to catch up in case of a failed run
+    # *(move DAYS to a config file later)
     DAYS = 2
     SEASON = "" #no season will cause website to default to current season, format is "2022-23"
     TODAY = datetime.now(timezone('EST')) #nba.com uses US Eastern Standard Time
@@ -96,10 +108,11 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
     DATEFROM = LASTWEEK.strftime("%m/%d/%y")
 
 
-    # NBA boxscores page is filtered by season type 
+    # NBA boxscores page is filtered by season type (regular season, play-in, and playoffs)
     # so to limit the number of scrape attempts, only try to scrape for games in the current season type
     # April is typically the transition month, so we need to scrape for regular season, play-in, and playoffs
     # May and June are typically playoffs only
+    # *(move the start dates of each season type to a config file later)
    
     CURRENT_MONTH = TODAY.strftime("%m")
     print(f"Current month is {CURRENT_MONTH}")
@@ -119,6 +132,7 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
         
         df = scrape_to_dataframe(api_key=SCRAPINGANT_API_KEY, driver=driver, Season=SEASON, DateFrom=DATEFROM, DateTo=DATETO, season_type=season_type)
 
+        # perform basic data processing to align with table schema
         if not(df.empty):
             df = convert_columns(df)
             df = combine_home_visitor(df)
@@ -129,7 +143,16 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
 
 
 
-def parse_ids(data_table):
+def parse_ids(data_table: soup) -> tuple[pd.Series, pd.Series]:
+    """
+    Parse the html table to extract the team and game ids
+
+    Args:
+        data_table (soup): html table from nba.com boxscores page
+
+    Returns:
+        pd.Series of game ids and team ids
+    """
     
     # TEAM_ID and GAME_ID are encoded in href= links
     # find all the hrefs, add them to a list
@@ -154,14 +177,29 @@ def parse_ids(data_table):
 
 
 
-def scrape_to_dataframe(api_key, driver, Season, DateFrom="NONE", DateTo="NONE", stat_type='standard', season_type: str = "Regular+Season"):
-    
+def scrape_to_dataframe(api_key: str, driver: webdriver, Season: str, DateFrom: str ="NONE", DateTo: str ="NONE", stat_type: str ='standard', season_type: str = "Regular+Season") -> pd.DataFrame:
+    """
+    Retrieves stats from nba.com and converts to a DataFrame
+
+    Args:
+        api_key (str): api key for webscraping service, is empty str if using selenium
+        driver (webdriver): selenium webdriver, is None if using scrapingant
+        Season (str): season to scrape, is empty str if using current season
+        DateFrom (str, optional): start date to scrape. Defaults to "NONE".
+        DateTo (str, optional): end date to scrape. Defaults to "NONE".
+        stat_type (str, optional): type of stats to scrape. Defaults to 'standard'.
+        season_type (str, optional): type of season to scrape. Defaults to "Regular+Season".
+
+    Returns:
+        pd.DataFrame: scraped DataFrame
+
+    """
     # go to boxscores webpage at nba.com
     # check if the data table is split over multiple pages 
     # if so, then select the "ALL" choice in pulldown menu to show all on one page
     # extract out the html table and convert to dataframe
     # parse out GAME_ID and TEAM_ID from href links
-    # and add these to dataframe
+    # and add these to DataFrame
     
     # if season not provided, then will default to current season
     # if DateFrom and DateTo not provided, then don't include in url - pull the whole season
@@ -240,16 +278,26 @@ def scrape_to_dataframe(api_key, driver, Season, DateFrom="NONE", DateTo="NONE",
 
         
     return df
+
+
     
-def convert_columns(df):
-    
-    # convert the dataframe to same format and column names as main data
+def convert_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert columns names and formats to match main DataFrame schema
+
+    Args:
+        df (pd.DataFrame): the scraped dataframe "as is" from nba.com
+
+    Returns:
+        processed DataFrame
+    """
     
     # drop columns not used
+    # *(move list later to config file or constants)
     drop_columns = ['Team', 'MIN', 'FGM', 'FGA', '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'STL', 'BLK', 'TOV', 'PF', '+/-',]
     df = df.drop(columns=drop_columns)  
     
-    #rename columns to match existing dataframes
+    #rename columns to match existing DataFrames
     mapper = {
          'Match Up': 'HOME',
          'Game Date': 'GAME_DATE_EST', 
@@ -280,8 +328,19 @@ def convert_columns(df):
 
     return df
 
-def combine_home_visitor(df):
-    
+
+
+def combine_home_visitor(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Combine home and visitor team stats into a single row
+
+    Args:
+        df (pd.DataFrame): the scraped dataframe
+
+    Returns:
+        processed DataFrame
+    """
+        
     # each game currently has one row for home team stats
     # and one row for visitor team stats
     # these be will combined into a single row
@@ -312,19 +371,24 @@ def combine_home_visitor(df):
     season = str(20) + season
     df['SEASON'] = season
     
-    #print(df)
-    
-    #convert all object columns to int64
+    #convert all object columns to int64 to match hopsworks
     for field in df.select_dtypes(include=['object']).columns.tolist():
         df[field] = df[field].astype('int64')
 
     return df
 
-def get_todays_matchups(api_key: str, driver: webdriver) -> list:
 
-    '''
-    Goes to NBA Schedule and scrapes the teams playing today
-    '''
+def get_todays_matchups(api_key: str, driver: webdriver) -> tuple[list, list]:
+    """
+    Scrapes the the teams playing today from the nba.com schedule page
+
+    Args:
+        api_key (str): scrapingant api key
+        driver (webdriver): selenium driver
+        
+    Returns:
+        tuple[list, list]: list of team ids for each matchup, list of game ids for each matchup
+    """
     
     NBA_SCHEDULE = "https://www.nba.com/schedule"
 
@@ -393,10 +457,9 @@ def get_todays_matchups(api_key: str, driver: webdriver) -> list:
     # all using the same anchor class, so we will filter out those just for PREVIEW
     CLASS_ID = "Anchor_anchor__cSc3P TabLink_link__f_15h"
     links = todays_games.find_all('a', {'class':CLASS_ID})
-    #print(links)
     links = [i for i in links if "PREVIEW" in i]
     game_id_list = [i.get("href") for i in links]
-    #print(game_id_list)
+    
 
     games = []
     for game in game_id_list:
@@ -404,6 +467,6 @@ def get_todays_matchups(api_key: str, driver: webdriver) -> list:
         if len(game_id) > 0:               
             games.append(game_id)   
 
-    #asyncio.run(main())
+    
     
     return matchups, games
