@@ -12,7 +12,6 @@ import xgboost as xgb
 
 from pathlib import Path
 
-
 print(f"Current directory: {Path.cwd()}")
 print(f"Home directory: {Path.home()}")
 print(f"Parent directory: {Path.cwd().parent}")
@@ -39,34 +38,18 @@ except:
     raise Exception('Set environment variable HOPSWORKS_API_KEY')
 
 
+########################## Constants #########################3
 
-def fancy_header(text, font_size=24):
-    res = f'<span style="color:#ff5f27; font-size: {font_size}px;">{text}</span>'
-    st.markdown(res, unsafe_allow_html=True )
-
-def get_model(project, model_name, evaluation_metric, sort_metrics_by):
-    """Retrieve desired model from the Hopsworks Model Registry."""
-
-    mr = project.get_model_registry()
-    # get best model based on custom metrics
-    model = mr.get_best_model(model_name,
-                                evaluation_metric,
-                                sort_metrics_by)
-    
-    # download model from Hopsworks
-    #model_dir = model.download()
-    #print(model_dir)
-    model_dir  = Path.cwd() / "models"
-    with open(model_dir / "model.pkl", 'rb') as f:
-        loaded_model = joblib.load(f)
-
-
-    return loaded_model
+# set constants used for data processing
+# *(move to configs or constants file later)
+LONG_INTEGER_FIELDS = ['GAME_ID', 'HOME_TEAM_ID', 'VISITOR_TEAM_ID', 'SEASON']
+SHORT_INTEGER_FIELDS = ['PTS_home', 'AST_home', 'REB_home', 'PTS_away', 'AST_away', 'REB_away']
+DATE_FIELDS = ['GAME_DATE_EST']
+DROP_COLUMNS = ['TARGET', 'GAME_DATE_EST', 'GAME_ID', ]
 
 
 # dictionary to convert team ids to team names
-
-nba_team_names = {
+NBA_TEAMS_NAMES = {
     1610612737: "Atlanta Hawks",
     1610612738: "Boston Celtics",
     1610612739: "Cleveland Cavaliers",
@@ -99,7 +82,57 @@ nba_team_names = {
     1610612766: "Charlotte Hornets",
 }
 
-# Streamlit app
+
+######################## Helper functions ########################
+
+def fancy_header(text, font_size=24):
+    res = f'<span style="color:#ff5f27; font-size: {font_size}px;">{text}</span>'
+    st.markdown(res, unsafe_allow_html=True )
+
+def process_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Prepare data for prediction.
+
+    """
+    
+    # convert feature names back to mixed case
+    df = convert_feature_names(df)
+    
+    # fix date and other types
+    df = fix_datatypes(df, DATE_FIELDS, SHORT_INTEGER_FIELDS, LONG_INTEGER_FIELDS)
+
+    # Add a column that displays the matchup using the team names 
+    # this will make the display more meaningful
+    df['MATCHUP'] = df['VISITOR_TEAM_ID'].map(NBA_TEAMS_NAMES) + " @ " + df['HOME_TEAM_ID'].map(NBA_TEAMS_NAMES)
+        
+    # drop columns not used in model
+    df = df.drop(DROP_COLUMNS, axis=1)
+    
+    return df
+
+def get_model(project, model_name, evaluation_metric, sort_metrics_by):
+    """Retrieve desired model from the Hopsworks Model Registry."""
+
+    mr = project.get_model_registry()
+    # get best model based on custom metrics
+    model = mr.get_best_model(model_name,
+                                evaluation_metric,
+                                sort_metrics_by)
+    
+    # download model from Hopsworks
+    #model_dir = model.download()
+    #print(model_dir)
+    model_dir  = Path.cwd() / "models"
+    with open(model_dir / "model.pkl", 'rb') as f:
+        loaded_model = joblib.load(f)
+
+
+    return loaded_model
+
+
+
+############################### Streamlit app ##############################
+
 st.title('NBA Prediction Project')
 st.write(36 * "-")
 st.write("This app uses a machine learning model to predict the winner of NBA games.")
@@ -114,7 +147,8 @@ st.write(36 * "-")
 fancy_header('\n📡 Connecting to Hopsworks Feature Store...')
 
 
-# Connect to Hopsworks Feature Store and get Feature Group
+########### Connect to Hopsworks Feature Store and get Feature Group
+
 project = hopsworks.login(api_key_value=HOPSWORKS_API_KEY)
 fs = project.get_feature_store()
 
@@ -127,11 +161,10 @@ st.write("Successfully connected!✔️")
 progress_bar.progress(20)
 
 
+########### Get data from Feature Store
 
-# Get data from Feature Store
 st.write(36 * "-")
 fancy_header('\n☁️ Retrieving data from Feature Store...')
-
 
 # pull games just for this season to get current games waiting prediction and additional games so that we show past performance
 current_season = datetime.today().year
@@ -143,6 +176,7 @@ df_current_season = ds_query.read()
 
 # get games for today that have not been played yet
 df_todays_matches = df_current_season[df_current_season['pts_home'] == 0]
+df_todays_matches = pd.DataFrame()
 
 # select games that have been played
 df_current_season = df_current_season[df_current_season['pts_home'] != 0]
@@ -151,62 +185,39 @@ df_current_season = df_current_season[df_current_season['pts_home'] != 0]
 df_current_season = df_current_season.sort_values(by=['game_id'], ascending=False).head(25)
 
 
-# if no games are scheduled for today, stop the app
+# if no games are scheduled for today, write a message 
 if df_todays_matches.shape[0] == 0:
-    progress_bar.progress(100)
+    progress_bar.progress(40)
     st.write()
     fancy_header('\n 🤷‍♂️ No games scheduled for today! 🤷‍♂️')
     st.write()
-    st.write("Try again tomorrow!")
+    st.write("No games for today. Check out the last 25 games below")
     st.write()
     st.write("NBA season and postseason usually runs from October to June.")
-    st.stop()
+    no_games = True
+else:
+    no_games = False
+    today = datetime.today().strftime('%Y-%m-%d')
+    st.write("Successfully retrieved games for " + today + "!✔️")
+    progress_bar.progress(40)
+    
 
-today = datetime.today().strftime('%Y-%m-%d')
-st.write("Successfully retrieved games for " + today + "!✔️")
-progress_bar.progress(40)
+########### Prepare data for prediction
 
-
-# Prepare data for prediction
 st.write(36 * "-")
 fancy_header('\n☁️ Processing Data for prediction...')
 
-# convert feature names back to mixed case
-df_todays_matches = convert_feature_names(df_todays_matches)
-df_current_season = convert_feature_names(df_current_season)
+if no_games == False:
+    df_todays_matches = process_for_prediction(df_todays_matches)
+    df_todays_matches = df_todays_matches.reset_index(drop=True)
+    st.write(df_todays_matches['MATCHUP'])
+    st.write("Successfully processed data!✔️")
 
-# Add a column that displays the matchup using the team names 
-# this will make the display more meaningful
-df_todays_matches['MATCHUP'] = df_todays_matches['VISITOR_TEAM_ID'].map(nba_team_names) + " @ " + df_todays_matches['HOME_TEAM_ID'].map(nba_team_names)
-df_current_season['MATCHUP'] = df_current_season['VISITOR_TEAM_ID'].map(nba_team_names) + " @ " + df_current_season['HOME_TEAM_ID'].map(nba_team_names)
-
-# fix date and other types
-long_integer_fields = ['GAME_ID', 'HOME_TEAM_ID', 'VISITOR_TEAM_ID', 'SEASON']
-short_integer_fields = ['PTS_home', 'AST_home', 'REB_home', 'PTS_away', 'AST_away', 'REB_away']
-date_fields = ['GAME_DATE_EST']
-
-df_todays_matches = fix_datatypes(df_todays_matches ,date_fields, short_integer_fields, long_integer_fields)
-df_current_season = fix_datatypes(df_current_season ,date_fields, short_integer_fields, long_integer_fields)
-
-# remove features not used by model
-drop_columns = ['TARGET', 'GAME_DATE_EST', 'GAME_ID', ] 
-df_todays_matches = df_todays_matches.drop(drop_columns, axis=1)
-
-# remove stats from today's games - these are blank (the game hasn't been played) and are not used by the model
-use_columns = remove_non_rolling(df_todays_matches)
-X = df_todays_matches[use_columns]
-
-# MATCHUP is just for informational display, not used by model
-X = X.drop('MATCHUP', axis=1) 
-
-df_todays_matches = df_todays_matches.reset_index(drop=True)
-st.write(df_todays_matches['MATCHUP'])
-
-st.write("Successfully processed!✔️")
 progress_bar.progress(60)
 
 
-# Load model from Hopsworks Model Registry
+###########  Load model from Hopsworks Model Registry
+
 st.write(36 * "-")
 fancy_header(f"Loading Best Model...")
 
@@ -219,30 +230,44 @@ st.write("Successfully loaded!✔️")
 progress_bar.progress(70)
 
 
+########### Predict winning probabilities of home team
 
-# Predict winning probabilities of home team
-st.write(36 * "-")
-fancy_header(f"Predicting Winning Probabilities...")
+if no_games == False:
+    
+    st.write(36 * "-")
+    fancy_header(f"Predicting Winning Probabilities...")
 
+    # remove stats from today's games - these are blank (the game hasn't been played) and are not used by the model
+    use_columns = remove_non_rolling(df_todays_matches)
+    X = df_todays_matches[use_columns]
 
-preds = model.predict_proba(X)[:,1]
+    # MATCHUP is just for informational display, not used by model
+    X = X.drop('MATCHUP', axis=1) 
 
-df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
+    preds = model.predict_proba(X)[:,1]
 
+    df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
 
-
-df_todays_matches = df_todays_matches.reset_index(drop=True)
-st.dataframe(df_todays_matches[['MATCHUP', 'HOME_TEAM_WIN_PROBABILITY']])
+    df_todays_matches = df_todays_matches.reset_index(drop=True)
+    st.dataframe(df_todays_matches[['MATCHUP', 'HOME_TEAM_WIN_PROBABILITY']])
 
 progress_bar.progress(85)
 
-# Show past performance
-st.write(36 * "-")
-fancy_header(f"Winning Probabilities and Results from last 25 games...")
 
-X = df_current_season.drop(drop_columns, axis=1)
-X = X[use_columns]
-X = X.drop('MATCHUP', axis=1)
+########### Show past performance
+
+st.write(36 * "-")
+fancy_header(f"Preparing Winning Probabilities and Results from last 25 games...")
+
+df_current_season = process_for_prediction(df_current_season)
+
+# remove stats from today's games - these are blank (the game hasn't been played) and are not used by the model
+use_columns = remove_non_rolling(df_current_season)
+X = df_current_season[use_columns]
+
+# MATCHUP is just for informational display, not used by model
+X = X.drop('MATCHUP', axis=1) 
+
 preds = model.predict_proba(X)[:,1]
 
 df_current_season['HOME_TEAM_WIN_PROBABILITY'] = preds
