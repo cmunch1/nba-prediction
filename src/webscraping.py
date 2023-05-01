@@ -32,6 +32,13 @@ DATAPATH = Path(r'data')
 
 import time
 
+from src.constants import (
+    OFF_SEASON_START,
+    REGULAR_SEASON_START,
+    PLAYOFFS_START,
+    NBA_COM_DROP_COLUMNS,  #columns to drop from nba.com boxscore table, either not used or already renamed to match our schema
+    DAYS, #number of days back to scrape for games, usually set to >1 to catch up in case of a failed run
+)
 
 
 
@@ -99,8 +106,7 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
 
     # this is intended to be run daily to update the feature store with stats from the previous day's games
     # set search for previous days games; use 2 days to catch up in case of a failed run
-    # *(move DAYS to a config file later)
-    DAYS = 2
+        
     SEASON = "" #no season will cause website to default to current season, format is "2022-23"
     TODAY = datetime.now(timezone('EST')) #nba.com uses US Eastern Standard Time
     LASTWEEK = (TODAY - timedelta(days=DAYS))
@@ -112,18 +118,17 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
     # so to limit the number of scrape attempts, only try to scrape for games in the current season type
     # April is typically the transition month, so we need to scrape for regular season, play-in, and playoffs
     # May and June are typically playoffs only
-    # *(move the start dates of each season type to a config file later)
-   
+       
     CURRENT_MONTH = TODAY.strftime("%m")
     print(f"Current month is {CURRENT_MONTH}")
-    if int(CURRENT_MONTH) > 6 and int(CURRENT_MONTH) < 10:
+    if int(CURRENT_MONTH) >= OFF_SEASON_START and int(CURRENT_MONTH) < REGULAR_SEASON_START:
         # off-season, no games being played
         return pd.DataFrame()
-    elif int(CURRENT_MONTH) < 4 or int(CURRENT_MONTH) > 9:
+    elif int(CURRENT_MONTH) < PLAYOFFS_START or int(CURRENT_MONTH) >= REGULAR_SEASON_START:
         season_types = ["Regular+Season"]
-    elif int(CURRENT_MONTH) == 4:
-        season_types = ["PlayIn", "Playoffs"]
-    elif int(CURRENT_MONTH) > 4:
+    elif int(CURRENT_MONTH) == PLAYOFFS_START:
+        season_types = ["Regular+Season", "PlayIn", "Playoffs"]
+    elif int(CURRENT_MONTH) > PLAYOFFS_START:
         season_types = ["Playoffs"]
 
     all_season_types = pd.DataFrame()
@@ -294,7 +299,7 @@ def convert_columns(df: pd.DataFrame) -> pd.DataFrame:
     
     # drop columns not used
     # *(move list later to config file or constants)
-    drop_columns = ['Team', 'MIN', 'FGM', 'FGA', '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'STL', 'BLK', 'TOV', 'PF', '+/-',]
+    drop_columns = NBA_COM_DROP_COLUMNS
     df = df.drop(columns=drop_columns)  
     
     #rename columns to match existing DataFrames

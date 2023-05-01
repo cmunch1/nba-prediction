@@ -12,9 +12,6 @@ import xgboost as xgb
 
 from pathlib import Path
 
-print(f"Current directory: {Path.cwd()}")
-print(f"Home directory: {Path.home()}")
-print(f"Parent directory: {Path.cwd().parent}")
 
 from hopsworks_utils import (
     convert_feature_names,
@@ -24,6 +21,19 @@ from feature_engineering import (
     fix_datatypes,
     remove_non_rolling,
 )
+
+from constants import (
+    LONG_INTEGER_FIELDS,
+    SHORT_INTEGER_FIELDS,
+    DATE_FIELDS,
+    DROP_COLUMNS,
+    NBA_TEAMS_NAMES,
+)
+
+
+print(f"Current directory: {Path.cwd()}")
+print(f"Home directory: {Path.home()}")
+print(f"Parent directory: {Path.cwd().parent}")
 
 
 # Load hopsworks API key from .env file
@@ -36,51 +46,6 @@ try:
     HOPSWORKS_API_KEY = os.environ['HOPSWORKS_API_KEY']
 except:
     raise Exception('Set environment variable HOPSWORKS_API_KEY')
-
-
-########################## Constants #########################3
-
-# set constants used for data processing
-# *(move to configs or constants file later)
-LONG_INTEGER_FIELDS = ['GAME_ID', 'HOME_TEAM_ID', 'VISITOR_TEAM_ID', 'SEASON']
-SHORT_INTEGER_FIELDS = ['PTS_home', 'AST_home', 'REB_home', 'PTS_away', 'AST_away', 'REB_away']
-DATE_FIELDS = ['GAME_DATE_EST']
-DROP_COLUMNS = ['TARGET', 'GAME_DATE_EST', 'GAME_ID', ]
-
-
-# dictionary to convert team ids to team names
-NBA_TEAMS_NAMES = {
-    1610612737: "Atlanta Hawks",
-    1610612738: "Boston Celtics",
-    1610612739: "Cleveland Cavaliers",
-    1610612740: "New Orleans Pelicans",
-    1610612741: "Chicago Bulls",
-    1610612742: "Dallas Mavericks",
-    1610612743: "Denver Nuggets",
-    1610612744: "Golden State Warriors",
-    1610612745: "Houston Rockets",
-    1610612746: "LA Clippers",
-    1610612754: "Indiana Pacers",
-    1610612747: "Los Angeles Lakers",
-    1610612763: "Memphis Grizzlies",
-    1610612748: "Miami Heat",
-    1610612749: "Milwaukee Bucks",
-    1610612750: "Minnesota Timberwolves",
-    1610612751: "Brooklyn Nets",
-    1610612752: "New York Knicks",
-    1610612753: "Orlando Magic",
-    1610612755: "Philadelphia 76ers",
-    1610612756: "Phoenix Suns",
-    1610612757: "Portland Trail Blazers",
-    1610612758: "Sacramento Kings",
-    1610612759: "San Antonio Spurs",
-    1610612760: "Oklahoma City Thunder",
-    1610612761: "Toronto Raptors",
-    1610612762: "Utah Jazz",
-    1610612764: "Washington Wizards",
-    1610612765: "Detroit Pistons",
-    1610612766: "Charlotte Hornets",
-}
 
 
 ######################## Helper functions ########################
@@ -176,7 +141,7 @@ df_current_season = ds_query.read()
 
 # get games for today that have not been played yet
 df_todays_matches = df_current_season[df_current_season['pts_home'] == 0]
-df_todays_matches = pd.DataFrame()
+#df_todays_matches = pd.DataFrame() # uncomment this line to test no games scheduled for today
 
 # select games that have been played
 df_current_season = df_current_season[df_current_season['pts_home'] != 0]

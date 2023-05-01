@@ -1,5 +1,30 @@
 import pandas as pd
-import numpy as np
+import os
+
+# temporary hack for the way the streamlit app is handling imports
+try :
+    from src.constants import (
+        LONG_INTEGER_FIELDS,
+        SHORT_INTEGER_FIELDS,
+        DATE_FIELDS,
+        DROP_COLUMNS_NON_ROLLING,
+        HOME_VISITOR_ROLL_LIST, #list of rolling periods to use when restricting to home or visitor role
+        ALL_ROLL_LIST, #list of rolling periods to use when NOT restricting to home or visitor role
+        FEATURE_LIST_HOME, # list of non-rolling features to create rolling features for home role
+        FEATURE_LIST_AWAY, # list of non-rolling features to create rolling features for visitor role
+    )
+except:
+    from constants import (
+        LONG_INTEGER_FIELDS,
+        SHORT_INTEGER_FIELDS,
+        DATE_FIELDS,
+        DROP_COLUMNS_NON_ROLLING,
+        HOME_VISITOR_ROLL_LIST, #list of rolling periods to use when restricting to home or visitor role
+        ALL_ROLL_LIST, #list of rolling periods to use when NOT restricting to home or visitor role
+        FEATURE_LIST_HOME, # list of non-rolling features to create rolling features for home role
+        FEATURE_LIST_AWAY, # list of non-rolling features to create rolling features for visitor role
+    )
+
 
 def process_features(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -12,7 +37,6 @@ def process_features(df: pd.DataFrame) -> pd.DataFrame:
         the processed dataframe
 
     
-
     Feature engineering to add: 
         - rolling averages of key stats, 
         - win/lose streaks, 
@@ -34,24 +58,16 @@ def process_features(df: pd.DataFrame) -> pd.DataFrame:
         - process_x_minus_y(): subtract visitor team rolling stats from home rolling stats
     """
     
-    # lengths of rolling averages and streaks to calculate for each team
-    # we will try a variety of lengths to see which works best
-    home_visitor_roll_list = [3, 7, 10]  #lengths to use when restricting to home or visitor role
-    all_roll_list = [3, 7, 10, 15] #lengths to use when NOT restricting to home or visitor role
-
-    long_integer_fields = ['GAME_ID', 'HOME_TEAM_ID', 'VISITOR_TEAM_ID', 'SEASON']
-    short_integer_fields = ['PTS_home', 'AST_home', 'REB_home', 'PTS_away', 'AST_away', 'REB_away']
-    date_fields = ['GAME_DATE_EST']
     
-    df = fix_datatypes(df, date_fields, short_integer_fields, long_integer_fields)
+    df = fix_datatypes(df, DATE_FIELDS, SHORT_INTEGER_FIELDS, LONG_INTEGER_FIELDS)
     df = add_date_features(df)
     df = remove_playoff_games(df)
-    df = add_rolling_home_visitor(df, "HOME", home_visitor_roll_list)
-    df = add_rolling_home_visitor(df, "VISITOR", home_visitor_roll_list)
+    df = add_rolling_home_visitor(df, "HOME", HOME_VISITOR_ROLL_LIST) # list of variety of rolling lengths
+    df = add_rolling_home_visitor(df, "VISITOR", HOME_VISITOR_ROLL_LIST) # list of variety of rolling lengths
     
     df_consecutive = process_games_consecutively(df)
-    df_consecutive = add_matchups(df_consecutive, home_visitor_roll_list)
-    df_consecutive = add_past_performance_all(df_consecutive, all_roll_list)
+    df_consecutive = add_matchups(df_consecutive, HOME_VISITOR_ROLL_LIST) # list of variety of rolling lengths
+    df_consecutive = add_past_performance_all(df_consecutive, ALL_ROLL_LIST) # list of variety of rolling lengths
 
     #add these features back to main dataframe
     df = combine_new_features(df,df_consecutive) 
@@ -176,10 +192,10 @@ def add_rolling_home_visitor(df: pd.DataFrame, location: str, roll_list: list)->
 
 
     # rolling means 
-    feature_list = ['HOME_TEAM_WINS', 'PTS_home', 'FG_PCT_home', 'FT_PCT_home', 'FG3_PCT_home', 'AST_home', 'REB_home']
+    feature_list = FEATURE_LIST_HOME
     
     if location == 'VISITOR':
-        feature_list = ['HOME_TEAM_WINS', 'PTS_away', 'FG_PCT_away', 'FT_PCT_away', 'FG3_PCT_away', 'AST_away', 'REB_away']
+        feature_list = FEATURE_LIST_AWAY
     
       
     roll_feature_list = []
@@ -482,7 +498,7 @@ def combine_new_features(df: pd.DataFrame, df_consecutive: pd.DataFrame)-> pd.Da
     df1 = df1.rename(columns={'TEAM1': 'HOME_TEAM_ID'})
     df = pd.merge(df, df1, how="left", on=["GAME_ID", "HOME_TEAM_ID"])
     
-    #don't include matchup features for visitor team since they are equivant for both home and visitor
+    #don't include matchup features for visitor team since they are equivalent for both home and visitor
     new_features = [x for x in new_features if x not in matchup_features]
     df_consecutive = df_consecutive.drop(matchup_features,axis=1)
     
@@ -550,16 +566,9 @@ def remove_non_rolling(df: pd.DataFrame) -> list:
     # These must be retained in the database to recalculate rolling avgs and streaks in the future,
     # so are filtered out as appropriate instead of deleted
     
-    drop_columns =[]
-    
+   
     all_columns = df.columns.tolist()
     
-    drop_columns1 = ['HOME_TEAM_WINS', 'PTS_home', 'FG_PCT_home', 'FT_PCT_home', 'FG3_PCT_home', 'AST_home', 'REB_home']
-    drop_columns2 = ['PTS_away', 'FG_PCT_away', 'FT_PCT_away', 'FG3_PCT_away', 'AST_away', 'REB_away']
-    
-    drop_columns = drop_columns + drop_columns1
-    drop_columns = drop_columns + drop_columns2 
-    
-    use_columns = [item for item in all_columns if item not in drop_columns]
+    use_columns = [item for item in all_columns if item not in DROP_COLUMNS_NON_ROLLING]
     
     return use_columns
