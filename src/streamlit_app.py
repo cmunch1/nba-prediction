@@ -73,6 +73,24 @@ def process_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
     
     return df
 
+def remove_unused_features(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove features that are not used in the model.
+
+    """
+    
+    # remove stats from today's games - these are blank (the game hasn't been played) and are not used by the model
+    use_columns = remove_non_rolling(df)
+    X = df[use_columns]
+
+    # drop columns not used in model
+    X = X.drop(DROP_COLUMNS, axis=1)
+
+    # MATCHUP is just for informational display, not used by model
+    X = X.drop('MATCHUP', axis=1) 
+    
+    return X
+
 def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     """Retrieve desired model from the Hopsworks Model Registry."""
 
@@ -200,15 +218,7 @@ if no_games == False:
     st.write(36 * "-")
     fancy_header(f"Predicting Winning Probabilities...")
 
-    # remove stats from today's games - these are blank (the game hasn't been played) and are not used by the model
-    use_columns = remove_non_rolling(df_todays_matches)
-    X = df_todays_matches[use_columns]
-
-    # drop columns not used in model
-    X = X.drop(DROP_COLUMNS, axis=1)
-
-    # MATCHUP is just for informational display, not used by model
-    X = X.drop('MATCHUP', axis=1) 
+    X = remove_unused_features(df_todays_matches)
 
     preds = model.predict_proba(X)[:,1]
 
@@ -227,15 +237,7 @@ fancy_header(f"Preparing Winning Probabilities and Results from last 25 games...
 
 df_current_season = process_for_prediction(df_current_season)
 
-# remove stats from today's games - these are blank (the game hasn't been played) and are not used by the model
-use_columns = remove_non_rolling(df_current_season)
-X = df_current_season[use_columns]
-
-# drop columns not used in model
-X = X.drop(DROP_COLUMNS, axis=1)
-
-# MATCHUP is just for informational display, not used by model
-X = X.drop('MATCHUP', axis=1) 
+X = remove_unused_features(df_current_season)
 
 preds = model.predict_proba(X)[:,1]
 
