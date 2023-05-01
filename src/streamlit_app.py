@@ -70,8 +70,6 @@ def process_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
     # this will make the display more meaningful
     df['MATCHUP'] = df['VISITOR_TEAM_ID'].map(NBA_TEAMS_NAMES) + " @ " + df['HOME_TEAM_ID'].map(NBA_TEAMS_NAMES)
         
-    # drop columns not used in model
-    df = df.drop(DROP_COLUMNS, axis=1)
     
     return df
 
@@ -206,6 +204,9 @@ if no_games == False:
     use_columns = remove_non_rolling(df_todays_matches)
     X = df_todays_matches[use_columns]
 
+    # drop columns not used in model
+    X = X.drop(DROP_COLUMNS, axis=1)
+
     # MATCHUP is just for informational display, not used by model
     X = X.drop('MATCHUP', axis=1) 
 
@@ -229,6 +230,9 @@ df_current_season = process_for_prediction(df_current_season)
 # remove stats from today's games - these are blank (the game hasn't been played) and are not used by the model
 use_columns = remove_non_rolling(df_current_season)
 X = df_current_season[use_columns]
+
+# drop columns not used in model
+X = X.drop(DROP_COLUMNS, axis=1)
 
 # MATCHUP is just for informational display, not used by model
 X = X.drop('MATCHUP', axis=1) 
