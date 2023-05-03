@@ -77,14 +77,19 @@ In reality, a betting strategy is a rather complex problem with many elements be
    - Scrape new data from NBA website and add to Feature Store every day using Github Actions
    - Retrain model and tune hyperparameters
 
+*Initial Modeling Development Cycle*
+
+<img src="./images/modeling_cycle.png" width="800"/>
+
+
 *Initial Data Setup*
 
-<img src="./images/initial_setup.png" width="600"/>
+<img src="./images/initial_setup.png" width="800"/>
 
 
 *Production Pipeline*
 
-<img src="./images/production_pipeline.png" width="600"/>
+<img src="./images/production_pipeline.png" width="800"/>
 
  
  Tools Used:
