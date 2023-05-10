@@ -315,9 +315,13 @@ def convert_columns(df: pd.DataFrame) -> pd.DataFrame:
     
     # reformat column data
     
-    # make HOME true if @ is in the text
-    # (Match Ups: POR @ DAL or DAl vs POR. Home team always has @)
-    df['HOME'] = df['HOME'].apply(lambda x: 1 if '@' in x else 0)
+    # make HOME true if @ is NOT in the text
+    # each game has two rows, one for each team
+    # Home team is always the team without the @
+    # TEAM   MATCH UP
+    # DAL    DAL @ POR  
+    # POR    POR vs DAL 
+    df['HOME'] = df['HOME'].apply(lambda x: 0 if '@' in x else 1)
     
     # convert wins to home team wins
     # incomplete games will be NaN
