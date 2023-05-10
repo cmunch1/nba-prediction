@@ -220,7 +220,7 @@ if no_games == False:
 
     X = remove_unused_features(df_todays_matches)
 
-    preds = model.predict_proba(X)[:,1]
+    preds = model.predict_proba(X)[:,0]
 
     df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
 
@@ -239,7 +239,7 @@ df_current_season = process_for_prediction(df_current_season)
 
 X = remove_unused_features(df_current_season)
 
-preds = model.predict_proba(X)[:,1]
+preds = model.predict_proba(X)[:,0]
 
 df_current_season['HOME_TEAM_WIN_PROBABILITY'] = preds
 
