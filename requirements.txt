@@ -1,7 +1,6 @@
 streamlit 
 joblib
 pandas
-json
 datetime 
 pathlib
 hopsworks
