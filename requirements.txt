@@ -4,3 +4,4 @@ pandas
 datetime 
 pathlib
 hopsworks
+xgboost==1.6.1
