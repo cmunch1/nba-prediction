@@ -1,5 +1,5 @@
 alembic==1.8.1
-altair<5.0.0
+altair==4.2.0
 asttokens==2.2.0
 async-generator==1.10
 attrs==22.1.0
@@ -42,7 +42,7 @@ great-expectations==0.14.12
 greenlet==2.0.1
 h11==0.14.0
 hopsworks==3.0.4
-hsfs
+hsfs==3.0.5
 hsml==3.0.3
 html5lib==1.1
 idna==3.4
@@ -53,7 +53,7 @@ ipython==8.7.0
 ipywidgets==8.0.2
 javaobj-py3==0.4.3
 jedi==0.18.2
-Jinja2
+Jinja2==3.0.3
 jmespath==1.0.1
 joblib==1.2.0
 jsonpatch==1.32
