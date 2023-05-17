@@ -42,7 +42,7 @@ great-expectations==0.16.12
 greenlet==2.0.1
 h11==0.14.0
 hopsworks==3.0.4
-hsfs==3.0.5
+hsfs
 hsml==3.0.3
 html5lib==1.1
 idna==3.4
