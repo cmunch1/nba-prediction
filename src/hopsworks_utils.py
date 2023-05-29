@@ -5,7 +5,7 @@ import hopsworks
 from datetime import datetime, timedelta
 from pathlib import Path  #for Windows/Linux compatibility
 
-from constants import (
+from src.constants import (
     FEATURE_GROUP_VERSION,
 )
 
