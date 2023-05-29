@@ -192,7 +192,8 @@ fancy_header('\n☁️ Processing Data for prediction...')
 if no_games == False:
     df_todays_matches = process_for_prediction(df_todays_matches)
     df_todays_matches = df_todays_matches.reset_index(drop=True)
-    st.write(df_todays_matches['GAME_DATE','MATCHUP'])
+    df_todays_matches["GAME_DATE_EST"] = df_todays_matches["GAME_DATE_EST"].dt.strftime('%Y-%m-%d')
+    st.write(df_todays_matches[['GAME_DATE_EST','MATCHUP']])
     st.write("Successfully processed data!✔️")
 
 progress_bar.progress(60)
@@ -226,7 +227,7 @@ if no_games == False:
     df_todays_matches['HOME_TEAM_WIN_PROBABILITY'] = preds
 
     df_todays_matches = df_todays_matches.reset_index(drop=True)
-    st.dataframe(df_todays_matches[['MATCHUP', 'HOME_TEAM_WIN_PROBABILITY']])
+    st.dataframe(df_todays_matches[['GAME_DATE_EST', 'MATCHUP', 'HOME_TEAM_WIN_PROBABILITY']])
 
 progress_bar.progress(85)
 
