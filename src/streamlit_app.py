@@ -23,11 +23,12 @@ from feature_engineering import (
 )
 
 from constants import (
-    LONG_INTEGER_FIELDS,
-    SHORT_INTEGER_FIELDS,
-    DATE_FIELDS,
+    LONG_INTEGER_FIELDS,    
+    SHORT_INTEGER_FIELDS,   
+    DATE_FIELDS,            
     DROP_COLUMNS,
     NBA_TEAMS_NAMES,
+    FEATURE_GROUP_VERSION,
 )
 
 
@@ -70,7 +71,6 @@ def process_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
     # this will make the display more meaningful
     df['MATCHUP'] = df['VISITOR_TEAM_ID'].map(NBA_TEAMS_NAMES) + " @ " + df['HOME_TEAM_ID'].map(NBA_TEAMS_NAMES)
         
-    
     return df
 
 def remove_unused_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -107,7 +107,6 @@ def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     with open(model_dir / "model.pkl", 'rb') as f:
         loaded_model = joblib.load(f)
 
-
     return loaded_model
 
 
@@ -137,7 +136,7 @@ fs = project.get_feature_store()
 
 rolling_stats_fg = fs.get_feature_group(
     name="rolling_stats",
-    version=2,
+    version=FEATURE_GROUP_VERSION,
 )
 
 st.write("Successfully connected!✔️")
@@ -181,7 +180,7 @@ if df_todays_matches.shape[0] == 0:
 else:
     no_games = False
     today = datetime.today().strftime('%Y-%m-%d')
-    st.write("Successfully retrieved games for " + today + "!✔️")
+    st.write("Successfully retrieved games"!✔️")
     progress_bar.progress(40)
     
 
@@ -193,7 +192,7 @@ fancy_header('\n☁️ Processing Data for prediction...')
 if no_games == False:
     df_todays_matches = process_for_prediction(df_todays_matches)
     df_todays_matches = df_todays_matches.reset_index(drop=True)
-    st.write(df_todays_matches['MATCHUP'])
+    st.write(df_todays_matches['GAME_DATE','MATCHUP'])
     st.write("Successfully processed data!✔️")
 
 progress_bar.progress(60)
