@@ -28,7 +28,7 @@ from constants import (
     DATE_FIELDS,            
     DROP_COLUMNS,
     NBA_TEAMS_NAMES,
-    FEATURE_GROUP_VERSION,
+    FEATURE_GROUP_VERSION
 )
 
 
