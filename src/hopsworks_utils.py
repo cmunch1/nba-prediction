@@ -5,6 +5,9 @@ import hopsworks
 from datetime import datetime, timedelta
 from pathlib import Path  #for Windows/Linux compatibility
 
+from constants import (
+    FEATURE_GROUP_VERSION,
+)
 
 
 CONFIGS_PATH = Path.cwd() / "configs"
@@ -82,7 +85,7 @@ def create_train_test_data(HOPSWORKS_API_KEY:str, STARTDATE:str, DAYS:int) -> tu
 
     rolling_stats_fg = fs.get_or_create_feature_group(
         name="rolling_stats",
-        version=2,
+        version=FEATURE_GROUP_VERSION,
     )
 
     query = rolling_stats_fg.select_all()

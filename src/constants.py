@@ -35,6 +35,10 @@ PLAYOFFS_START = 4 #month that the playoffs start, typically April
 # columns from the nba.com boxscore table to dropped, either not used or already renamed to match our schema
 NBA_COM_DROP_COLUMNS = ['Team', 'MIN', 'FGM', 'FGA', '3PM', '3PA', 'FTM', 'FTA', 'OREB', 'DREB', 'STL', 'BLK', 'TOV', 'PF', '+/-',]
 
+############ HOPSWORKS CONSTANTS ############
+
+FEATURE_GROUP_VERSION = 3 #version of feature group to use
+
 
 
 ########## STREAMLIT CONSTANTS ############
