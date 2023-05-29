@@ -180,7 +180,7 @@ if df_todays_matches.shape[0] == 0:
 else:
     no_games = False
     today = datetime.today().strftime('%Y-%m-%d')
-    st.write("Successfully retrieved games"!✔️")
+    st.write("Successfully retrieved games!✔️")
     progress_bar.progress(40)
     
 
