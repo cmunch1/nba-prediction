@@ -5,10 +5,10 @@ import hopsworks
 from datetime import datetime, timedelta
 from pathlib import Path  #for Windows/Linux compatibility
 
-from src.constants import (
-    FEATURE_GROUP_VERSION,
-)
-
+#from src.constants import (
+#    FEATURE_GROUP_VERSION,
+#)
+FEATURE_GROUP_VERSION = 2  # quick fix for now
 
 CONFIGS_PATH = Path.cwd() / "configs"
 FEATURE_NAMES_FILE = CONFIGS_PATH / "feature_names.json" # dictionary of {lower case feature names : original mixed-case feature names}

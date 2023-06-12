@@ -26,7 +26,7 @@ CATEGORY_COLUMNS = ['SEASON', 'HOME_TEAM_ID', 'VISITOR_TEAM_ID' ]
 
 ########### WEB SCRAPING CONSTANTS ##############
 
-DAYS = 2 #number of days back to scrape for games, set to >1 to catch up in case of a failed run
+DAYS = 7 #number of days back to scrape for games, set to >1 to catch up in case of a failed run or game sparsity during playoffs
 
 OFF_SEASON_START = 7 #month that the off-season starts, typically July
 REGULAR_SEASON_START = 10 #month that the regular season starts, typically October
