@@ -12,3 +12,4 @@ geckodriver.log
 .env
 .vs
 .vscode
+pandas.ipynb
