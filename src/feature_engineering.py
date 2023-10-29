@@ -90,7 +90,7 @@ def fix_datatypes(df: pd.DataFrame, date_columns: list, short_integer_fields: li
     """
 
     for field in date_columns:
-        df[field] = pd.to_datetime(df[field])
+        df[field] = pd.to_datetime(df[field], utc=True)
 
     #convert long integer fields to int32 from int64
     for field in long_integer_fields:
