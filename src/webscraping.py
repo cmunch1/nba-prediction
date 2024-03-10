@@ -177,6 +177,8 @@ def parse_ids(data_table: soup) -> tuple[pd.Series, pd.Series]:
     # create a series using last 10 digits of the appropriate links
     team_id = pd.Series([i[-10:] for i in links_list if ('stats' in i)])
     game_id = pd.Series([i[-10:] for i in links_list if ('/game/' in i)])
+
+    print(team_id)
     
     return team_id, game_id
 
@@ -382,8 +384,14 @@ def combine_home_visitor(df: pd.DataFrame) -> pd.DataFrame:
     
     #convert all object columns to int64 to match hopsworks
     for field in df.select_dtypes(include=['object']).columns.tolist():
-        df[field] = df[field].astype('int64')
-
+        print(field, df[field])
+        #check if any NaN values in field
+        if df[field].isnull().values.any():
+            print(f"NaN in {field}")
+            df[field] = df[field].fillna(0)
+        else:
+            df[field] = df[field].astype('int64')
+        
     return df
 
 

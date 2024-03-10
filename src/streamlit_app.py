@@ -119,7 +119,7 @@ st.write("This app uses a machine learning model to predict the winner of NBA ga
 st.write(" - For the 2022-23 regular season (not playoffs), the current model would have an accuracy of 0.615.")
 st.write(" - One of the best publicly available models achieved an accuracy of 0.656.")
 st.write(" - A simple baseline model of 'home team always wins' would have an accuracy of 0.58.")
-st.write("*** THE CURRENT MODEL APPEARS TO SUCK FOR PLAYOFF GAMES. I'M WORKING ON IT. ***")
+#st.write("*** THE CURRENT MODEL APPEARS TO SUCK FOR PLAYOFF GAMES. I'M WORKING ON IT. ***")
 st.write("")
 st.write("Note: NBA season and postseason usually runs annually from October to June. There will be no games to predict outside of this time period.")
 
