@@ -390,7 +390,18 @@ def combine_home_visitor(df: pd.DataFrame) -> pd.DataFrame:
             print(f"NaN in {field}")
             df[field] = df[field].fillna(0)
         else:
-            df[field] = df[field].astype('int64')
+            #once, scraped data like FT_PCT was missing values (and used a dash mark as a placeholder) and caused float fields to be saved as object fields
+            #this is a quick fix for that particular issue. 
+            if df[field].str.contains('.').any():  
+                df[field] = df[field].astype('float64') 
+            else:
+                if df[field].str.contains('-').any():
+                    df[field] = df[field].str.replace('-','0')
+                    df[field] = df[field].astype('float64')  
+                else:   
+                    df[field] = df[field].astype('int64')   
+            
+            
         
     return df
 
