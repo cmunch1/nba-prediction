@@ -116,6 +116,8 @@ def get_model(project, model_name, evaluation_metric, sort_metrics_by):
 st.title('NBA Prediction Project')
 st.write(36 * "-")
 st.write("This app uses a machine learning model to predict the winner of NBA games.")
+st.write("")
+st.write("This streamlit app demonstrates on-demand retrieval of data from the Hopsworks Feature Store, loading a model from the Hopsworks Model Registry, and making predictions.")
 st.write(" - For the 2022-23 regular season (not playoffs), the current model would have an accuracy of 0.615.")
 st.write(" - One of the best publicly available models achieved an accuracy of 0.656.")
 st.write(" - A simple baseline model of 'home team always wins' would have an accuracy of 0.58.")

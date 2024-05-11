@@ -11,11 +11,11 @@ from scrapingant_client import ScrapingAntClient
 
 # if using selenium and chrome, import these
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service as ChromiumService
+from selenium.webdriver.chrome.service import Service
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.core.utils import ChromeType
-from webdriver_manager.chrome import ChromeDriverManager
+
 
 # if using selenium and firefox, import these
 from selenium.webdriver.firefox.service import Service as FirefoxService
@@ -80,8 +80,8 @@ def activate_web_driver(browser: str) -> webdriver:
         driver = webdriver.Firefox(service=service, options=firefox_options)
     
     else:
-        service = ChromiumService(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())  
-        
+
+        service = Service()
         chrome_options = Options() 
         for option in options:
             chrome_options.add_argument(option)
@@ -271,7 +271,25 @@ def scrape_to_dataframe(api_key: str, driver: webdriver, Season: str, DateFrom: 
             time.sleep(3)
             source = soup(driver.page_source, 'html.parser')
             data_table = source.find('table', {'class':CLASS_ID_TABLE})
-    
+    else:
+        #if using scrapingant, then check for multiple pages
+        if pagination is not None:
+            # if multiple pages, send javascript to select "ALL" pages
+            # first, scroll to bottom of page and wait 2 seconds to ensure all elements are loaded
+            # // js code
+            # window.scrollTo(0,document.body.scrollHeight);
+            # await new Promise(r => setTimeout(r, 2000));
+            # document.getElementById("DropDown_select__4pIg9").selectedIndex = 0;
+            # document.getElementById("DropDown_select__4pIg9").dispatchEvent(new Event('change'));
+            # // end js code
+            # these must be encoded into Base64 for use with scrapingant:
+
+            js_snippet_Base64 = "d2luZG93LnNjcm9sbFRvKDAsZG9jdW1lbnQuYm9keS5zY3JvbGxIZWlnaHQpOwphd2FpdCBuZXcgUHJvbWlzZShyID0+IHNldFRpbWVvdXQociwgMjAwMCkpOwpkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgiRHJvcERvd25fc2VsZWN0X180cElnOSIpLnNlbGVjdGVkSW5kZXggPSAwOwpkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgiRHJvcERvd25fc2VsZWN0X180cElnOSIpLmRpc3BhdGNoRXZlbnQobmV3IEV2ZW50KCdjaGFuZ2UnKSk7"
+
+            result = client.general_request(nba_url + "&js_snippet=" + js_snippet_Base64)
+            source = soup(result.content, 'html.parser')
+
+
     #print(source)
 
     # convert the html table to a dataframe   
