@@ -1,0 +1,55 @@
+1. Create Hopsworks.ai account, create an empty project, go to settings, and create an API key, 
+
+2. Optional - create a ScrapingAnt account if you wish to run online through GithHub Actions
+
+3. Optional - create a Streamlit server account if you wish to display results online
+
+4. Create your python environment in Anaconda or venv or whatever you prefer, for best compatibility use Python 3.9.13,  pip install -r requirements.txt.main
+
+5. Create a file in the main folder called .env (nothing before the dot). Add the following lines:
+HOPSWORKS_API_KEY = Whatever your API key is
+
+6. If you have a ScrapingAnt account, you should add your API key as well: SCRAPINGANT_API_KEY = Whatever your API key is
+
+7. Run the notebook 00_update_local_data.ipynb. This makes sure that games.csv has all the current games
+
+8. Run the notebook 08_backfill_features.ipynb. This loads the data to Hopsworks.ai
+
+9. This completes the initial setup phase
+
+10. Notebook 09_production_features_pipeline.ipynb does the daily updates. This should be run every night after all the games are completed and before the next day’s games have started (so 02am EST to 08am EST is probably good). It may have problems if a game is in progress. It updates the stats and finds the games that will be played the coming day.
+
+11. A cron job can be setup to run automatically on a daily schedule. This can be run locally or via a GitHub Action. 
+
+12. For the GitHub Action, there are several considerations: you don’t want your .env file in your repository where everyone can see your private API keys, so these keys will need to be stored inside GitHub Secrets.
+
+12.a Inside the repository, go to Settings on the right end of the top menu bar.
+Now go to left vertical sidebar and click on Secrets and variables, then Actions
+
+12.b Click New repository secret, Name = HOPSWORKS_API_KEY, secret = actual API key.
+
+12.c Click New repository secret, Name = SCRAPINGANT_API_KEY, secret = actual API key
+
+12.d This should enable GitHub Actions to run
+
+13. Streamlit_app.py will, on demand, load today’s games from hopsworks.ai, run the model, and predict the probability of the home team winning, and it will list the results of the model over the last 25 games.
+
+14. This can be run locally, or it can be run through the streamlit server:
+
+15. To run online, create a Streamlit account - you can link this to your GitHub account
+
+15.a Choose  Create an App
+
+15.b Select link to GitHub
+
+15.c Paste link to you GitHub
+
+15.d Main File Path is streamlit_app.py
+
+15.e Click Advanced Settings - Secrets - and enter Hopsworks and ScrapingAnt API keys. It appears they need to be enclosed in " " marks
+
+15.f Steamlit will give you an url to access the app online
+
+ISSUES:
+
+GitHub Actions may fail if there are no games scheduled for the day it is run. You may want to pause this over the off-season.
