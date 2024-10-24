@@ -97,8 +97,8 @@ def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     # mr = project.get_model_registry()
     # get best model based on custom metrics
     # model = mr.get_best_model(model_name,
-                                evaluation_metric,
-                                sort_metrics_by)
+    #                            evaluation_metric,
+    #                            sort_metrics_by)
     
     # download model from Hopsworks
     #model_dir = model.download()
