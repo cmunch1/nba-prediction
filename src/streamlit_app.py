@@ -94,9 +94,9 @@ def remove_unused_features(df: pd.DataFrame) -> pd.DataFrame:
 def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     """Retrieve desired model from the Hopsworks Model Registry."""
 
-    mr = project.get_model_registry()
+    # mr = project.get_model_registry()
     # get best model based on custom metrics
-    model = mr.get_best_model(model_name,
+    # model = mr.get_best_model(model_name,
                                 evaluation_metric,
                                 sort_metrics_by)
     
