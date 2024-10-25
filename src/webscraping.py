@@ -19,7 +19,7 @@ from selenium.webdriver.chrome.options import Options
 
 # if using selenium and firefox, import these
 from selenium.webdriver.firefox.service import Service as FirefoxService
-from webdriver_manager.firefox import GeckoDriverManager
+#from webdriver_manager.firefox import GeckoDriverManager
 
 
 from bs4 import BeautifulSoup as soup
@@ -473,7 +473,8 @@ def get_todays_matchups(api_key: str, driver: webdriver) -> tuple[list, list]:
     if todays_games is None:
         # no games today
         return None, None
-
+    
+    
     # Get the teams playing
     # Each team listed in todays block will have a href with the specified anchor class
     # e.g. <a href="/team/1610612743/nuggets/" class="Anchor_anchor__cSc3P Link_styled__okbXW" ...
@@ -503,13 +504,14 @@ def get_todays_matchups(api_key: str, driver: webdriver) -> tuple[list, list]:
     # all using the same anchor class, so we will filter out those just for PREVIEW
     CLASS_ID = "Anchor_anchor__cSc3P TabLink_link__f_15h"
     links = todays_games.find_all('a', {'class':CLASS_ID})
-    links = [i for i in links if "PREVIEW" in i]
+    links = [i for i in links if i.get('data-text') == "PREVIEW"] #changed to match new website changes for 2024 season
     game_id_list = [i.get("href") for i in links]
     
 
     games = []
     for game in game_id_list:
-        game_id = game.partition("-00")[2].partition("?")[0] # extract team id from text for link
+        #game_id = game.partition("-00")[2].partition("?")[0] 
+        game_id = game.partition("-00")[2] #new version for 2024 season
         if len(game_id) > 0:               
             games.append(game_id)   
 
