@@ -4,7 +4,7 @@
 # the other file in the this repo - requirements.txt.main, should be renamed and used for local installs
 streamlit 
 joblib
-pandas
+pandas==1.5.3
 datetime 
 pathlib
 hopsworks

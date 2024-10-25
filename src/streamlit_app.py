@@ -94,11 +94,11 @@ def remove_unused_features(df: pd.DataFrame) -> pd.DataFrame:
 def get_model(project, model_name, evaluation_metric, sort_metrics_by):
     """Retrieve desired model from the Hopsworks Model Registry."""
 
-    mr = project.get_model_registry()
+    # mr = project.get_model_registry()
     # get best model based on custom metrics
-    model = mr.get_best_model(model_name,
-                                evaluation_metric,
-                                sort_metrics_by)
+    # model = mr.get_best_model(model_name,
+    #                            evaluation_metric,
+    #                            sort_metrics_by)
     
     # download model from Hopsworks
     #model_dir = model.download()
@@ -152,7 +152,7 @@ fancy_header('\n☁️ Retrieving data from Feature Store...')
 
 # pull games just for this season to get current games waiting prediction and additional games so that we show past performance
 current_season = datetime.today().year
-if datetime.today().month < 10:
+if datetime.today().month <= 10:
     current_season = current_season - 1
 
 ds_query = rolling_stats_fg.filter(rolling_stats_fg.season == current_season)
