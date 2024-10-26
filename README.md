@@ -15,6 +15,8 @@
 
 Project Repository: [https://github.com/cmunch1/nba-prediction](https://github.com/cmunch1/nba-prediction)
 
+NOTE: As of October 2024, I am temporarily removing Hopsworks feature store and model registry from this project until it becomes more stable.
+
 #### Table of contents
 - [Introduction](#introduction)
 - [Problem](#problem-increase-the-profitability-of-betting-on-nba-games)
@@ -108,7 +110,7 @@ In reality, a betting strategy is a rather complex problem with many elements be
  - Github Actions - running notebooks to scrape new data, predict winning probabilities, and retrain models
  - Streamlit - web app deployment
 
-
+NOTE: As of October 2024, I am temporarily removing Hopsworks feature store and model registry from this project until it becomes more stable.
 
 ### Future Possibilities
 

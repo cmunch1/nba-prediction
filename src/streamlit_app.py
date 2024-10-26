@@ -1,7 +1,11 @@
+# this had been modified at the start of the the 2024 season to no longer rely on Hopsworks.ai
+# data and model will be simply used from the repository
+
+
 import os
 
 import streamlit as st
-import hopsworks
+#import hopsworks
 import joblib
 import pandas as pd
 import numpy as np
@@ -13,9 +17,9 @@ import xgboost as xgb
 from pathlib import Path
 
 
-from hopsworks_utils import (
-    convert_feature_names,
-)
+#from hopsworks_utils import (
+#    convert_feature_names,
+#)
 
 from feature_engineering import (
     fix_datatypes,
@@ -31,6 +35,7 @@ from constants import (
     FEATURE_GROUP_VERSION
 )
 
+DATAPATH = Path(r'data')
 
 print(f"Current directory: {Path.cwd()}")
 print(f"Home directory: {Path.home()}")
@@ -43,10 +48,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-try:
-    HOPSWORKS_API_KEY = os.environ['HOPSWORKS_API_KEY']
-except:
-    raise Exception('Set environment variable HOPSWORKS_API_KEY')
+#try:
+#    HOPSWORKS_API_KEY = os.environ['HOPSWORKS_API_KEY']
+#except:
+#    raise Exception('Set environment variable HOPSWORKS_API_KEY')
 
 
 ######################## Helper functions ########################
@@ -62,7 +67,7 @@ def process_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
     """
     
     # convert feature names back to mixed case
-    df = convert_feature_names(df)
+    #df = convert_feature_names(df)
     
     # fix date and other types
     df = fix_datatypes(df, DATE_FIELDS, SHORT_INTEGER_FIELDS, LONG_INTEGER_FIELDS)
@@ -91,7 +96,7 @@ def remove_unused_features(df: pd.DataFrame) -> pd.DataFrame:
     
     return X
 
-def get_model(project, model_name, evaluation_metric, sort_metrics_by):
+def get_model():
     """Retrieve desired model from the Hopsworks Model Registry."""
 
     # mr = project.get_model_registry()
@@ -128,18 +133,18 @@ st.write("Note: NBA season and postseason usually runs annually from October to 
 progress_bar = st.sidebar.header('⚙️ Working Progress')
 progress_bar = st.sidebar.progress(0)
 st.write(36 * "-")
-fancy_header('\n📡 Connecting to Hopsworks Feature Store...')
+fancy_header('\n📡 Connecting to Data Store...')
 
 
-########### Connect to Hopsworks Feature Store and get Feature Group
+########### Connect to Feature Store and get Feature Group
 
-project = hopsworks.login(api_key_value=HOPSWORKS_API_KEY)
-fs = project.get_feature_store()
+#project = hopsworks.login(api_key_value=HOPSWORKS_API_KEY)
+#fs = project.get_feature_store()
 
-rolling_stats_fg = fs.get_feature_group(
-    name="rolling_stats",
-    version=FEATURE_GROUP_VERSION,
-)
+#rolling_stats_fg = fs.get_feature_group(
+#    name="rolling_stats",
+#    version=FEATURE_GROUP_VERSION,
+#)
 
 st.write("Successfully connected!✔️")
 progress_bar.progress(20)
@@ -155,18 +160,20 @@ current_season = datetime.today().year
 if datetime.today().month <= 10:
     current_season = current_season - 1
 
-ds_query = rolling_stats_fg.filter(rolling_stats_fg.season == current_season)
-df_current_season = ds_query.read()
+#ds_query = rolling_stats_fg.filter(rolling_stats_fg.season == current_season)
+#df_current_season = ds_query.read()
+
+df_current_season = pd.read_csv(DATAPATH / 'games_engineered.csv')
 
 # get games for today that have not been played yet
-df_todays_matches = df_current_season[df_current_season['pts_home'] == 0]
+df_todays_matches = df_current_season[df_current_season['PTS_home'] == 0]
 #df_todays_matches = pd.DataFrame() # uncomment this line to test no games scheduled for today
 
 # select games that have been played
-df_current_season = df_current_season[df_current_season['pts_home'] != 0]
+df_current_season = df_current_season[df_current_season['PTS_home'] != 0]
 
 # select last 25 games from the season
-df_current_season = df_current_season.sort_values(by=['game_id'], ascending=False).head(25)
+df_current_season = df_current_season.sort_values(by=['GAME_ID'], ascending=False).head(25)
 
 
 # if no games are scheduled for today, write a message 
@@ -206,10 +213,7 @@ progress_bar.progress(60)
 st.write(36 * "-")
 fancy_header(f"Loading Best Model...")
 
-model = get_model(project=project,
-                  model_name="xgboost",
-                  evaluation_metric="AUC",
-                  sort_metrics_by="max")
+model = get_model()
 
 st.write("Successfully loaded!✔️")
 progress_bar.progress(70)
