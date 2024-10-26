@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout repo content
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: setup python
         uses: actions/setup-python@v2
@@ -34,4 +34,13 @@ jobs:
           
         run: 
           jupyter nbconvert --to notebook --execute notebooks/09_production_features_pipeline.ipynb
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add data/games.csv
+          git add data/games_engineered.csv
+          git commit -m "Update games_engineered.csv"
+          git push
 
