@@ -265,12 +265,14 @@ df_current_season['CORRECT_PREDICTION'] = df_current_season['HOME_TEAM_WIN_PROBA
 # format date
 df_current_season["GAME_DATE_EST"] = df_current_season["GAME_DATE_EST"].dt.strftime('%Y-%m-%d')
 
+#sort by game date
+df_current_season = df_current_season.sort_values(by=['GAME_DATE_EST'], ascending=False)
+
 # clean up display
 df_current_season = df_current_season.rename(columns={'GAME_DATE_EST': 'GAME_DATE', 'HOME_TEAM_WIN_PROBABILITY': 'HOME_WIN_PROB', 'CORRECT_PREDICTION': 'CORRECT'})
 df_current_season = df_current_season.reset_index(drop=True)
 
-#sort by game date
-df_current_season = df_current_season.sort_values(by=['GAME_DATE_EST'], ascending=False)
+
 
 st.dataframe(df_current_season[['GAME_DATE','MATCHUP', 'HOME_WIN_PROB', 'HOME_WINS', 'CORRECT']])
 
