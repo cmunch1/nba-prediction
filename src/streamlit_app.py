@@ -173,7 +173,10 @@ df_todays_matches = df_current_season[df_current_season['PTS_home'] == 0]
 df_current_season = df_current_season[df_current_season['PTS_home'] != 0]
 
 # select last 25 games from the season
-df_current_season = df_current_season.sort_values(by=['GAME_ID'], ascending=False).head(25)
+df_current_season = df_current_season.sort_values(
+    by=['GAME_DATE_EST', 'GAME_ID'], 
+    ascending=[False, False]
+).head(25)
 
 
 # if no games are scheduled for today, write a message 
@@ -258,8 +261,6 @@ df_current_season = df_current_season.rename(columns={'TARGET': 'HOME_WINS'})
 df_current_season['HOME_TEAM_WIN_PROBABILITY_INT'] = df_current_season['HOME_TEAM_WIN_PROBABILITY'].round().astype(int)
 df_current_season['CORRECT_PREDICTION'] = df_current_season['HOME_TEAM_WIN_PROBABILITY_INT'] == df_current_season['HOME_WINS'] 
 
-#sort by game date
-df_current_season = df_current_season.sort_values(by=['GAME_DATE_EST'], ascending=False)
 
 # format date
 df_current_season["GAME_DATE_EST"] = df_current_season["GAME_DATE_EST"].dt.strftime('%Y-%m-%d')
@@ -267,6 +268,10 @@ df_current_season["GAME_DATE_EST"] = df_current_season["GAME_DATE_EST"].dt.strft
 # clean up display
 df_current_season = df_current_season.rename(columns={'GAME_DATE_EST': 'GAME_DATE', 'HOME_TEAM_WIN_PROBABILITY': 'HOME_WIN_PROB', 'CORRECT_PREDICTION': 'CORRECT'})
 df_current_season = df_current_season.reset_index(drop=True)
+
+#sort by game date
+df_current_season = df_current_season.sort_values(by=['GAME_DATE_EST'], ascending=False)
+
 st.dataframe(df_current_season[['GAME_DATE','MATCHUP', 'HOME_WIN_PROB', 'HOME_WINS', 'CORRECT']])
 
 # Show accuracy
