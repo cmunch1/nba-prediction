@@ -157,7 +157,7 @@ fancy_header('\n☁️ Retrieving data from Feature Store...')
 
 # pull games just for this season to get current games waiting prediction and additional games so that we show past performance
 current_season = datetime.today().year
-if datetime.today().month <= 10:
+if datetime.today().month < 10:
     current_season = current_season - 1
 
 #ds_query = rolling_stats_fg.filter(rolling_stats_fg.season == current_season)
