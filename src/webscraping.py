@@ -436,7 +436,7 @@ def get_todays_matchups(api_key: str, driver: webdriver) -> tuple[list, list]:
         tuple[list, list]: list of team ids for each matchup, list of game ids for each matchup
     """
     
-    NBA_SCHEDULE = "https://www.nba.com/schedule"
+    NBA_SCHEDULE = "https://www.nba.com/schedule?region=1"
 
     
     if api_key == "": #if no api key, then use selenium
