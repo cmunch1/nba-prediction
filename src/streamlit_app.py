@@ -188,7 +188,7 @@ if df_todays_matches.shape[0] == 0:
     st.write()
     fancy_header('\n 🤷‍♂️ No games scheduled for today! 🤷‍♂️')
     st.write()
-    st.write("No games for today. Check out the last 25 games below")
+    st.write("https://www.nba.com/schedule currently does not list games for today (occasionally they are in error) . Check out the last 25 games below")
     st.write()
     st.write("NBA season and postseason usually runs from October to June.")
     no_games = True
