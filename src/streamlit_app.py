@@ -167,6 +167,8 @@ if datetime.today().month < 10:
 #df_current_season = ds_query.read()
 
 df_current_season = pd.read_csv(DATAPATH / 'games_engineered.csv')
+# select only current season
+df_current_season = df_current_season[df_current_season['SEASON'] == current_season]
 
 # get games for today that have not been played yet
 df_todays_matches = df_current_season[df_current_season['PTS_home'] == 0]
