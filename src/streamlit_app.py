@@ -175,12 +175,6 @@ df_todays_matches = df_current_season[df_current_season['PTS_home'] == 0]
 # select games that have been played
 df_current_season = df_current_season[df_current_season['PTS_home'] != 0]
 
-# select last 25 games from the season
-df_current_season = df_current_season.sort_values(
-    by=['GAME_DATE_EST', 'GAME_ID'], 
-    ascending=[False, False]
-).head(25)
-
 
 # if no games are scheduled for today, write a message 
 if df_todays_matches.shape[0] == 0:
@@ -264,23 +258,29 @@ df_current_season = df_current_season.rename(columns={'TARGET': 'HOME_WINS'})
 df_current_season['HOME_TEAM_WIN_PROBABILITY_INT'] = df_current_season['HOME_TEAM_WIN_PROBABILITY'].round().astype(int)
 df_current_season['CORRECT_PREDICTION'] = df_current_season['HOME_TEAM_WIN_PROBABILITY_INT'] == df_current_season['HOME_WINS'] 
 
-
 # format date
 df_current_season["GAME_DATE_EST"] = df_current_season["GAME_DATE_EST"].dt.strftime('%Y-%m-%d')
 
-#sort by game date
-df_current_season = df_current_season.sort_values(by=['GAME_DATE_EST'], ascending=False)
+# sort and limit to last 25 games
+df_current_season_25 = df_current_season.sort_values(
+    by=['GAME_DATE_EST', 'GAME_ID'], 
+    ascending=[False, False]
+).head(25)
+
 
 # clean up display
-df_current_season = df_current_season.rename(columns={'GAME_DATE_EST': 'GAME_DATE', 'HOME_TEAM_WIN_PROBABILITY': 'HOME_WIN_PROB', 'CORRECT_PREDICTION': 'CORRECT'})
-df_current_season = df_current_season.reset_index(drop=True)
+df_current_season_25 = df_current_season_25.rename(columns={'GAME_DATE_EST': 'GAME_DATE', 'HOME_TEAM_WIN_PROBABILITY': 'HOME_WIN_PROB', 'CORRECT_PREDICTION': 'CORRECT'})
+df_current_season_25 = df_current_season_25.reset_index(drop=True)
 
-
-
-st.dataframe(df_current_season[['GAME_DATE','MATCHUP', 'HOME_WIN_PROB', 'HOME_WINS', 'CORRECT']])
+st.dataframe(df_current_season_25[['GAME_DATE','MATCHUP', 'HOME_WIN_PROB', 'HOME_WINS', 'CORRECT']])
 
 # Show accuracy
-st.write("Accuracy: " + str(df_current_season['CORRECT'].sum() / df_current_season.shape[0]))
+st.write("Accuracy (Last 25 Games): " + str(df_current_season_25['CORRECT'].sum() / df_current_season_25.shape[0]))
+st.write()
+st.write("Total Games this Season: " + str(df_current_season.shape[0])) 
+st.write("Total Games Correct: " + str(df_current_season['CORRECT_PREDICTION'].sum()))
+st.write("Accuracy (All Games): " + str(df_current_season['CORRECT_PREDICTION'].sum() / df_current_season.shape[0]))
+
 
 
 progress_bar.progress(100)
