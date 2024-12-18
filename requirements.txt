@@ -7,7 +7,6 @@ joblib
 pandas==1.5.3
 datetime 
 pathlib
-hopsworks
 xgboost==1.6.1
 python-dotenv
 scikit-learn==1.1.3
