@@ -48,3 +48,35 @@ jobs:
           git commit -m "Update new data"
           git push
 
+      - name: Clone second repository
+        run: |
+          # Create a temp directory for the second repo
+          mkdir -p /tmp/nba_dashboard
+          
+          # Clone the second repository using PAT
+          git clone https://${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository_owner }}/nba_dashboard.git /tmp/nba_dashboard
+          
+          # Ensure the data directory exists in the second repo
+          mkdir -p /tmp/nba_dashboard/data
+          
+      - name: Copy specific files to second repository
+        run: |
+          # Copy the specific files
+          cp data/games_dashboard.csv /tmp/nba_dashboard/data/
+          cp data/season_summary_stats.csv /tmp/nba_dashboard/data/
+          cp data/running_accuracy_metrics.csv /tmp/nba_dashboard/data/
+          
+      - name: Commit and push to second repository
+        run: |
+          cd /tmp/nba_dashboard
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add data/games_dashboard.csv
+          git add data/season_summary_stats.csv
+          git add data/running_accuracy_metrics.csv
+          
+          # Only commit if there are changes
+          git diff --staged --quiet || git commit -m "Update dashboard data"
+          
+          git push
+
