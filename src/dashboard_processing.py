@@ -743,7 +743,69 @@ class NBADataProcessor:
         logger.info(f"Filtered dataframe from {len(games_df.columns)} to {len(df_filtered.columns)} columns")
         
         return df_filtered
+    
+    def _calculate_weekly_averages(self, completed_games):
+        """
+        Calculate 7-day rolling accuracy averages for all games.
+        Starting with the first game of the season, creates weekly buckets
+        and calculates average accuracy for each 7-day period.
         
+        Args:
+            completed_games: DataFrame with completed games data
+            
+        Returns:
+            DataFrame with weekly average metrics
+        """
+        logger.info("Calculating weekly (7-day) average accuracy metrics")
+        
+        # Ensure games are sorted by date
+        games_df = completed_games.copy()
+        games_df = games_df.sort_values('GAME_DATE')
+        
+        # Get the first and last game dates
+        if games_df.empty:
+            logger.warning("No completed games data to calculate weekly averages")
+            return pd.DataFrame()
+        
+        first_date = games_df['GAME_DATE'].min()
+        last_date = games_df['GAME_DATE'].max()
+        
+        # Generate all 7-day periods starting from the first game
+        weekly_periods = []
+        current_date = first_date
+        
+        while current_date <= last_date:
+            period_end = current_date + pd.Timedelta(days=6)
+            weekly_periods.append((current_date, period_end))
+            current_date = current_date + pd.Timedelta(days=7)
+        
+        # Calculate accuracy for each weekly period
+        weekly_metrics = []
+        
+        for start_date, end_date in weekly_periods:
+            # Get games in this period
+            period_games = games_df[(games_df['GAME_DATE'] >= start_date) & 
+                                    (games_df['GAME_DATE'] <= end_date)]
+            
+            if not period_games.empty:
+                # Calculate accuracy for this period
+                correct_count = period_games['CORRECT'].sum()
+                total_games = len(period_games)
+                period_accuracy = correct_count / total_games if total_games > 0 else 0
+                
+                # Only add if we have games in this period
+                if total_games > 0:
+                    weekly_metrics.append({
+                        'GAME_DATE': start_date,  # Use the first day of the period
+                        'PERIOD_END': end_date,   # Store the last day of the period
+                        'METRIC_TYPE': 'OVERALL_7_DAY_AVG',
+                        'METRIC_VALUE': period_accuracy,
+                        'GAMES_IN_PERIOD': total_games
+                    })
+        
+        return pd.DataFrame(weekly_metrics)
+
+            
     def export_data_for_dashboard(self, output_dir=DATAPATH):
         """Export datasets to CSV files for dashboard consumption."""
         logger.info(f"Exporting data for dashboards to {output_dir}")
@@ -904,6 +966,9 @@ class NBADataProcessor:
                     'METRIC_VALUE': game['VISITOR_TEAM_RUNNING_ACCURACY']
                 })
         
+        # Calculate and add 7-day average metrics
+        weekly_avg_metrics = self._calculate_weekly_averages(completed_games)
+        
         # Create dataframe and export
         if accuracy_metrics:
             accuracy_df = pd.DataFrame(accuracy_metrics)
@@ -919,10 +984,18 @@ class NBADataProcessor:
                 # Combine unique team metrics with non-team metrics
                 accuracy_df = pd.concat([team_metrics, non_team_metrics], ignore_index=True)
             
+            # Add the weekly average metrics
+            if not weekly_avg_metrics.empty:
+                # Only keep essential columns for the export
+                weekly_metrics_export = weekly_avg_metrics[['GAME_DATE', 'METRIC_TYPE', 'METRIC_VALUE']].copy()
+                accuracy_df = pd.concat([accuracy_df, weekly_metrics_export], ignore_index=True)
+                
+                # Log some info about the weekly metrics
+                logger.info(f"Added {len(weekly_avg_metrics)} weekly average metrics")
+            
             # Export to CSV
             accuracy_df.to_csv(output_path / 'running_accuracy_metrics.csv', index=False)
             logger.info(f"Exported running accuracy metrics to {output_path / 'running_accuracy_metrics.csv'}")
-
 if __name__ == "__main__":
     # Example usage
     processor = NBADataProcessor()
