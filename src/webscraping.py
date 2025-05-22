@@ -228,7 +228,7 @@ def scrape_to_dataframe(api_key: str, driver: webdriver, Season: str, DateFrom: 
     print(f"Scraping {nba_url}")
 
     #try 2 times to load page correctly; scrapingant can fail sometimes on it first try
-    for i in range(1, 2): 
+    for i in range(1, 3): 
         if api_key == "": #if no api key, then use selenium
             driver.get(nba_url)
             time.sleep(10)
@@ -252,60 +252,164 @@ def scrape_to_dataframe(api_key: str, driver: webdriver, Season: str, DateFrom: 
         # this may happen at the end of the season when there are no more games
         return pd.DataFrame()     
 
-    #check for more than one page
+    # Function to extract data from the current page
+    def extract_current_page_data(data_table):
+        # Convert the html table to a dataframe
+        dfs = pd.read_html(str(data_table), header=0) 
+        df = pd.concat(dfs)
+        
+        # pull out teams ids and game ids from hrefs and add these to the dataframe
+        TEAM_ID, GAME_ID = parse_ids(data_table)
+        df['TEAM_ID'] = TEAM_ID
+        df['GAME_ID'] = GAME_ID
+        
+        return df
+
+    #check for more than one page - look for pagination container
     CLASS_ID_PAGINATION = "Pagination_pageDropdown__KgjBU" #determined by visual inspection of page source code
     pagination = source.find('div', {'class':CLASS_ID_PAGINATION})
 
     if api_key == "": #if using selenium, then check for multiple pages
         if pagination is not None:
-            # if multiple pages, first activate pulldown option for All pages to show all rows on one page
-            CLASS_ID_DROPDOWN = "DropDown_select__4pIg9" #determined by visual inspection of page source code
-            page_dropdown = driver.find_element(By.XPATH, "//*[@class='" + CLASS_ID_PAGINATION + "']//*[@class='" + CLASS_ID_DROPDOWN + "']")
-        
-            page_dropdown.send_keys("ALL") # show all pages
-            #page_dropdown.click() doesn't work in headless mode
-            time.sleep(3)
-            driver.execute_script('arguments[0].click()', page_dropdown) #click() didn't work in headless mode, used this workaround (https://stackoverflow.com/questions/57741875)
-            
-            #refresh page data now that it contains all rows of the table
-            time.sleep(3)
-            source = soup(driver.page_source, 'html.parser')
-            data_table = source.find('table', {'class':CLASS_ID_TABLE})
+            try:
+                # Target the specific pagination dropdown within the pagination container
+                # This ensures we get the right dropdown when there are multiple DropDown_select__4pIg9 elements
+                page_dropdown = None
+                try:
+                    # Method 1: Use CSS selector to find select within pagination div
+                    page_dropdown = driver.find_element(By.CSS_SELECTOR, f".{CLASS_ID_PAGINATION} select.DropDown_select__4pIg9")
+                    print("Found pagination dropdown using CSS selector")
+                except:
+                    try:
+                        # Method 2: Use XPath to find select within pagination div
+                        page_dropdown = driver.find_element(By.XPATH, f"//*[@class='{CLASS_ID_PAGINATION}']//select[@class='DropDown_select__4pIg9']")
+                        print("Found pagination dropdown using XPath")
+                    except:
+                        try:
+                            # Method 3: More specific XPath with the full path
+                            page_dropdown = driver.find_element(By.XPATH, "//div[@class='Pagination_pageDropdown__KgjBU']//select[@class='DropDown_select__4pIg9']")
+                            print("Found pagination dropdown using specific XPath")
+                        except:
+                            print("Could not find pagination dropdown with any method")
+                
+                if page_dropdown is None:
+                    print("Could not find pagination dropdown, continuing with current page")
+                    return extract_current_page_data(data_table)
+                
+                # Check if dropdown has multiple options (indicating multiple pages)
+                from selenium.webdriver.support.ui import Select
+                try:
+                    select = Select(page_dropdown)
+                    options = select.options
+                    option_texts = [option.text for option in options]
+                    print(f"Dropdown options found: {option_texts}")
+                    
+                    # Check if there's an "All" option or if there are multiple page options
+                    has_all_option = any(option.upper() == "ALL" for option in option_texts)
+                    has_multiple_pages = len(options) > 1
+                    
+                    print(f"Has 'All' option: {has_all_option}")
+                    print(f"Has multiple pages: {has_multiple_pages}")
+                    print(f"Total options: {len(options)}")
+                    
+                    if has_all_option:
+                        print("'All' option found, selecting it")
+                        # Scroll to dropdown to ensure it's visible
+                        driver.execute_script("arguments[0].scrollIntoView(true);", page_dropdown)
+                        time.sleep(2)
+                        
+                        # Select "All" option by value (value="-1" based on your HTML)
+                        try:
+                            select.select_by_value("-1")
+                            print("Selected 'All' option by value")
+                        except:
+                            try:
+                                select.select_by_visible_text("All")
+                                print("Selected 'All' option by visible text")
+                            except:
+                                print("Could not select 'All' option")
+                                
+                        time.sleep(5)  # Wait longer for the page to load all data
+                        
+                        # Refresh page data now that it contains all rows of the table
+                        source = soup(driver.page_source, 'html.parser')
+                        data_table = source.find('table', {'class':CLASS_ID_TABLE})
+                        
+                    elif has_multiple_pages:
+                        print(f"Multiple pages detected ({len(options)} options), but no 'All' option found")
+                        print("Continuing with current page - consider implementing page iteration")
+                    else:
+                        print("Only one page detected")
+                        
+                except Exception as select_error:
+                    print(f"Error working with Select dropdown: {select_error}")
+                    print("Continuing with current page")
+                
+            except Exception as e:
+                print(f"Error handling pagination: {e}")
+                print("Continuing with current page of results")
     else:
         #if using scrapingant, then check for multiple pages
         if pagination is not None:
-            # if multiple pages, send javascript to select "ALL" pages
-            # first, scroll to bottom of page and wait 2 seconds to ensure all elements are loaded
-            # // js code
-            # window.scrollTo(0,document.body.scrollHeight);
-            # await new Promise(r => setTimeout(r, 2000));
-            # document.getElementById("DropDown_select__4pIg9").selectedIndex = 0;
-            # document.getElementById("DropDown_select__4pIg9").dispatchEvent(new Event('change'));
-            # // end js code
-            # these must be encoded into Base64 for use with scrapingant:
+            try:
+                # JavaScript snippet to handle pagination with multiple fallback approaches
+                js_snippet = """
+                window.scrollTo(0, document.body.scrollHeight);
+                await new Promise(r => setTimeout(r, 2000));
+                
+                // Target the specific pagination dropdown, not just any dropdown
+                const paginationDropdown = document.querySelector('.Pagination_pageDropdown__KgjBU select.DropDown_select__4pIg9');
+                
+                if (paginationDropdown && !paginationDropdown.disabled) {
+                    // Check if there are multiple options
+                    const options = Array.from(paginationDropdown.options);
+                    console.log('Pagination options found: ' + options.map(o => o.text + ' (value: ' + o.value + ')').join(', '));
+                    
+                    // Look for "All" option (should have value="-1" based on HTML structure)
+                    const allOption = options.find(o => o.value === '-1' || o.text.toUpperCase().includes('ALL'));
+                    
+                    if (allOption) {
+                        console.log('Selecting All option with value: ' + allOption.value);
+                        try {
+                            // Method 1: Select by value
+                            paginationDropdown.value = '-1';
+                            paginationDropdown.dispatchEvent(new Event('change', { bubbles: true }));
+                        } catch (e) {
+                            console.log('Method 1 failed, trying selectedIndex');
+                            try {
+                                paginationDropdown.selectedIndex = allOption.index;
+                                paginationDropdown.dispatchEvent(new Event('change', { bubbles: true }));
+                            } catch (e2) {
+                                console.log('Method 2 failed, trying option.selected');
+                                allOption.selected = true;
+                                paginationDropdown.dispatchEvent(new Event('change', { bubbles: true }));
+                            }
+                        }
+                    } else if (options.length > 1) {
+                        console.log('Multiple pages found but no All option available');
+                    } else {
+                        console.log('Only one page detected');
+                    }
+                } else {
+                    console.log('Pagination dropdown not found or disabled. Continuing with current page.');
+                }
+                """
+                
+                # Convert the JavaScript to Base64 for ScrapingAnt
+                import base64
+                js_snippet_Base64 = base64.b64encode(js_snippet.encode()).decode()
+                
+                # Execute the JavaScript
+                result = client.general_request(nba_url + "&js_snippet=" + js_snippet_Base64)
+                source = soup(result.content, 'html.parser')
+                data_table = source.find('table', {'class':CLASS_ID_TABLE})
+                
+            except Exception as e:
+                print(f"Error handling pagination with ScrapingAnt: {e}")
+                print("Continuing with current page of results")
 
-            js_snippet_Base64 = "d2luZG93LnNjcm9sbFRvKDAsZG9jdW1lbnQuYm9keS5zY3JvbGxIZWlnaHQpOwphd2FpdCBuZXcgUHJvbWlzZShyID0+IHNldFRpbWVvdXQociwgMjAwMCkpOwpkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgiRHJvcERvd25fc2VsZWN0X180cElnOSIpLnNlbGVjdGVkSW5kZXggPSAwOwpkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgiRHJvcERvd25fc2VsZWN0X180cElnOSIpLmRpc3BhdGNoRXZlbnQobmV3IEV2ZW50KCdjaGFuZ2UnKSk7"
-
-            result = client.general_request(nba_url + "&js_snippet=" + js_snippet_Base64)
-            source = soup(result.content, 'html.parser')
-
-
-    #print(source)
-
-    # convert the html table to a dataframe   
-    dfs = pd.read_html(str(data_table), header=0) 
-    df = pd.concat(dfs)
-
-    # pull out teams ids and game ids from hrefs and add these to the dataframe
-    TEAM_ID, GAME_ID = parse_ids(data_table)
-    df['TEAM_ID'] = TEAM_ID
-    df['GAME_ID'] = GAME_ID
-
-        
-    return df
-
-
-    
+    # Convert the html table to a dataframe
+    return extract_current_page_data(data_table)
 def convert_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Convert columns names and formats to match main DataFrame schema
