@@ -39,7 +39,7 @@ from src.constants import (
     NBA_COM_DROP_COLUMNS,  #columns to drop from nba.com boxscore table, either not used or already renamed to match our schema
     DAYS, #number of days back to scrape for games, usually set to >1 to catch up in case of a failed run
 )
-
+ 
 
 
 def activate_web_driver(browser: str) -> webdriver:
@@ -183,7 +183,7 @@ def parse_ids(data_table: soup) -> tuple[pd.Series, pd.Series]:
     return team_id, game_id
 
 
-
+# added more pagination handling to compensate for the new website changes
 def scrape_to_dataframe(api_key: str, driver: webdriver, Season: str, DateFrom: str ="NONE", DateTo: str ="NONE", stat_type: str ='standard', season_type: str = "Regular+Season") -> pd.DataFrame:
     """
     Retrieves stats from nba.com and converts to a DataFrame
