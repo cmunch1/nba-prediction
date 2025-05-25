@@ -747,8 +747,8 @@ class NBADataProcessor:
     def _calculate_weekly_averages(self, completed_games):
         """
         Calculate 7-day rolling accuracy averages for all games.
-        Starting with the first game of the season, creates weekly buckets
-        and calculates average accuracy for each 7-day period.
+        Working backwards from the last completed game date, creates weekly buckets
+        and calculates average accuracy for each 7-day period ending on specific dates.
         
         Args:
             completed_games: DataFrame with completed games data
@@ -756,7 +756,7 @@ class NBADataProcessor:
         Returns:
             DataFrame with weekly average metrics
         """
-        logger.info("Calculating weekly (7-day) average accuracy metrics")
+        logger.info("Calculating weekly (7-day) average accuracy metrics (working backwards from end)")
         
         # Ensure games are sorted by date
         games_df = completed_games.copy()
@@ -770,14 +770,25 @@ class NBADataProcessor:
         first_date = games_df['GAME_DATE'].min()
         last_date = games_df['GAME_DATE'].max()
         
-        # Generate all 7-day periods starting from the first game
+        # Generate all 7-day periods working backwards from the last game date
         weekly_periods = []
-        current_date = first_date
+        current_end_date = last_date
         
-        while current_date <= last_date:
-            period_end = current_date + pd.Timedelta(days=6)
-            weekly_periods.append((current_date, period_end))
-            current_date = current_date + pd.Timedelta(days=7)
+        while current_end_date >= first_date:
+            period_start = current_end_date - pd.Timedelta(days=6)
+            # Only include periods where the start date is not before our first game
+            if period_start >= first_date:
+                weekly_periods.append((period_start, current_end_date))
+            else:
+                # For the final period, adjust to start from the first game date
+                weekly_periods.append((first_date, current_end_date))
+                break
+            
+            # Move backwards by 7 days for the next period
+            current_end_date = current_end_date - pd.Timedelta(days=7)
+        
+        # Reverse the list so periods are in chronological order
+        weekly_periods.reverse()
         
         # Calculate accuracy for each weekly period
         weekly_metrics = []
@@ -796,12 +807,14 @@ class NBADataProcessor:
                 # Only add if we have games in this period
                 if total_games > 0:
                     weekly_metrics.append({
-                        'GAME_DATE': start_date,  # Use the first day of the period
-                        'PERIOD_END': end_date,   # Store the last day of the period
+                        'GAME_DATE': end_date,    # Use the last day of the period (end date)
+                        'PERIOD_START': start_date,  # Store the first day of the period
                         'METRIC_TYPE': 'OVERALL_7_DAY_AVG',
                         'METRIC_VALUE': period_accuracy,
                         'GAMES_IN_PERIOD': total_games
                     })
+        
+        logger.info(f"Calculated {len(weekly_metrics)} weekly average periods ending on game dates")
         
         return pd.DataFrame(weekly_metrics)
 
