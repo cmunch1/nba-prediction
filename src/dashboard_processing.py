@@ -493,6 +493,15 @@ class NBADataProcessor:
         calculating running accuracy metrics.
         """
         logger.info("Calculating team-specific prediction accuracy (legacy method)")
+
+        # Handle edge case: no completed games
+        if games_df is None or games_df.empty:
+            logger.warning("No completed games available for team accuracy; returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'GAME_ID', 'GAME_DATE', 'TEAM_ID', 'ACTUAL_WIN', 'PREDICTED_WIN_PROB',
+                'CORRECT', 'IS_HOME', 'TEAM_NAME', 'GAMES_PLAYED', 'CORRECT_CUMULATIVE',
+                'ACCURACY_CUMULATIVE', 'TEAM_OVERALL_ACCURACY'
+            ])
         
         # Create copies of the dataframe for home and away team calculations
         home_games = games_df.copy()
@@ -553,7 +562,15 @@ class NBADataProcessor:
             
             team_accuracy.append(team_data)
         
-        # Combine all team data
+        # Combine all team data (guard against no data)
+        if len(team_accuracy) == 0:
+            logger.warning("No team accuracy records to concatenate; returning empty DataFrame")
+            return pd.DataFrame(columns=[
+                'GAME_ID', 'GAME_DATE', 'TEAM_ID', 'ACTUAL_WIN', 'PREDICTED_WIN_PROB',
+                'CORRECT', 'IS_HOME', 'TEAM_NAME', 'GAMES_PLAYED', 'CORRECT_CUMULATIVE',
+                'ACCURACY_CUMULATIVE', 'TEAM_OVERALL_ACCURACY'
+            ])
+
         team_accuracy_df = pd.concat(team_accuracy, ignore_index=True)
         
         logger.info(f"Calculated team accuracy for {len(team_accuracy_df['TEAM_NAME'].unique())} teams")
@@ -585,6 +602,35 @@ class NBADataProcessor:
         
         # Select games that have been played
         df_completed_games = df_current_season[df_current_season['PTS_home'] != 0]
+        
+        # If there are no completed games (e.g., season just started), short-circuit gracefully
+        if df_completed_games.empty:
+            logger.warning("No completed games found for current season; skipping prediction and accuracy calculations")
+
+            processed_games_with_accuracy = pd.DataFrame(columns=[
+                'GAME_ID', 'GAME_DATE', 'SEASON', 'HOME_TEAM_ID', 'VISITOR_TEAM_ID',
+                'MATCHUP', 'HOME_WINS', 'PTS_home', 'PTS_away', 'HOME_WIN_PROB',
+                'CORRECT', 'HOME_TEAM_RUNNING_ACCURACY', 'VISITOR_TEAM_RUNNING_ACCURACY',
+                'HOME_ROLE_RUNNING_ACCURACY', 'AWAY_ROLE_RUNNING_ACCURACY',
+                'OVERALL_RUNNING_ACCURACY', 'RECENT_FLAG'
+            ])
+
+            summary = {
+                'SEASON': current_season,
+                'TOTAL_GAMES': 0,
+                'CORRECT_PREDICTIONS': 0,
+                'ACCURACY': 0,
+                'HOME_TEAM_WINS': 0,
+                'HOME_TEAM_WIN_PCT': 0,
+            }
+
+            legacy_team_accuracy = pd.DataFrame(columns=[
+                'GAME_ID', 'GAME_DATE', 'TEAM_ID', 'ACTUAL_WIN', 'PREDICTED_WIN_PROB',
+                'CORRECT', 'IS_HOME', 'TEAM_NAME', 'GAMES_PLAYED', 'CORRECT_CUMULATIVE',
+                'ACCURACY_CUMULATIVE', 'TEAM_OVERALL_ACCURACY'
+            ])
+
+            return processed_games_with_accuracy, pd.DataFrame([summary]), legacy_team_accuracy
         
         # Process data
         df_completed_games = self.process_for_prediction(df_completed_games)

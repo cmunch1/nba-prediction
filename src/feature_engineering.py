@@ -96,8 +96,11 @@ def fix_datatypes(df: pd.DataFrame, date_columns: list, short_integer_fields: li
     for field in long_integer_fields:
         df[field] = df[field].astype('int32')
 
-    #convert specific fields to int16 to avoid type issues with hopsworks.ai
+    # convert specific fields to int16 to avoid type issues with hopsworks.ai
+    # Fill NaNs for short integer stat fields (e.g., new/unplayed games) prior to casting
     for field in short_integer_fields:
+        print(f"Converting field {field} to int16", df[field].dtype, df[field].min(), df[field].max())
+        df[field] = df[field].fillna(0)
         df[field] = df[field].astype('int16')
         
     #convert to positive. For some reason, some values have been saved as negative numbers
@@ -181,14 +184,30 @@ def add_rolling_home_visitor(df: pd.DataFrame, location: str, roll_list: list)->
     # sort games by the order in which they were played for each home or visitor team
     df = df.sort_values(by = [location_id, 'GAME_DATE_EST'], axis=0, ascending=[True, True,], ignore_index=True)
     
-    # Win streak, negative if a losing streak
-    df[location + '_TEAM_WIN_STREAK'] = df['HOME_TEAM_WINS'].groupby((df['HOME_TEAM_WINS'].shift() != df.groupby([location_id])['HOME_TEAM_WINS'].shift(2)).cumsum()).cumcount() + 1
-    # if home team lost the last game of the streak, then the streak must be a losing streak. make it negative
-    df[location + '_TEAM_WIN_STREAK'].loc[df['HOME_TEAM_WINS'].shift() == 0] =  -1 * df[location + '_TEAM_WIN_STREAK']
+    # Win streak prior to current game (negative if a losing streak)
+    # Define team win indicator based on location role
+    if location == 'HOME':
+        df['_team_won_role'] = df['HOME_TEAM_WINS']
+    else:  # VISITOR
+        df['_team_won_role'] = 1 - df['HOME_TEAM_WINS']
 
-    # If visitor, the streak has opposite meaning (3 wins in a row for home team is 3 losses in a row for visitor)
-    if location == 'VISITOR':
-        df[location + '_TEAM_WIN_STREAK'] = - df[location + '_TEAM_WIN_STREAK']  
+    # Use previous results only to avoid leakage into current row
+    df['_w_prev'] = df.groupby([location_id])['_team_won_role'].shift(1)
+
+    def _streak_from_prev(group: pd.DataFrame) -> pd.Series:
+        r = group['_w_prev']
+        # Identify runs of equal prev outcomes
+        run_id = (r != r.shift()).cumsum()
+        streak_len = run_id.groupby(run_id).cumcount() + 1
+        # Where no previous result, streak is 0
+        streak_len = streak_len.where(r.notna(), 0)
+        # Negative for losing streaks
+        signed = streak_len.where(r == 1, -streak_len)
+        return signed.astype('int16')
+
+    df[location + '_TEAM_WIN_STREAK'] = df.groupby([location_id], group_keys=False).apply(_streak_from_prev)
+    # Clean up temp columns
+    df = df.drop(columns=['_team_won_role', '_w_prev'])
 
 
     # rolling means 
@@ -205,7 +224,8 @@ def add_rolling_home_visitor(df: pd.DataFrame, location: str, roll_list: list)->
             if feature == 'HOME_TEAM_WINS': #remove the "HOME_" for better readability
                 roll_feature_name = location + '_' + feature[5:] + '_AVG_LAST_' + str(roll) + '_' + location
             roll_feature_list.append(roll_feature_name)
-            df[roll_feature_name] = df.groupby(['HOME_TEAM_ID'])[feature].rolling(roll, closed= "left").mean().values
+            # use the correct team id for grouping depending on location (HOME vs VISITOR)
+            df[roll_feature_name] = df.groupby([location_id])[feature].rolling(roll, closed= "left").mean().values
             
     
     

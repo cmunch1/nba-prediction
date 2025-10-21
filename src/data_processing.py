@@ -1,6 +1,15 @@
 
 import pandas as pd
 
+# Optional import of constants for targeted fills
+try:
+    from src.constants import SHORT_INTEGER_FIELDS
+except ImportError:
+    try:
+        from constants import SHORT_INTEGER_FIELDS  # type: ignore
+    except Exception:
+        SHORT_INTEGER_FIELDS = ['PTS_home', 'AST_home', 'REB_home', 'PTS_away', 'AST_away', 'REB_away']
+
 def process_games(games: pd.DataFrame) -> pd.DataFrame:
     """
     Performs basic data cleaning on the games dataset.
@@ -28,6 +37,11 @@ def process_games(games: pd.DataFrame) -> pd.DataFrame:
     drop_columns = ['GAME_STATUS_TEXT', 'TEAM_ID_home', 'TEAM_ID_away']
     use_columns = [item for item in all_columns if item not in drop_columns]
     games = games[use_columns]
+
+    # Fill missing short integer stat fields with 0 for unplayed/incomplete games
+    for field in SHORT_INTEGER_FIELDS:
+        if field in games.columns:
+            games[field] = games[field].fillna(0)
     
     return games
 
@@ -145,4 +159,3 @@ def split_train_test(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     test = df[df['SEASON'] >= (latest_season - 1)]
     
     return train, test
-
