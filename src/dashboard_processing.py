@@ -762,20 +762,27 @@ class NBADataProcessor:
         
         # Keep only columns that exist in the dataframe
         available_columns = [col for col in dashboard_columns if col in games_df.columns]
-        
+
         # Create a copy with only the needed columns
         df_filtered = games_df[available_columns].copy()
+
+        # Ensure consistent schema: add any missing expected columns with sensible defaults
+        missing_columns = [col for col in dashboard_columns if col not in df_filtered.columns]
+        for col in missing_columns:
+            if col == 'RECENT_FLAG':
+                df_filtered[col] = False
+            else:
+                df_filtered[col] = np.nan
         
         # Add team name columns based on ID mapping
         df_filtered['HOME_TEAM_NAME'] = df_filtered['HOME_TEAM_ID'].map(NBA_TEAMS_NAMES)
         df_filtered['VISITOR_TEAM_NAME'] = df_filtered['VISITOR_TEAM_ID'].map(NBA_TEAMS_NAMES)
         
-        # For upcoming games, ensure prediction-related columns exist
+        # For upcoming games, ensure prediction/result columns exist
         if 'CORRECT' not in df_filtered.columns:
-            df_filtered['CORRECT'] = None
-        
+            df_filtered['CORRECT'] = np.nan
         if 'HOME_WINS' not in df_filtered.columns:
-            df_filtered['HOME_WINS'] = None
+            df_filtered['HOME_WINS'] = np.nan
         
         # Calculate score difference for completed games
         if 'PTS_home' in df_filtered.columns and 'PTS_away' in df_filtered.columns:
