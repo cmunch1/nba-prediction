@@ -110,9 +110,8 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
     SEASON = "" #no season will cause website to default to current season, format is "2022-23"
     TODAY = datetime.now(timezone('EST')) #nba.com uses US Eastern Standard Time
     LASTWEEK = (TODAY - timedelta(days=DAYS))
-    DATETO = TODAY.strftime("%m/%d/%y")
-    DATEFROM = LASTWEEK.strftime("%m/%d/%y")
-
+    DATETO = TODAY.strftime("%m/%d/%Y")
+    DATEFROM = LASTWEEK.strftime("%m/%d/%Y")
 
     # NBA boxscores page is filtered by season type (regular season, play-in, and playoffs)
     # so to limit the number of scrape attempts, only try to scrape for games in the current season type
@@ -211,19 +210,34 @@ def scrape_to_dataframe(api_key: str, driver: webdriver, Season: str, DateFrom: 
     # if season not provided, then will default to current season
     # if DateFrom and DateTo not provided, then don't include in url - pull the whole season
 
-    
+    # Normalize DateFrom/DateTo to mm/dd/YYYY (nba.com requires 4-digit year)
+    def _norm_date(value: str) -> str:
+        if value is None or value == "NONE" or value == "":
+            return "NONE"
+        try:
+            ts = pd.to_datetime(value, errors='coerce')
+            if pd.isna(ts):
+                return value
+            return ts.strftime("%m/%d/%Y")
+        except Exception:
+            return value
+
+    norm_from = _norm_date(DateFrom)
+    norm_to = _norm_date(DateTo)
+
     if stat_type == 'standard':
         nba_url = "https://www.nba.com/stats/teams/boxscores?SeasonType=" + season_type
     else:
         nba_url = "https://www.nba.com/stats/teams/boxscores-"+ stat_type + "?SeasonType=" + season_type
         
     if not Season:
-        nba_url = nba_url + "&DateFrom=" + DateFrom + "&DateTo=" + DateTo
+        if norm_from != "NONE" and norm_to != "NONE":
+            nba_url = nba_url + "&DateFrom=" + norm_from + "&DateTo=" + norm_to
     else:
-        if DateFrom == "NONE" and DateTo == "NONE":
+        if norm_from == "NONE" and norm_to == "NONE":
             nba_url = nba_url + "&Season=" + Season
         else:
-            nba_url = nba_url + "&Season=" + Season + "&DateFrom=" + DateFrom + "&DateTo=" + DateTo
+            nba_url = nba_url + "&Season=" + Season + "&DateFrom=" + norm_from + "&DateTo=" + norm_to
 
     print(f"Scraping {nba_url}")
 
