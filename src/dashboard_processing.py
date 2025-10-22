@@ -698,6 +698,67 @@ class NBADataProcessor:
         
         return processed_games_with_accuracy, pd.DataFrame([summary]), legacy_team_accuracy
 
+    def prepare_processed_games_data_for_season(self, season:int, num_recent_games=25):
+        """Process completed games for a specific season, returning detailed and summary data."""
+        logger.info(f"Preparing processed games data for season {season}")
+
+        df_all = self.load_data()
+        df_current_season = df_all[df_all['SEASON'] == season]
+        df_completed_games = df_current_season[df_current_season['PTS_home'] != 0]
+
+        if df_completed_games.empty:
+            logger.warning(f"No completed games found for season {season}")
+            return pd.DataFrame(columns=[
+                'GAME_ID','GAME_DATE','SEASON','HOME_TEAM_ID','VISITOR_TEAM_ID','MATCHUP',
+                'HOME_WINS','PTS_home','PTS_away','HOME_WIN_PROB','CORRECT',
+                'HOME_TEAM_RUNNING_ACCURACY','VISITOR_TEAM_RUNNING_ACCURACY',
+                'HOME_ROLE_RUNNING_ACCURACY','AWAY_ROLE_RUNNING_ACCURACY','OVERALL_RUNNING_ACCURACY','RECENT_FLAG'
+            ]), pd.DataFrame([{
+                'SEASON': season,
+                'TOTAL_GAMES': 0,
+                'CORRECT_PREDICTIONS': 0,
+                'ACCURACY': 0,
+                'HOME_TEAM_WINS': 0,
+                'HOME_TEAM_WIN_PCT': 0,
+            }])
+
+        df_completed_games = self.process_for_prediction(df_completed_games)
+        preds = self.make_predictions(df_completed_games)
+        df_completed_games['HOME_TEAM_WIN_PROBABILITY'] = preds
+        df_completed_games = df_completed_games.rename(columns={'TARGET': 'HOME_WINS'})
+        df_completed_games['HOME_TEAM_WIN_PROBABILITY_INT'] = df_completed_games['HOME_TEAM_WIN_PROBABILITY'].round().astype(int)
+        df_completed_games['CORRECT_PREDICTION'] = df_completed_games['HOME_TEAM_WIN_PROBABILITY_INT'] == df_completed_games['HOME_WINS']
+
+        if 'GAME_DATE_EST' in df_completed_games.columns:
+            if pd.api.types.is_datetime64_any_dtype(df_completed_games['GAME_DATE_EST']):
+                df_completed_games["GAME_DATE_EST"] = pd.to_datetime(df_completed_games["GAME_DATE_EST"]).dt.tz_localize(None).dt.strftime('%Y-%m-%d')
+
+        processed_games = df_completed_games.rename(columns={
+            'GAME_DATE_EST':'GAME_DATE',
+            'HOME_TEAM_WIN_PROBABILITY':'HOME_WIN_PROB',
+            'CORRECT_PREDICTION':'CORRECT'
+        })
+        processed_games['RECENT_FLAG'] = False
+        recent_indices = processed_games.sort_values(by=['GAME_DATE','GAME_ID'], ascending=[False, False]).head(num_recent_games).index
+        processed_games.loc[recent_indices,'RECENT_FLAG'] = True
+
+        processed_games['GAME_DATE'] = pd.to_datetime(processed_games['GAME_DATE'])
+        accuracy_lookups = self.calculate_daily_running_accuracy(processed_games)
+        processed_games_with_accuracy = self._add_running_accuracy_to_games(processed_games, accuracy_lookups)
+
+        total_games = processed_games.shape[0]
+        correct_predictions = processed_games['CORRECT'].sum()
+        accuracy = correct_predictions / total_games if total_games > 0 else 0
+        summary = {
+            'SEASON': season,
+            'TOTAL_GAMES': total_games,
+            'CORRECT_PREDICTIONS': correct_predictions,
+            'ACCURACY': accuracy,
+            'HOME_TEAM_WINS': processed_games['HOME_WINS'].sum(),
+            'HOME_TEAM_WIN_PCT': processed_games['HOME_WINS'].mean() if total_games > 0 else 0,
+        }
+        return processed_games_with_accuracy, pd.DataFrame([summary])
+
     def _determine_seasons(self, df_all: pd.DataFrame) -> dict:
         """Infer upcoming and completed seasons from data.
 
@@ -920,6 +981,22 @@ class NBADataProcessor:
 
         # Process completed games data using the combined function
         completed_games, season_summary, _ = self.prepare_processed_games_data(num_recent_games=25)
+
+        # If the upcoming season already has completed games, include them as well
+        try:
+            df_all = self.load_data()
+            seasons = self._determine_seasons(df_all)
+            upcoming = int(seasons['upcoming_season'])
+            completed_season = int(seasons['completed_season'])
+            if upcoming != completed_season:
+                has_completed_in_upcoming = not df_all[(df_all['SEASON'] == upcoming) & (df_all['PTS_home'] != 0)].empty
+                if has_completed_in_upcoming:
+                    logger.info(f"Including completed games from upcoming season {upcoming} as well")
+                    upcoming_completed, _ = self.prepare_processed_games_data_for_season(upcoming, num_recent_games=25)
+                    if not upcoming_completed.empty:
+                        completed_games = pd.concat([completed_games, upcoming_completed], ignore_index=True).drop_duplicates(subset=['GAME_ID'])
+        except Exception as e:
+            logger.warning(f"Unable to include upcoming season completed games: {e}")
 
         # Create a consolidated games dataframe
         consolidated_games = []
