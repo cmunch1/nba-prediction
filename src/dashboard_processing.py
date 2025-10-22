@@ -129,10 +129,8 @@ class NBADataProcessor:
         # Load data
         df_all = self.load_data()
         
-        # Select current season
-        current_season = datetime.today().year
-        if datetime.today().month < 10:
-            current_season = current_season - 1
+        # Determine active season from data
+        current_season = int(self._determine_current_season(df_all))
         
         logger.info(f"Filtering for season: {current_season}")
         df_current_season = df_all[df_all['SEASON'] == current_season]
@@ -592,10 +590,8 @@ class NBADataProcessor:
         # Load data
         df_all = self.load_data()
         
-        # Select current season
-        current_season = datetime.today().year
-        if datetime.today().month < 10:
-            current_season = current_season - 1
+        # Determine active season from data
+        current_season = int(self._determine_current_season(df_all))
         
         logger.info(f"Filtering for season: {current_season}")
         df_current_season = df_all[df_all['SEASON'] == current_season]
@@ -699,6 +695,23 @@ class NBADataProcessor:
         logger.info(f"Processed {total_games} completed games with {correct_predictions} correct predictions")
         
         return processed_games_with_accuracy, pd.DataFrame([summary]), legacy_team_accuracy
+
+    def _determine_current_season(self, df_all: pd.DataFrame) -> int:
+        """Infer the active season from the dataset (max SEASON present).
+
+        Robust against server date/time drift and early-season edge cases.
+        """
+        try:
+            seasons = pd.to_numeric(df_all['SEASON'], errors='coerce')
+            max_season = int(seasons.max())
+            logger.info(f"Inferred active season from data: {max_season}")
+            return max_season
+        except Exception as e:
+            logger.warning(f"Failed to infer season from data ({e}); falling back to date heuristic")
+            current_season = datetime.today().year
+            if datetime.today().month < 10:
+                current_season = current_season - 1
+            return current_season
     
     # Backward compatibility methods
     def prepare_recent_games(self, num_games=25):
