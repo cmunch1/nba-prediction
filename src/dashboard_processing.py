@@ -129,8 +129,9 @@ class NBADataProcessor:
         # Load data
         df_all = self.load_data()
         
-        # Determine active season from data
-        current_season = int(self._determine_current_season(df_all))
+        # Determine seasons from data
+        seasons = self._determine_seasons(df_all)
+        current_season = int(seasons['upcoming_season'])
         
         logger.info(f"Filtering for season: {current_season}")
         df_current_season = df_all[df_all['SEASON'] == current_season]
@@ -590,8 +591,9 @@ class NBADataProcessor:
         # Load data
         df_all = self.load_data()
         
-        # Determine active season from data
-        current_season = int(self._determine_current_season(df_all))
+        # Determine seasons from data. For completed games, use the latest season with results
+        seasons = self._determine_seasons(df_all)
+        current_season = int(seasons['completed_season'])
         
         logger.info(f"Filtering for season: {current_season}")
         df_current_season = df_all[df_all['SEASON'] == current_season]
@@ -696,22 +698,42 @@ class NBADataProcessor:
         
         return processed_games_with_accuracy, pd.DataFrame([summary]), legacy_team_accuracy
 
-    def _determine_current_season(self, df_all: pd.DataFrame) -> int:
-        """Infer the active season from the dataset (max SEASON present).
+    def _determine_seasons(self, df_all: pd.DataFrame) -> dict:
+        """Infer upcoming and completed seasons from data.
 
-        Robust against server date/time drift and early-season edge cases.
+        - upcoming_season: max SEASON value present in the dataset.
+        - completed_season: latest SEASON that has at least one completed game (PTS_home != 0).
         """
+        result = {
+            'upcoming_season': None,
+            'completed_season': None,
+        }
+
         try:
-            seasons = pd.to_numeric(df_all['SEASON'], errors='coerce')
-            max_season = int(seasons.max())
-            logger.info(f"Inferred active season from data: {max_season}")
-            return max_season
+            seasons_series = pd.to_numeric(df_all['SEASON'], errors='coerce')
+            upcoming = int(seasons_series.max())
+            result['upcoming_season'] = upcoming
+
+            # Find latest season with at least one completed game
+            seasons_sorted = sorted(seasons_series.dropna().unique(), reverse=True)
+            completed_season = None
+            for s in seasons_sorted:
+                subset = df_all[(df_all['SEASON'] == s) & (df_all['PTS_home'] != 0)]
+                if not subset.empty:
+                    completed_season = int(s)
+                    break
+            # Fallback: if none found, use upcoming (will be handled upstream)
+            result['completed_season'] = completed_season if completed_season is not None else upcoming
+            logger.info(f"Season selection -> upcoming: {result['upcoming_season']}, completed: {result['completed_season']}")
+            return result
         except Exception as e:
-            logger.warning(f"Failed to infer season from data ({e}); falling back to date heuristic")
-            current_season = datetime.today().year
+            logger.warning(f"Failed to infer seasons from data ({e}); falling back to date heuristic")
+            current = datetime.today().year
             if datetime.today().month < 10:
-                current_season = current_season - 1
-            return current_season
+                current -= 1
+            result['upcoming_season'] = current
+            result['completed_season'] = current
+            return result
     
     # Backward compatibility methods
     def prepare_recent_games(self, num_games=25):
