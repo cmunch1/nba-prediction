@@ -13,3 +13,5 @@ geckodriver.log
 .vs
 .vscode
 pandas.ipynb
+notebooks/*.nbconvert.ipynb
+*.nbconvert.ipynb

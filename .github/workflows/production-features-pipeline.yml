@@ -39,15 +39,29 @@ jobs:
           jupyter nbconvert --to notebook --execute notebooks/09_production_features_pipeline.ipynb
 
       - name: Commit and push changes
+        shell: bash
         run: |
+          set -e
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add data/games.csv
-          git add data/games_engineered.csv
-          git add data/games_dashboard.csv
-          git add data/running_accuracy_metrics.csv
-          git add data/season_summary_stats.csv
-          git commit -m "Update new data"
+
+          # Add only files that exist to avoid pathspec errors
+          for f in \
+            data/games.csv \
+            data/games_engineered.csv \
+            data/games_dashboard.csv \
+            data/running_accuracy_metrics.csv \
+            data/season_summary_stats.csv; do
+            [ -f "$f" ] && git add "$f" || true
+          done
+
+          # Commit only if something is staged
+          if ! git diff --staged --quiet; then
+            git commit -m "Update new data"
+          else
+            echo "No staged changes to commit"
+          fi
+
           git push
 
       - name: Clone second repository
