@@ -895,19 +895,20 @@ class NBADataProcessor:
     
     def _calculate_weekly_averages(self, completed_games):
         """
-        Calculate rolling accuracy averages for all games with an adaptive window.
+        Calculate rolling accuracy averages for all games with a progression-based window.
 
-        Early in the season, when there are only a few unique game dates,
-        shrink the window from 7 days to the number of unique dates available
-        (minimum of 1) so the line is informative and not flat.
+        Window rules based on days elapsed in season (first to last completed game):
+          - < 60 days: 1-day window (daily accuracy)
+          - 60–89 days: 3-day window
+          - >= 90 days: 7-day window
 
         Args:
             completed_games: DataFrame with completed games data
 
         Returns:
-            DataFrame with weekly (adaptive-window) average metrics
+            DataFrame with weekly (progression-window) average metrics
         """
-        logger.info("Calculating rolling average accuracy metrics with adaptive window (up to 7 days)")
+        logger.info("Calculating rolling average accuracy metrics with progression-based window")
         
         # Ensure games are sorted by date
         games_df = completed_games.copy()
@@ -921,9 +922,16 @@ class NBADataProcessor:
         first_date = games_df['GAME_DATE'].min()
         last_date = games_df['GAME_DATE'].max()
         
-        # Determine adaptive window length based on number of unique game dates
+        # Determine window length based on how far along the season is
         unique_dates = sorted(games_df['GAME_DATE'].unique())
-        window_days = min(7, max(1, len(unique_dates)))
+        season_days = (last_date - first_date).days + 1
+
+        if season_days >= 90:
+            window_days = 7
+        elif season_days >= 60:
+            window_days = 3
+        else:
+            window_days = 1
 
         # Generate all window-length periods working backwards from the last game date
         weekly_periods = []
