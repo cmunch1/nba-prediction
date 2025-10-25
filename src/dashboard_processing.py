@@ -642,9 +642,9 @@ class NBADataProcessor:
         # Rename TARGET to HOME_WINS
         df_completed_games = df_completed_games.rename(columns={'TARGET': 'HOME_WINS'})
         
-        # Add column to show if prediction was correct
-        df_completed_games['HOME_TEAM_WIN_PROBABILITY_INT'] = df_completed_games['HOME_TEAM_WIN_PROBABILITY'].round().astype(int)
-        df_completed_games['CORRECT_PREDICTION'] = df_completed_games['HOME_TEAM_WIN_PROBABILITY_INT'] == df_completed_games['HOME_WINS']
+        # Add column to show if prediction was correct (use 0.5 threshold, not bankers rounding)
+        df_completed_games['HOME_TEAM_WIN_PRED_CLASS'] = (df_completed_games['HOME_TEAM_WIN_PROBABILITY'] >= 0.5).astype(int)
+        df_completed_games['CORRECT_PREDICTION'] = df_completed_games['HOME_TEAM_WIN_PRED_CLASS'] == df_completed_games['HOME_WINS']
         
         # Format date for display
         if 'GAME_DATE_EST' in df_completed_games.columns:
@@ -726,8 +726,8 @@ class NBADataProcessor:
         preds = self.make_predictions(df_completed_games)
         df_completed_games['HOME_TEAM_WIN_PROBABILITY'] = preds
         df_completed_games = df_completed_games.rename(columns={'TARGET': 'HOME_WINS'})
-        df_completed_games['HOME_TEAM_WIN_PROBABILITY_INT'] = df_completed_games['HOME_TEAM_WIN_PROBABILITY'].round().astype(int)
-        df_completed_games['CORRECT_PREDICTION'] = df_completed_games['HOME_TEAM_WIN_PROBABILITY_INT'] == df_completed_games['HOME_WINS']
+        df_completed_games['HOME_TEAM_WIN_PRED_CLASS'] = (df_completed_games['HOME_TEAM_WIN_PROBABILITY'] >= 0.5).astype(int)
+        df_completed_games['CORRECT_PREDICTION'] = df_completed_games['HOME_TEAM_WIN_PRED_CLASS'] == df_completed_games['HOME_WINS']
 
         if 'GAME_DATE_EST' in df_completed_games.columns:
             if pd.api.types.is_datetime64_any_dtype(df_completed_games['GAME_DATE_EST']):
@@ -1120,7 +1120,7 @@ class NBADataProcessor:
             # Get a sample game for this date to extract overall and role-based metrics
             sample_game = date_games.iloc[0]
             
-            # Add overall and role-based accuracy for this date
+            # Add overall and role-based cumulative accuracy for this date
             accuracy_metrics.append({
                 'GAME_DATE': date,
                 'METRIC_TYPE': 'OVERALL',
@@ -1138,6 +1138,21 @@ class NBADataProcessor:
                 'METRIC_TYPE': 'AWAY_ROLE',
                 'METRIC_VALUE': sample_game['AWAY_ROLE_RUNNING_ACCURACY']
             })
+
+            # Also add single-day accuracy (non-cumulative) for this date
+            # Deduplicate to one row per actual game using home team rows
+            day_home_games = date_games.copy()
+            if 'IS_HOME' in day_home_games.columns:
+                day_home_games = day_home_games[day_home_games['IS_HOME'] == True]
+            if not day_home_games.empty and 'CORRECT' in day_home_games.columns:
+                daily_total = len(day_home_games)
+                daily_correct = day_home_games['CORRECT'].sum()
+                daily_acc = (daily_correct / daily_total) if daily_total > 0 else np.nan
+                accuracy_metrics.append({
+                    'GAME_DATE': date,
+                    'METRIC_TYPE': 'OVERALL_DAILY',
+                    'METRIC_VALUE': daily_acc
+                })
             
             # Add team-specific metrics
             for _, game in date_games.iterrows():
