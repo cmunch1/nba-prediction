@@ -1,1 +1,1 @@
-{"model_name": "xgboost", "calibration_method": "Model + Isotonic", "brier_loss": 0.2321545388641955, "metrics": {"AUC": 0.627570332480818, "Accuracy": 0.6280701754385964}}
+{"model_name": "xgboost", "calibration_method": "Base Model", "brier_loss": 0.21760611253396317, "metrics": {"AUC": 0.7005042016806723, "Accuracy": 0.646594982078853}}
