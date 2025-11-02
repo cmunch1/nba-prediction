@@ -143,6 +143,14 @@ def get_new_games(SCRAPINGANT_API_KEY: str, driver: webdriver) -> pd.DataFrame:
             all_season_types = pd.concat([all_season_types, df], axis=0)
             
 
+    # Ensure no duplicate games are returned from scraping
+    # Dedupe by GAME_ID to avoid re-appending the same game across pages/runs
+    if not all_season_types.empty and 'GAME_ID' in all_season_types.columns:
+        try:
+            all_season_types = all_season_types.drop_duplicates(subset=['GAME_ID'], keep='last')
+        except Exception:
+            pass
+
     return all_season_types
 
 
